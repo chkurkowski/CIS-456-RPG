@@ -4,9 +4,6 @@ using UnityEngine;
 
 public class Laser : MonoBehaviour {
 
-    //Laser works even better now
-    //Lets see if this works
-
     [SerializeField] private GameObject atkOrigin;
 
     private GameObject target;
@@ -18,7 +15,8 @@ public class Laser : MonoBehaviour {
 
     public void Awake()
     {
-        range = this.transform.localScale.z * this.GetComponent<BoxCollider>().size.z * this.transform.parent.localScale.z; //Gets the length of the red line
+        //Gets the length of the red line
+        range = this.transform.localScale.z * this.GetComponent<BoxCollider>().size.z * this.transform.parent.localScale.z;
     }
 
     public void Update()
@@ -61,6 +59,8 @@ public class Laser : MonoBehaviour {
 
     public float getRange()
     {
+        //Recalculates the range in case it has updated since last function call
+        range = this.transform.localScale.z * this.GetComponent<BoxCollider>().size.z * this.transform.parent.localScale.z;
         return range;
     }
 }
