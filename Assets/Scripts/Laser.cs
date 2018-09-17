@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Laser : MonoBehaviour {
 
+    //Laser works even better now
+
     [SerializeField] private GameObject atkOrigin;
 
     private GameObject target;
