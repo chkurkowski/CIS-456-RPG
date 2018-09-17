@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour {
 
@@ -8,11 +6,11 @@ public class EnemyHealth : MonoBehaviour {
 
     private void Update()
     {
-        Move();
-        if(health <= 0)
+        if (health <= 0)
         {
             Destroy(this.gameObject);
         }
+        Move();
     }
 
     private void OnCollisionEnter(Collision col)
