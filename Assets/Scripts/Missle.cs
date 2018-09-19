@@ -7,7 +7,7 @@ public class Missle : MonoBehaviour {
     private GameObject target;
 
     [SerializeField] private float speed = 5f;
-    [SerializeField] private float damage = 50f;
+    [SerializeField] private float damage = 25f;
     [SerializeField] private float attackRate = 1f;
 
 	// Update is called once per frame

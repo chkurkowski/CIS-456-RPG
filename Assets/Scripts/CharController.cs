@@ -16,9 +16,9 @@ public class CharController : MonoBehaviour
     private BoxCollider laserBoxCollInst;
 
     //access the attack script
-
     private NavMeshAgent navMeshAgent;
     private Transform targetedTransform;
+
     //use this if you need to shoot on this character.
     private Ray shootRay;
     private RaycastHit shotHit;
