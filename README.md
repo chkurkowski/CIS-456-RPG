@@ -1,6 +1,6 @@
 # CIS-456-RPG
 
-This is the repository for our Action Adventure RPG in out CIS 456 course.
+This is the repository for our Action Adventure RPG in our CIS 456 course.
 
 The game will be similar to Diablo style games with a click to move system and a upgrade system of some kind. 
 
