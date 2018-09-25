@@ -191,12 +191,11 @@ public class RoomGeneration : MonoBehaviour {
         }
     }
 
+    //Instatiates the rooms and offsets them to build out the map
     private void BuildPrimitives()
     {
         float offsetX = 0;
         float offsetZ = 0;
-
-        Vector3 dir;
 
         for (int x = 0; x < areaSizeX; x++)
         {
@@ -204,6 +203,7 @@ public class RoomGeneration : MonoBehaviour {
             {
                 if (rooms[x, y] != null)
                 {
+                    //Checks how many doors a room has
                     int doorCount = 0;
                     if(rooms[x, y].doorTop)
                     {
@@ -222,6 +222,7 @@ public class RoomGeneration : MonoBehaviour {
                         doorCount++;
                     }
 
+                    //Spawns a different room based on the amount of doors/neighboring rooms then parents them to the map object in the world.
                     if(doorCount > 1)
                     {
                         GameObject rm = Instantiate(roomDoorAll, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
@@ -229,7 +230,6 @@ public class RoomGeneration : MonoBehaviour {
                     }
                     else
                     {
-                        dir = (map.position - transform.position).normalized;
                         GameObject rm = Instantiate(roomDoorOne, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
                         rm.transform.parent = map;
                     }

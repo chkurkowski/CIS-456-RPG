@@ -19,7 +19,6 @@ public class clickToMove : MonoBehaviour {
     private Ray shootRay; 
     private RaycastHit shotHit;
     private bool ranged;
-    private bool walking;
     private bool enemyClicked;
     private float nextFire;
 
@@ -36,7 +35,6 @@ public class clickToMove : MonoBehaviour {
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, 100))
             {
-                walking = true;
                 print(hit.point);
                 navMeshAgent.destination = hit.point;
                 navMeshAgent.isStopped = false;

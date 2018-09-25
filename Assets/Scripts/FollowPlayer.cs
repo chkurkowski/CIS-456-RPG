@@ -8,9 +8,9 @@ public class FollowPlayer : MonoBehaviour {
 
     private Transform charTransform;
     private Transform cameraTransform;
-    private float[] xBounds;
-    private float yBound;
-    private float[] zBounds;
+    //private float[] xBounds;
+    //private float yBound;
+    //private float[] zBounds;
     private float xOffset = .5f;
     private float yOffset = 3.6f;
     private float zOffset = 2.8f;
@@ -19,9 +19,9 @@ public class FollowPlayer : MonoBehaviour {
     {
         charTransform = character.transform;
         Vector3 charPos = charTransform.position;
-        xBounds = new float[2] { charPos.x + .5f, charPos.x - .5f };
-        zBounds = new float[2] { charPos.x + .5f, charPos.y - .5f };
-        yBound = charPos.y;
+        //xBounds = new float[2] { charPos.x + .5f, charPos.x - .5f };
+        //zBounds = new float[2] { charPos.x + .5f, charPos.y - .5f };
+        //yBound = charPos.y;
         
     }
 

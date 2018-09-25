@@ -23,7 +23,6 @@ public class CharController : MonoBehaviour
     private Ray shootRay;
     private RaycastHit shotHit;
     private bool ranged;
-    private bool walking;
     private float missleNextFire = 0f; //Used for missle cooldown
 
     // Use this for initialization
@@ -51,7 +50,6 @@ public class CharController : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, 100))
             {
-                walking = true;
                 navMeshAgent.destination = hit.point;
                 navMeshAgent.isStopped = false;
             }
@@ -73,7 +71,6 @@ public class CharController : MonoBehaviour
                 {
                     return;
                 }
-                walking = false;
                 navMeshAgent.isStopped = true;
                 this.transform.LookAt(new Vector3(hit.point.x, this.transform.position.y, hit.point.z));
                 GameObject mm = Instantiate(magicMissile, atkOrigin.transform.position, Quaternion.identity);
@@ -92,7 +89,6 @@ public class CharController : MonoBehaviour
             RaycastHit hit; 
             if (Physics.Raycast(ray, out hit, 100))
             {
-                walking = false;
                 navMeshAgent.isStopped = true;
                 laserLineRendInst.enabled = true;
                 laserBoxCollInst.enabled = true;
