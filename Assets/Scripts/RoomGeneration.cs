@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class RoomGeneration : MonoBehaviour {
 
+    public Transform map;
+    public GameObject room;
+
     [SerializeField] int areaSizeX = 5; //Size of the grid on the x axis
     [SerializeField] int areaSizeY = 5; //Size of the grid on the y axis
     [SerializeField] int numOfRooms = 10; //Number of rooms to add to the grid
@@ -27,6 +30,7 @@ public class RoomGeneration : MonoBehaviour {
         CreateRooms();
         SetRoomDoors();
         DebugPrintArray();
+        BuildPrimitives();
     }
 
     //Populates the "rooms" array with rooms
@@ -185,5 +189,29 @@ public class RoomGeneration : MonoBehaviour {
             Debug.Log(line);
             line = "";
         }
+    }
+
+    private void BuildPrimitives()
+    {
+        float offsetX = 0;
+        float offsetZ = 0;
+
+        for (int x = 0; x < areaSizeX; x++)
+        {
+            for (int y = 0; y < areaSizeY; y++)
+            {
+                if (rooms[x, y] != null)
+                {
+                    GameObject rm = Instantiate(room, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                    rm.transform.parent = map;
+                }
+                offsetZ += 10;
+            }
+            offsetX += 10;
+            offsetZ = 0;
+
+        }
+
+        map.transform.position = Vector3.zero;
     }
 }
