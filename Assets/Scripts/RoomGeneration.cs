@@ -5,11 +5,11 @@ using UnityEngine;
 public class RoomGeneration : MonoBehaviour {
 
     public Transform map;
-    public GameObject room;
+    public GameObject room, roomDoorAll, roomDoorOne;
 
     [SerializeField] int areaSizeX = 5; //Size of the grid on the x axis
     [SerializeField] int areaSizeY = 5; //Size of the grid on the y axis
-    [SerializeField] int numOfRooms = 10; //Number of rooms to add to the grid
+    [SerializeField] int numOfRooms = 20; //Number of rooms to add to the grid
 
     //2D array where the rooms are added
     Room[,] rooms;
@@ -196,14 +196,44 @@ public class RoomGeneration : MonoBehaviour {
         float offsetX = 0;
         float offsetZ = 0;
 
+        Vector3 dir;
+
         for (int x = 0; x < areaSizeX; x++)
         {
             for (int y = 0; y < areaSizeY; y++)
             {
                 if (rooms[x, y] != null)
                 {
-                    GameObject rm = Instantiate(room, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
-                    rm.transform.parent = map;
+                    int doorCount = 0;
+                    if(rooms[x, y].doorTop)
+                    {
+                        doorCount++;
+                    }
+                    if (rooms[x, y].doorBottom)
+                    {
+                        doorCount++;
+                    }
+                    if (rooms[x, y].doorLeft)
+                    {
+                        doorCount++;
+                    }
+                    if (rooms[x, y].doorRight)
+                    {
+                        doorCount++;
+                    }
+
+                    if(doorCount > 1)
+                    {
+                        GameObject rm = Instantiate(roomDoorAll, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                        rm.transform.parent = map;
+                    }
+                    else
+                    {
+                        dir = (map.position - transform.position).normalized;
+                        GameObject rm = Instantiate(roomDoorOne, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                        rm.transform.parent = map;
+                    }
+
                 }
                 offsetZ += 10;
             }
@@ -211,7 +241,6 @@ public class RoomGeneration : MonoBehaviour {
             offsetZ = 0;
 
         }
-
         map.transform.position = Vector3.zero;
     }
 }
