@@ -26,6 +26,7 @@ public class RoomGeneration : MonoBehaviour {
 
         CreateRooms();
         SetRoomDoors();
+        DebugPrintArray();
     }
 
     //Populates the "rooms" array with rooms
@@ -36,11 +37,11 @@ public class RoomGeneration : MonoBehaviour {
 
         //Add starter room in middle (TODO: probably want a different type for the starter room)
         Vector2 startRoom = new Vector2((int)(areaSizeX / 2), (int)(areaSizeY / 2));
-        rooms[(int)(areaSizeX / 2), (int)(areaSizeY / 2)] = new Room(startRoom, 0);
-        takenPos.Add(startRoom);
+        rooms[((int)(areaSizeX / 2)), ((int)(areaSizeY / 2))] = new Room(startRoom, 0);
+        takenPos.Insert(0, startRoom);
 
         //Add each room to the grid
-        for (int i = 0; i < numOfRooms; i++)
+        for (int i = 0; i < numOfRooms - 1; i++)
         {
             //Get temp position of new room
             Vector2 temp = getRandomPosition();
@@ -48,9 +49,9 @@ public class RoomGeneration : MonoBehaviour {
             //TODO: Check how many neighbors it has
             //TODO: Math to encourage branching and select a "better" new room (so it's not one giant cube of rooms)
 
-            //Actually insert the room
-            rooms[(int) temp.x, (int) temp.y] = new Room(temp, 0);
-            takenPos.Add(temp);
+            //Actually insert the room to the "rooms" array
+            rooms[((int) temp.x), ((int) temp.y)] = new Room(temp, 0);
+            takenPos.Insert(0, temp);
         }
     }
 
@@ -58,13 +59,14 @@ public class RoomGeneration : MonoBehaviour {
     private Vector2 getRandomPosition()
     {
         Vector2 randomPos;
-        bool validRandomPos = true;
+        bool validRandomPos;
 
         do
         {
             //Pick a random room that's already in the grid
             //TODO: Make more efficient so it remembers which rooms have available neighbors instead of choosing at random
-            int index = Mathf.RoundToInt(Random.value * (numOfRooms - 1));
+            int index = Mathf.RoundToInt(Random.value * (takenPos.Count - 1));
+
             int x = (int) takenPos[index].x;
             int y = (int) takenPos[index].y;
 
@@ -91,9 +93,14 @@ public class RoomGeneration : MonoBehaviour {
             randomPos = new Vector2(x, y);
 
             //If this new location already has a room there or if it's not in the grid, go through the loop again
-            if (takenPos.Contains(randomPos) || x >= areaSizeX || x < -areaSizeX || y >= areaSizeY || y < -areaSizeY)
+            if (takenPos.Contains(randomPos) || x >= areaSizeX || x < 0 || y >= areaSizeY || y < 0)
             {
                 validRandomPos = false;
+            }
+            else
+            {
+                //Not having this else statement made Unity crash for an hour straight before I realized...
+                validRandomPos = true;
             }
         }
         while (!validRandomPos);
@@ -155,6 +162,28 @@ public class RoomGeneration : MonoBehaviour {
                     rooms[x, y].doorTop = (rooms[x, y + 1] != null);
                 }
             }
+        }
+    }
+
+    //Solely to visualize the randomized rooms until we actually implement it
+    private void DebugPrintArray()
+    {
+        string line = "";
+        for (int x = 0; x < areaSizeX; x++)
+        {
+            for (int y = 0; y < areaSizeY; y++)
+            {
+                if (rooms[x, y] != null)
+                {
+                    line += "[R] ";
+                }
+                else
+                {
+                    line += "[X] ";
+                }
+            }
+            Debug.Log(line);
+            line = "";
         }
     }
 }
