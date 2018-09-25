@@ -4,20 +4,21 @@ using UnityEngine;
 
 public class RoomGeneration : MonoBehaviour {
 
-    [SerializeField] int areaSizeX = 5;
-    [SerializeField] int areaSizeY = 5;
-    [SerializeField] int numOfRooms = 10;
+    [SerializeField] int areaSizeX = 5; //Size of the grid on the x axis
+    [SerializeField] int areaSizeY = 5; //Size of the grid on the y axis
+    [SerializeField] int numOfRooms = 10; //Number of rooms to add to the grid
 
-    Vector2 areaSize;
-
+    //2D array where the rooms are added
     Room[,] rooms;
-    List<Vector2> takenPos = new List<Vector2>();
+
+    //List of all rooms and their locations in the "rooms" array
+    List<Vector2> takenPos = new List<Vector2>(); 
 
 
 	// Use this for initialization
-	void Start () {
-        areaSize = new Vector2(areaSizeX, areaSizeY);
-
+	void Start ()
+    {
+        //If there are more rooms than can fit in the grid
         if (numOfRooms >= (areaSizeX * areaSizeY))
         {
             numOfRooms = Mathf.RoundToInt(areaSizeX * areaSizeY);
@@ -27,22 +28,25 @@ public class RoomGeneration : MonoBehaviour {
         SetRoomDoors();
     }
 
+    //Populates the "rooms" array with rooms
     private void CreateRooms()
     {
+        //Initializes the rooms array
         rooms = new Room[areaSizeX, areaSizeY];
 
-        //Add starter room in middle (TODO: probably want a different type)
+        //Add starter room in middle (TODO: probably want a different type for the starter room)
         Vector2 startRoom = new Vector2((int)(areaSizeX / 2), (int)(areaSizeY / 2));
         rooms[(int)(areaSizeX / 2), (int)(areaSizeY / 2)] = new Room(startRoom, 0);
         takenPos.Add(startRoom);
 
+        //Add each room to the grid
         for (int i = 0; i < numOfRooms; i++)
         {
             //Get temp position of new room
             Vector2 temp = getRandomPosition();
 
-            //Check how many neighbors it has
-            //Math to encourage branching and select a "better" new room
+            //TODO: Check how many neighbors it has
+            //TODO: Math to encourage branching and select a "better" new room (so it's not one giant cube of rooms)
 
             //Actually insert the room
             rooms[(int) temp.x, (int) temp.y] = new Room(temp, 0);
@@ -50,6 +54,7 @@ public class RoomGeneration : MonoBehaviour {
         }
     }
 
+    //Gets a random position that's adjacent to a random room
     private Vector2 getRandomPosition()
     {
         Vector2 randomPos;
@@ -57,11 +62,13 @@ public class RoomGeneration : MonoBehaviour {
 
         do
         {
+            //Pick a random room that's already in the grid
             //TODO: Make more efficient so it remembers which rooms have available neighbors instead of choosing at random
             int index = Mathf.RoundToInt(Random.value * (numOfRooms - 1));
             int x = (int) takenPos[index].x;
             int y = (int) takenPos[index].y;
 
+            //Move one (random) direction over from the random room we selected
             float dir = Random.value;
 
             if (dir < 0.25f) //Down
@@ -83,6 +90,7 @@ public class RoomGeneration : MonoBehaviour {
 
             randomPos = new Vector2(x, y);
 
+            //If this new location already has a room there or if it's not in the grid, go through the loop again
             if (takenPos.Contains(randomPos) || x >= areaSizeX || x < -areaSizeX || y >= areaSizeY || y < -areaSizeY)
             {
                 validRandomPos = false;
@@ -93,6 +101,8 @@ public class RoomGeneration : MonoBehaviour {
         return randomPos;
     }
 
+    //Once all the rooms are put on the grid, mark each room connect to its neighbors
+    //TODO: Possibly make it so some rooms only have one entrance (ie. a room surrounded by 3 rooms can be entered from only one of the surrouding rooms)
     private void SetRoomDoors()
     {
         for (int x = 0; x < areaSizeX; x++)
