@@ -237,6 +237,8 @@ public class RoomGeneration : MonoBehaviour {
         float offsetX = 0;
         float offsetZ = 0;
 
+        Quaternion rot = Quaternion.identity;
+
         for (int x = 0; x < areaSizeX; x++)
         {
             for (int y = 0; y < areaSizeY; y++)
@@ -245,21 +247,25 @@ public class RoomGeneration : MonoBehaviour {
                 {
                     //Checks how many doors a room has
                     int doorCount = 0;
-                    if(rooms[x, y].doorTop)
+                    if (rooms[x, y].doorTop)
                     {
                         doorCount++;
+                        rot = Quaternion.LookRotation(Vector3.back);
                     }
                     if (rooms[x, y].doorBottom)
                     {
                         doorCount++;
+                        rot = Quaternion.LookRotation(Vector3.forward);
                     }
                     if (rooms[x, y].doorLeft)
                     {
                         doorCount++;
+                        rot = Quaternion.LookRotation(Vector3.right);
                     }
                     if (rooms[x, y].doorRight)
                     {
                         doorCount++;
+                        rot = Quaternion.LookRotation(Vector3.left);
                     }
 
                     //Spawns a different room based on the amount of doors/neighboring rooms then parents them to the map object in the world.
@@ -270,7 +276,7 @@ public class RoomGeneration : MonoBehaviour {
                     }
                     else
                     {
-                        GameObject rm = Instantiate(roomDoorOne, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                        GameObject rm = Instantiate(roomDoorOne, new Vector3(offsetX, 0, offsetZ), rot);
                         rm.transform.parent = map;
                     }
 
