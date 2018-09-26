@@ -39,7 +39,7 @@ GameObject:
   - component: {fileID: 4542421887114020}
   m_Layer: 0
   m_Name: RoomDoorAll
-  m_TagString: Untagged
+  m_TagString: Walkable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

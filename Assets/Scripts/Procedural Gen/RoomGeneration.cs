@@ -7,6 +7,8 @@ public class RoomGeneration : MonoBehaviour {
     public Transform map;
     public GameObject room, roomDoorAll, roomDoorOne;
 
+    //private NavigationBaker baker;
+
     [SerializeField] int areaSizeX = 5; //Size of the grid on the x axis
     [SerializeField] int areaSizeY = 5; //Size of the grid on the y axis
     [SerializeField] int numOfRooms = 20; //Number of rooms to add to the grid
@@ -21,6 +23,9 @@ public class RoomGeneration : MonoBehaviour {
 	// Use this for initialization
 	void Start ()
     {
+        //Grabbing a reference to the navagation baker
+        //baker = baker.GetComponent<NavigationBaker>();
+
         //If there are more rooms than can fit in the grid
         if (numOfRooms >= (areaSizeX * areaSizeY))
         {
@@ -273,6 +278,8 @@ public class RoomGeneration : MonoBehaviour {
                     {
                         GameObject rm = Instantiate(roomDoorAll, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
                         rm.transform.parent = map;
+                        //if (baker.surfaces.Length > 0)
+                            //baker.surfaces[baker.surfaces.Length - 1] = rm.
                     }
                     else
                     {
