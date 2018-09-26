@@ -44,6 +44,11 @@ public class RoomGeneration : MonoBehaviour {
         rooms[((int)(areaSizeX / 2)), ((int)(areaSizeY / 2))] = new Room(startRoom, 0);
         takenPos.Insert(0, startRoom);
 
+        float startBranchProb = 0.2f;
+        float branchProb = startBranchProb;
+        float endBranchProb = 0.01f;
+        float changeInProb = Mathf.Abs(startBranchProb - endBranchProb);
+
         //Add each room to the grid
         for (int i = 0; i < numOfRooms - 1; i++)
         {
@@ -52,11 +57,21 @@ public class RoomGeneration : MonoBehaviour {
 
             //TODO: Check how many neighbors it has
             //TODO: Math to encourage branching and select a "better" new room (so it's not one giant cube of rooms)
+            //Note: Just look at what I print in console to understand and tweak "numOfRooms" as well
+            Debug.Log("Branch Prob: " + branchProb);
+            //Debug.Log("y(" + (float)i / (numOfRooms - 1) + "): " + getBranchY((float)i / (numOfRooms - 1)));
+            float num = getBranchY(((float)i) / (numOfRooms - 1));
+            branchProb = Mathf.Clamp((startBranchProb - (changeInProb - (changeInProb * num))), endBranchProb, startBranchProb);
 
             //Actually insert the room to the "rooms" array
             rooms[((int) temp.x), ((int) temp.y)] = new Room(temp, 0);
             takenPos.Insert(0, temp);
         }
+    }
+
+    private float getBranchY(float x)
+    {
+        return ((-2.308f * Mathf.Pow(x, 3)) + (4.972f * Mathf.Pow(x, 2)) + (-3.620f * x) + 0.930f);
     }
 
     //Gets a random position that's adjacent to a random room
@@ -167,6 +182,31 @@ public class RoomGeneration : MonoBehaviour {
                 }
             }
         }
+    }
+
+    private int getNumNeighbors(Vector2 location)
+    {
+        int numRooms = 0;
+
+        if (takenPos.Contains(location + Vector2.down))
+        {
+            numRooms++;
+        }
+        if (takenPos.Contains(location + Vector2.left))
+        {
+            numRooms++;
+        }
+        if (takenPos.Contains(location + Vector2.right))
+        {
+            numRooms++;
+        }
+        if (takenPos.Contains(location + Vector2.up))
+        {
+            numRooms++;
+        }
+
+        return numRooms;
+
     }
 
     //Solely to visualize the randomized rooms until we actually implement it
