@@ -60,13 +60,14 @@ public class RoomGeneration : MonoBehaviour {
             //Get temp position of new room
             Vector2 temp = getRandomPosition();
 
-            //TODO: Check how many neighbors it has
-            //TODO: Math to encourage branching and select a "better" new room (so it's not one giant cube of rooms)
             //Note: Just look at what I print in console to understand and tweak "numOfRooms" as well
             Debug.Log("Branch Prob: " + branchProb);
-            //Debug.Log("y(" + (float)i / (numOfRooms - 1) + "): " + getBranchY((float)i / (numOfRooms - 1)));
             float num = getBranchY(((float)i) / (numOfRooms - 1));
             branchProb = Mathf.Clamp((startBranchProb - (changeInProb - (changeInProb * num))), endBranchProb, startBranchProb);
+            if (getNumNeighbors(temp) > 1 && Random.value > branchProb)
+            {
+                //TODO: Math to encourage branching and select a "better" new room (so it's not one giant cube of rooms)
+            }
 
             //Actually insert the room to the "rooms" array
             rooms[((int) temp.x), ((int) temp.y)] = new Room(temp, 0);
