@@ -7,6 +7,7 @@ public class RoomGeneration : MonoBehaviour {
 
     public Transform map;
     public GameObject room, roomDoorAll, roomDoorOne;
+    public GameObject character;
 
     private NavigationBaker baker;
 
@@ -297,11 +298,17 @@ public class RoomGeneration : MonoBehaviour {
 
         }
         map.transform.position = Vector3.zero;
+        SetCharToMap();
     }
 
     private void FillNavBaker(GameObject rm)
     {
             baker.surfaces.Add(rm.GetComponent<NavMeshSurface>());
             print(baker.surfaces[baker.surfaces.Count - 1]);
+    }
+
+    private void SetCharToMap()
+    {
+        character.transform.position = baker.surfaces[Random.Range(0, baker.surfaces.Count)].gameObject.transform.position;
     }
 }

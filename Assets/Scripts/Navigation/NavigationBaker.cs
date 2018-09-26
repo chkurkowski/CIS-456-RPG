@@ -7,7 +7,7 @@ public class NavigationBaker : MonoBehaviour {
     public List <NavMeshSurface> surfaces = new List<NavMeshSurface>();
     public int roomCount = 0;
 
-    private bool generated;
+    public bool generated;
 
 	// Use this for initialization
 	void Update () {

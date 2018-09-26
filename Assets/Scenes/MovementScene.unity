@@ -212,7 +212,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 2.5
+  m_Speed: 3
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -693,11 +693,11 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0.1
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 3.5
+  orthographic size: 4
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -772,6 +772,7 @@ MonoBehaviour:
     type: 2}
   roomDoorOne: {fileID: 1923619413720996, guid: d4a30815606ab42249609f3199cea4ef,
     type: 2}
+  character: {fileID: 42301132}
   areaSizeX: 8
   areaSizeY: 8
   numOfRooms: 20
@@ -799,8 +800,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29ef11ca33f574aca8935ef070ed39fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  surfaces:
-  - {fileID: 129274553}
+  surfaces: []
+  roomCount: 0
+  generated: 0
 --- !u!1 &729227796
 GameObject:
   m_ObjectHideFlags: 0
