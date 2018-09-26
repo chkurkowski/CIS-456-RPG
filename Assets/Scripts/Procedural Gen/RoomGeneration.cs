@@ -82,7 +82,7 @@ public class RoomGeneration : MonoBehaviour
                 float num = getBranchY(((float)i) / (numOfRooms - 1));
                 branchProb = Mathf.Clamp((startBranchProb + (changeInProb - (changeInProb * num))), startBranchProb, endBranchProb);
             }
-            
+
             //Determines if the random position of the new room will have more than one neighbor and uses branchProb to
             //decide whether or not to force the new room to be a branch position (a position with only one neighbor)
             if (getNumNeighbors(temp) > 1 && branchProb > Random.value)
