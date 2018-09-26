@@ -1,13 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
+
 
 public class RoomGeneration : MonoBehaviour {
 
     public Transform map;
     public GameObject room, roomDoorAll, roomDoorOne;
 
-    //private NavigationBaker baker;
+    private NavigationBaker baker;
 
     [SerializeField] int areaSizeX = 5; //Size of the grid on the x axis
     [SerializeField] int areaSizeY = 5; //Size of the grid on the y axis
@@ -24,7 +25,8 @@ public class RoomGeneration : MonoBehaviour {
 	void Start ()
     {
         //Grabbing a reference to the navagation baker
-        //baker = baker.GetComponent<NavigationBaker>();
+        baker = FindObjectOfType<NavigationBaker>();
+        baker.roomCount = numOfRooms;
 
         //If there are more rooms than can fit in the grid
         if (numOfRooms >= (areaSizeX * areaSizeY))
@@ -60,14 +62,13 @@ public class RoomGeneration : MonoBehaviour {
             //Get temp position of new room
             Vector2 temp = getRandomPosition();
 
+            //TODO: Check how many neighbors it has
+            //TODO: Math to encourage branching and select a "better" new room (so it's not one giant cube of rooms)
             //Note: Just look at what I print in console to understand and tweak "numOfRooms" as well
             Debug.Log("Branch Prob: " + branchProb);
+            //Debug.Log("y(" + (float)i / (numOfRooms - 1) + "): " + getBranchY((float)i / (numOfRooms - 1)));
             float num = getBranchY(((float)i) / (numOfRooms - 1));
             branchProb = Mathf.Clamp((startBranchProb - (changeInProb - (changeInProb * num))), endBranchProb, startBranchProb);
-            if (getNumNeighbors(temp) > 1 && Random.value > branchProb)
-            {
-                //TODO: Math to encourage branching and select a "better" new room (so it's not one giant cube of rooms)
-            }
 
             //Actually insert the room to the "rooms" array
             rooms[((int) temp.x), ((int) temp.y)] = new Room(temp, 0);
@@ -279,13 +280,13 @@ public class RoomGeneration : MonoBehaviour {
                     {
                         GameObject rm = Instantiate(roomDoorAll, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
                         rm.transform.parent = map;
-                        //if (baker.surfaces.Length > 0)
-                            //baker.surfaces[baker.surfaces.Length - 1] = rm.
+                        FillNavBaker(rm);
                     }
                     else
                     {
                         GameObject rm = Instantiate(roomDoorOne, new Vector3(offsetX, 0, offsetZ), rot);
                         rm.transform.parent = map;
+                        FillNavBaker(rm);
                     }
 
                 }
@@ -296,5 +297,11 @@ public class RoomGeneration : MonoBehaviour {
 
         }
         map.transform.position = Vector3.zero;
+    }
+
+    private void FillNavBaker(GameObject rm)
+    {
+            baker.surfaces.Add(rm.GetComponent<NavMeshSurface>());
+            print(baker.surfaces[baker.surfaces.Count - 1]);
     }
 }

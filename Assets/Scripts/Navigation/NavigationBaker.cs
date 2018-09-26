@@ -1,15 +1,25 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.AI;
 
 public class NavigationBaker : MonoBehaviour {
 
-    public NavMeshSurface[] surfaces;
+    public List <NavMeshSurface> surfaces = new List<NavMeshSurface>();
+    public int roomCount = 0;
+
+    private bool generated;
 
 	// Use this for initialization
-	void Start () {
-        for (int i = 0; i < surfaces.Length; i++)
+	void Update () {
+        if (surfaces.Count >= roomCount && !generated)
         {
-            surfaces[i].BuildNavMesh();
+            generated = true;
+            for (int i = 0; i < surfaces.Count; i++)
+            {
+                surfaces[i].BuildNavMesh();
+            }
         }
+        else if (generated)
+            this.enabled = false;
 	}
 }
