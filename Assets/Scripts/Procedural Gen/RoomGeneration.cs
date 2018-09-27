@@ -1,12 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class RoomGeneration : MonoBehaviour
 {
 
     public Transform map;
     public GameObject room, roomDoorAll, roomDoorOne;
+    public GameObject character;
+    private NavigationBaker baker;
 
     [SerializeField] int areaSizeX = 5; //Size of the grid on the x axis
     [SerializeField] int areaSizeY = 5; //Size of the grid on the y axis
@@ -30,6 +33,9 @@ public class RoomGeneration : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        baker = FindObjectOfType<NavigationBaker>();
+        baker.roomCount = numOfRooms;
+
         branchProb = startBranchProb;
         changeInProb = Mathf.Abs(startBranchProb - endBranchProb);
 
@@ -395,11 +401,13 @@ public class RoomGeneration : MonoBehaviour
                     {
                         GameObject rm = Instantiate(roomDoorAll, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
                         rm.transform.parent = map;
+                        FillNavBaker(rm);
                     }
                     else
                     {
                         GameObject rm = Instantiate(roomDoorOne, new Vector3(offsetX, 0, offsetZ), rot);
                         rm.transform.parent = map;
+                        FillNavBaker(rm);
                     }
 
                 }
@@ -410,5 +418,17 @@ public class RoomGeneration : MonoBehaviour
 
         }
         map.transform.position = Vector3.zero;
+        SetCharToMap();
+    }
+
+    private void FillNavBaker(GameObject rm)
+    {
+        baker.surfaces.Add(rm.GetComponent<NavMeshSurface>());
+        print(baker.surfaces[baker.surfaces.Count - 1]);
+    }
+
+    private void SetCharToMap()
+    {
+        character.transform.position = baker.surfaces[Random.Range(0, baker.surfaces.Count)].gameObject.transform.position;
     }
 }
