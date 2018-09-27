@@ -7,7 +7,7 @@ public class RoomGeneration : MonoBehaviour
 {
 
     public Transform map;
-    public GameObject room, roomDoorAll, roomDoorOne;
+    public GameObject room, roomDoorAll, roomTri, roomCorner, roomCorridor, roomDoorOne;
     public GameObject character;
     private NavigationBaker baker;
 
@@ -397,11 +397,33 @@ public class RoomGeneration : MonoBehaviour
                     }
 
                     //Spawns a different room based on the amount of doors/neighboring rooms then parents them to the map object in the world.
-                    if (doorCount > 1)
+
+                    if(doorCount > 3)
                     {
                         GameObject rm = Instantiate(roomDoorAll, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
                         rm.transform.parent = map;
                         FillNavBaker(rm);
+                    }
+                    else if(doorCount > 2)
+                    {
+                        GameObject rm = Instantiate(roomTri, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                        rm.transform.parent = map;
+                        FillNavBaker(rm);
+                    }
+                    else if(doorCount > 1)
+                    {
+                        if((rooms[x, y].doorTop && rooms[x, y].doorBottom) || (rooms[x, y].doorLeft && rooms[x, y].doorRight))
+                        {
+                            GameObject rm = Instantiate(roomCorridor, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                            rm.transform.parent = map;
+                            FillNavBaker(rm);
+                        }
+                        else
+                        {
+                            GameObject rm = Instantiate(roomCorner, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                            rm.transform.parent = map;
+                            FillNavBaker(rm);
+                        }
                     }
                     else
                     {

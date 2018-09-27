@@ -770,8 +770,13 @@ MonoBehaviour:
   room: {fileID: 1311974410015160, guid: d09ea76072e49495a91a2d0a8096537f, type: 2}
   roomDoorAll: {fileID: 1094071686088998, guid: a83a922f5730d4b2184c7a479726cc73,
     type: 2}
+  roomTri: {fileID: 1184047401792974, guid: 32a497d07579a4b37ace02f530a196d6, type: 2}
+  roomCorner: {fileID: 1126764092855898, guid: 628844e878c8349b38404645849bb768, type: 2}
+  roomCorridor: {fileID: 1792552989271508, guid: 4fb342e806c3041f1a4569ea8058fa0d,
+    type: 2}
   roomDoorOne: {fileID: 1923619413720996, guid: d4a30815606ab42249609f3199cea4ef,
     type: 2}
+
   areaSizeX: 5
   areaSizeY: 5
   numOfRooms: 20
