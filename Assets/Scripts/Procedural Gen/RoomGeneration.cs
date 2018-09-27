@@ -1,33 +1,52 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-
-public class RoomGeneration : MonoBehaviour {
+public class RoomGeneration : MonoBehaviour
+{
 
     public Transform map;
     public GameObject room, roomDoorAll, roomTri, roomCorner, roomCorridor, roomDoorOne;
     public GameObject character;
-
     private NavigationBaker baker;
 
     [SerializeField] int areaSizeX = 5; //Size of the grid on the x axis
     [SerializeField] int areaSizeY = 5; //Size of the grid on the y axis
     [SerializeField] int numOfRooms = 20; //Number of rooms to add to the grid
 
+    [SerializeField] float startBranchProb = 1.0f; //Branch probability when the first rooms are being created
+    [SerializeField] float endBranchProb = 0.01f; //Branch probability when the last rooms are being created
+    float branchProb; //Actual branch probability that gets decreased/increased over the course of adding all of the rooms
+    float changeInProb; //The difference between startBranchProb and endBranchProb
+    bool decreasing; //Whether the branchProb is decreasing or increasing
+
     //2D array where the rooms are added
     Room[,] rooms;
 
     //List of all rooms and their locations in the "rooms" array
-    List<Vector2> takenPos = new List<Vector2>(); 
+    List<Vector2> takenPos = new List<Vector2>();
 
+    //Placeholder vector in-case a randomBranchPosition can't be found in a timely manner
+    Vector2 errorVector = new Vector2(3.14f, 3.14f);
 
-	// Use this for initialization
-	void Start ()
+    // Use this for initialization
+    void Start()
     {
-        //Grabbing a reference to the navagation baker
         baker = FindObjectOfType<NavigationBaker>();
         baker.roomCount = numOfRooms;
+
+        branchProb = startBranchProb;
+        changeInProb = Mathf.Abs(startBranchProb - endBranchProb);
+
+        if (startBranchProb >= endBranchProb)
+        {
+            decreasing = true;
+        }
+        else
+        {
+            decreasing = false;
+        }
 
         //If there are more rooms than can fit in the grid
         if (numOfRooms >= (areaSizeX * areaSizeY))
@@ -52,37 +71,51 @@ public class RoomGeneration : MonoBehaviour {
         rooms[((int)(areaSizeX / 2)), ((int)(areaSizeY / 2))] = new Room(startRoom, 0);
         takenPos.Insert(0, startRoom);
 
-        float startBranchProb = 0.2f;
-        float branchProb = startBranchProb;
-        float endBranchProb = 0.01f;
-        float changeInProb = Mathf.Abs(startBranchProb - endBranchProb);
-
         //Add each room to the grid
         for (int i = 0; i < numOfRooms - 1; i++)
         {
             //Get temp position of new room
             Vector2 temp = getRandomPosition();
 
-            //TODO: Check how many neighbors it has
-            //TODO: Math to encourage branching and select a "better" new room (so it's not one giant cube of rooms)
-            //Note: Just look at what I print in console to understand and tweak "numOfRooms" as well
-            Debug.Log("Branch Prob: " + branchProb);
-            //Debug.Log("y(" + (float)i / (numOfRooms - 1) + "): " + getBranchY((float)i / (numOfRooms - 1)));
-            float num = getBranchY(((float)i) / (numOfRooms - 1));
-            branchProb = Mathf.Clamp((startBranchProb - (changeInProb - (changeInProb * num))), endBranchProb, startBranchProb);
+            //Decreases/Increases branchProb for this iteration
+            if (decreasing)
+            {
+                float num = getBranchY(((float)i) / (numOfRooms - 1));
+                branchProb = Mathf.Clamp((startBranchProb - (changeInProb - (changeInProb * num))), endBranchProb, startBranchProb);
+            }
+            else
+            {
+                float num = getBranchY(((float)i) / (numOfRooms - 1));
+                branchProb = Mathf.Clamp((startBranchProb + (changeInProb - (changeInProb * num))), startBranchProb, endBranchProb);
+            }
+
+            //Determines if the random position of the new room will have more than one neighbor and uses branchProb to
+            //decide whether or not to force the new room to be a branch position (a position with only one neighbor)
+            if (getNumNeighbors(temp) > 1 && branchProb > Random.value)
+            {
+                Vector2 tempBranch = getRandomBranchPosition();
+
+                //If it is the errorVector, a branch position couldn't be found and will use the original random position
+                if (tempBranch != errorVector)
+                {
+                    temp = tempBranch;
+                }
+            }
 
             //Actually insert the room to the "rooms" array
-            rooms[((int) temp.x), ((int) temp.y)] = new Room(temp, 0);
+            rooms[((int)temp.x), ((int)temp.y)] = new Room(temp, 0);
             takenPos.Insert(0, temp);
         }
     }
 
+    //Equation used in decreasing/increasing branchProb over time (curve fit)
     private float getBranchY(float x)
     {
         return ((-2.308f * Mathf.Pow(x, 3)) + (4.972f * Mathf.Pow(x, 2)) + (-3.620f * x) + 0.930f);
     }
 
     //Gets a random position that's adjacent to a random room
+    //TODO: Apply efficiency changes from getRandomBranchPosition
     private Vector2 getRandomPosition()
     {
         Vector2 randomPos;
@@ -90,12 +123,14 @@ public class RoomGeneration : MonoBehaviour {
 
         do
         {
+            validRandomPos = true;
+
             //Pick a random room that's already in the grid
             //TODO: Make more efficient so it remembers which rooms have available neighbors instead of choosing at random
             int index = Mathf.RoundToInt(Random.value * (takenPos.Count - 1));
 
-            int x = (int) takenPos[index].x;
-            int y = (int) takenPos[index].y;
+            int x = (int)takenPos[index].x;
+            int y = (int)takenPos[index].y;
 
             //Move one (random) direction over from the random room we selected
             float dir = Random.value;
@@ -124,13 +159,97 @@ public class RoomGeneration : MonoBehaviour {
             {
                 validRandomPos = false;
             }
+        }
+        while (!validRandomPos);
+
+        return randomPos;
+    }
+
+    //Gets a random position that's adjacent to only one random room (branching)
+    private Vector2 getRandomBranchPosition()
+    {
+        Vector2 randomPos;
+        bool validRandomPos;
+        int index;
+        int iterationsMain = 0; //Iterations of the main do while loop
+        int iterationsRoom = 0; //Iterations of the do while loop that selects a random room with only one neighbor
+        int iterationsDir = 0; //Iterations of the do while loop that selects which direction to deviate from the random room
+
+        do
+        {
+            //Pick a random room that's already in the grid that has only one neighbor
+            //TODO: Make more efficient so it remembers which rooms have available neighbors instead of choosing at random
+            iterationsRoom = 0;
+            do
+            {
+                index = Mathf.RoundToInt(Random.value * (takenPos.Count - 1));
+                iterationsRoom++;
+            }
+            while (getNumNeighbors(new Vector2((int)takenPos[index].x, (int)takenPos[index].y)) > 1 && iterationsRoom < 100);
+
+            int x = (int)takenPos[index].x;
+            int y = (int)takenPos[index].y;
+
+            //Move one (random) direction over from the random room we selected
+            iterationsDir = 0;
+            bool isValidDir;
+            do
+            {
+                isValidDir = true;
+
+                float dir = Random.value;
+
+                if (dir < 0.25f && !(takenPos.Contains(new Vector2(x, y - 1)))) //Down
+                {
+                    y -= 1;
+                }
+                else if (dir < 0.50f && !(takenPos.Contains(new Vector2(x - 1, y)))) //Left
+                {
+                    x -= 1;
+                }
+                else if (dir < .75f && !(takenPos.Contains(new Vector2(x + 1, y)))) //Right
+                {
+                    x += 1;
+                }
+                else if (dir >= .75 && !(takenPos.Contains(new Vector2(x, y + 1))))//Up
+                {
+                    y += 1;
+                }
+                else
+                {
+                    isValidDir = false;
+                    iterationsDir++;
+                }
+            }
+            while (!isValidDir && iterationsDir < 100);
+
+            randomPos = new Vector2(x, y);
+
+            //If this new location does not meet branching requirements
+            if (iterationsRoom >= 100
+                || iterationsDir >= 100
+                || takenPos.Contains(randomPos)
+                || getNumNeighbors(randomPos) > 1
+                || x >= areaSizeX
+                || x < 0
+                || y >= areaSizeY
+                || y < 0)
+            {
+                validRandomPos = false;
+                iterationsMain++;
+            }
             else
             {
-                //Not having this else statement made Unity crash for an hour straight before I realized...
                 validRandomPos = true;
             }
         }
-        while (!validRandomPos);
+        while (!validRandomPos && iterationsMain < 100);
+
+        //If a branch position was unable to be found
+        if (iterationsMain >= 100)
+        {
+            return errorVector;
+        }
 
         return randomPos;
     }
@@ -144,7 +263,7 @@ public class RoomGeneration : MonoBehaviour {
             for (int y = 0; y < areaSizeY; y++)
             {
                 //If there is no room at the position
-                if (rooms[x,y] == null)
+                if (rooms[x, y] == null)
                 {
                     continue;
                 }
@@ -192,6 +311,7 @@ public class RoomGeneration : MonoBehaviour {
         }
     }
 
+    //Gets the number of neighboring rooms surrounding a given room
     private int getNumNeighbors(Vector2 location)
     {
         int numRooms = 0;
@@ -277,6 +397,7 @@ public class RoomGeneration : MonoBehaviour {
                     }
 
                     //Spawns a different room based on the amount of doors/neighboring rooms then parents them to the map object in the world.
+
                     if(doorCount > 3)
                     {
                         GameObject rm = Instantiate(roomDoorAll, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
@@ -324,8 +445,8 @@ public class RoomGeneration : MonoBehaviour {
 
     private void FillNavBaker(GameObject rm)
     {
-            baker.surfaces.Add(rm.GetComponent<NavMeshSurface>());
-            print(baker.surfaces[baker.surfaces.Count - 1]);
+        baker.surfaces.Add(rm.GetComponent<NavMeshSurface>());
+        print(baker.surfaces[baker.surfaces.Count - 1]);
     }
 
     private void SetCharToMap()

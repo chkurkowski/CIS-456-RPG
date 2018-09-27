@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4405886, g: 0.48922247, b: 0.5693638, a: 1}
+  m_IndirectSpecularColor: {r: 0.44058868, g: 0.48922265, b: 0.5693641, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -212,7 +212,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 3
+  m_Speed: 2.5
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -693,11 +693,11 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.1
+  near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 4
+  orthographic size: 3.5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -763,7 +763,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 603840741}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc575ed67796325428cf093512b70202, type: 3}
+  m_Script: {fileID: 11500000, guid: 880099ecc86cdc1429743fb053fa7571, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   map: {fileID: 1653424545}
@@ -776,10 +776,10 @@ MonoBehaviour:
     type: 2}
   roomDoorOne: {fileID: 1923619413720996, guid: d4a30815606ab42249609f3199cea4ef,
     type: 2}
-  character: {fileID: 42301132}
-  areaSizeX: 8
-  areaSizeY: 8
-  numOfRooms: 40
+
+  areaSizeX: 5
+  areaSizeY: 5
+  numOfRooms: 20
 --- !u!4 &603840743
 Transform:
   m_ObjectHideFlags: 0
@@ -804,9 +804,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29ef11ca33f574aca8935ef070ed39fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  surfaces: []
-  roomCount: 0
-  generated: 0
+  surfaces:
+  - {fileID: 129274553}
 --- !u!1 &729227796
 GameObject:
   m_ObjectHideFlags: 0
