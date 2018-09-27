@@ -3,13 +3,25 @@ using UnityEngine.AI;
 
 public class NavigationBaker : MonoBehaviour {
 
-    public NavMeshSurface[] surfaces;
+    public List<NavMeshSurface> surfaces = new List<NavMeshSurface>();
+    public int roomCount = 0;
 
-	// Use this for initialization
-	void Start () {
-        for (int i = 0; i < surfaces.Length; i++)
+    private bool generated;
+
+    // Use this for initialization
+    void SUpdate()
+    {
+        if (surfaces.Count >= roomCount && !generated)
         {
-            surfaces[i].BuildNavMesh();
+            generated = true;
+            for (int i = 0; i < surfaces.Count; i++)
+            {
+                surfaces[i].BuildNavMesh();
+            }
         }
-	}
+        else if (generated)
+        {
+            this.enabled = false;
+        }
+    }
 }
