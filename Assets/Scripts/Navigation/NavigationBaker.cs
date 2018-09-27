@@ -10,7 +10,7 @@ public class NavigationBaker : MonoBehaviour {
     public bool generated;
 
     // Use this for initialization
-    void SUpdate()
+    void Update()
     {
         if (surfaces.Count >= roomCount && !generated)
         {
