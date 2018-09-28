@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4405886, g: 0.48922247, b: 0.5693638, a: 1}
+  m_IndirectSpecularColor: {r: 0.44058868, g: 0.48922265, b: 0.5693641, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -777,11 +777,11 @@ MonoBehaviour:
   roomDoorOne: {fileID: 1923619413720996, guid: d4a30815606ab42249609f3199cea4ef,
     type: 2}
   character: {fileID: 42301132}
-  areaSizeX: 5
-  areaSizeY: 5
-  numOfRooms: 20
-  startBranchProb: 1
-  endBranchProb: 0.1
+  areaSizeX: 25
+  areaSizeY: 25
+  numOfRooms: 50
+  startBranchProb: 0.25
+  endBranchProb: 0.75
 --- !u!4 &603840743
 Transform:
   m_ObjectHideFlags: 0

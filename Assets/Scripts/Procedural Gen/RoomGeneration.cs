@@ -127,6 +127,7 @@ public class RoomGeneration : MonoBehaviour
 
             //Pick a random room that's already in the grid
             //TODO: Make more efficient so it remembers which rooms have available neighbors instead of choosing at random
+            //*****If has 4 neighbors, don't include
             int index = Mathf.RoundToInt(Random.value * (takenPos.Count - 1));
 
             int x = (int)takenPos[index].x;
