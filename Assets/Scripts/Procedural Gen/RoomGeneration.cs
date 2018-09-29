@@ -26,11 +26,15 @@ public class RoomGeneration : MonoBehaviour
 
     //List of all rooms and their locations in the "rooms" array
     List<Vector2> takenPos = new List<Vector2>();
+    //List of all rooms that have at least one open neighboring position
+    List<Vector2> openTakenPos = new List<Vector2>();
+    //List of all rooms that have at most one neighboring position
+    List<Vector2> singleNeighborTakenPos = new List<Vector2>();
 
-    //Placeholder vector in-case a randomBranchPosition can't be found in a timely manner
+    //Placeholder vector in case a randomBranchPosition can't be found in a timely manner
     Vector2 errorVector = new Vector2(3.14f, 3.14f);
 
-    // Use this for initialization
+    // Initilization
     void Start()
     {
         baker = FindObjectOfType<NavigationBaker>();
@@ -56,7 +60,6 @@ public class RoomGeneration : MonoBehaviour
 
         CreateRooms();
         SetRoomDoors();
-        DebugPrintArray();
         BuildPrimitives();
     }
 
@@ -70,6 +73,8 @@ public class RoomGeneration : MonoBehaviour
         Vector2 startRoom = new Vector2((int)(areaSizeX / 2), (int)(areaSizeY / 2));
         rooms[((int)(areaSizeX / 2)), ((int)(areaSizeY / 2))] = new Room(startRoom, 0);
         takenPos.Insert(0, startRoom);
+        openTakenPos.Insert(0, startRoom);
+        singleNeighborTakenPos.Insert(0, startRoom);
 
         //Add each room to the grid
         for (int i = 0; i < numOfRooms - 1; i++)
@@ -89,22 +94,37 @@ public class RoomGeneration : MonoBehaviour
                 branchProb = Mathf.Clamp((startBranchProb + (changeInProb - (changeInProb * num))), startBranchProb, endBranchProb);
             }
 
+            int tempNeighbors = getNumNeighbors(temp);
+
             //Determines if the random position of the new room will have more than one neighbor and uses branchProb to
             //decide whether or not to force the new room to be a branch position (a position with only one neighbor)
-            if (getNumNeighbors(temp) > 1 && branchProb > Random.value)
+            if (tempNeighbors > 1 && branchProb > Random.value)
             {
                 Vector2 tempBranch = getRandomBranchPosition();
 
-                //If it is the errorVector, a branch position couldn't be found and will use the original random position
+                //If it isn't the error vector, a branch position was found and it will be the position of the new room
                 if (tempBranch != errorVector)
                 {
                     temp = tempBranch;
+                    tempNeighbors = getNumNeighbors(temp);
                 }
             }
 
             //Actually insert the room to the "rooms" array
             rooms[((int)temp.x), ((int)temp.y)] = new Room(temp, 0);
             takenPos.Insert(0, temp);
+
+            if (tempNeighbors < 4)
+            {
+                openTakenPos.Insert(0, temp);
+            }
+            if (tempNeighbors <= 1)
+            {
+                singleNeighborTakenPos.Insert(0, temp);
+            }
+
+            removeNotOpenTakenPos(temp);
+            removeNotSingleNeighborTakenPos(temp);
         }
     }
 
@@ -114,81 +134,63 @@ public class RoomGeneration : MonoBehaviour
         return ((-2.308f * Mathf.Pow(x, 3)) + (4.972f * Mathf.Pow(x, 2)) + (-3.620f * x) + 0.930f);
     }
 
+    //Removes rooms that do not have an opening neighboring position from the openTakenPos list
+    private void removeNotOpenTakenPos(Vector2 location)
+    {
+        if (openTakenPos.Contains(location + Vector2.down) && getNumNeighbors(location + Vector2.down) >= 4)
+        {
+            openTakenPos.Remove(location + Vector2.down);
+        }
+        if (openTakenPos.Contains(location + Vector2.left) && getNumNeighbors(location + Vector2.left) >= 4)
+        {
+            openTakenPos.Remove(location + Vector2.left);
+        }
+        if (openTakenPos.Contains(location + Vector2.right) && getNumNeighbors(location + Vector2.right) >= 4)
+        {
+            openTakenPos.Remove(location + Vector2.right);
+        }
+        if (openTakenPos.Contains(location + Vector2.up) && getNumNeighbors(location + Vector2.up) >= 4)
+        {
+            openTakenPos.Remove(location + Vector2.up);
+        }
+    }
+
+    //Removes rooms that do not have at most one neighboring position from the singleNeighborTakenPos list
+    private void removeNotSingleNeighborTakenPos(Vector2 location)
+    {
+        if (singleNeighborTakenPos.Contains(location + Vector2.down) && getNumNeighbors(location + Vector2.down) > 1)
+        {
+            singleNeighborTakenPos.Remove(location + Vector2.down);
+        }
+        if (singleNeighborTakenPos.Contains(location + Vector2.left) && getNumNeighbors(location + Vector2.left) > 1)
+        {
+            singleNeighborTakenPos.Remove(location + Vector2.left);
+        }
+        if (singleNeighborTakenPos.Contains(location + Vector2.right) && getNumNeighbors(location + Vector2.right) > 1)
+        {
+            singleNeighborTakenPos.Remove(location + Vector2.right);
+        }
+        if (singleNeighborTakenPos.Contains(location + Vector2.up) && getNumNeighbors(location + Vector2.up) > 1)
+        {
+            singleNeighborTakenPos.Remove(location + Vector2.up);
+        }
+    }
+
     //Gets a random position that's adjacent to a random room
-    //TODO: Apply efficiency changes from getRandomBranchPosition
     private Vector2 getRandomPosition()
     {
         Vector2 randomPos;
         bool validRandomPos;
-
-        do
-        {
-            validRandomPos = true;
-
-            //Pick a random room that's already in the grid
-            //TODO: Make more efficient so it remembers which rooms have available neighbors instead of choosing at random
-            int index = Mathf.RoundToInt(Random.value * (takenPos.Count - 1));
-
-            int x = (int)takenPos[index].x;
-            int y = (int)takenPos[index].y;
-
-            //Move one (random) direction over from the random room we selected
-            float dir = Random.value;
-
-            if (dir < 0.25f) //Down
-            {
-                y -= 1;
-            }
-            else if (dir < 0.50f) //Left
-            {
-                x -= 1;
-            }
-            else if (dir < .75f) //Right
-            {
-                x += 1;
-            }
-            else //Up
-            {
-                y += 1;
-            }
-
-            randomPos = new Vector2(x, y);
-
-            //If this new location already has a room there or if it's not in the grid, go through the loop again
-            if (takenPos.Contains(randomPos) || x >= areaSizeX || x < 0 || y >= areaSizeY || y < 0)
-            {
-                validRandomPos = false;
-            }
-        }
-        while (!validRandomPos);
-
-        return randomPos;
-    }
-
-    //Gets a random position that's adjacent to only one random room (branching)
-    private Vector2 getRandomBranchPosition()
-    {
-        Vector2 randomPos;
-        bool validRandomPos;
         int index;
-        int iterationsMain = 0; //Iterations of the main do while loop
-        int iterationsRoom = 0; //Iterations of the do while loop that selects a random room with only one neighbor
         int iterationsDir = 0; //Iterations of the do while loop that selects which direction to deviate from the random room
 
         do
         {
-            //Pick a random room that's already in the grid that has only one neighbor
-            //TODO: Make more efficient so it remembers which rooms have available neighbors instead of choosing at random
-            iterationsRoom = 0;
-            do
-            {
-                index = Mathf.RoundToInt(Random.value * (takenPos.Count - 1));
-                iterationsRoom++;
-            }
-            while (getNumNeighbors(new Vector2((int)takenPos[index].x, (int)takenPos[index].y)) > 1 && iterationsRoom < 100);
+            //Pick a random room that's already in the grid that doesn't have four neighbors
+            index = Mathf.RoundToInt(Random.value * (openTakenPos.Count - 1));
 
-            int x = (int)takenPos[index].x;
-            int y = (int)takenPos[index].y;
+            int x = (int)openTakenPos[index].x;
+            int y = (int)openTakenPos[index].y;
 
             //Move one (random) direction over from the random room we selected
             iterationsDir = 0;
@@ -211,7 +213,7 @@ public class RoomGeneration : MonoBehaviour
                 {
                     x += 1;
                 }
-                else if (dir >= .75 && !(takenPos.Contains(new Vector2(x, y + 1))))//Up
+                else if (dir >= .75 && !(takenPos.Contains(new Vector2(x, y + 1)))) //Up
                 {
                     y += 1;
                 }
@@ -221,13 +223,84 @@ public class RoomGeneration : MonoBehaviour
                     iterationsDir++;
                 }
             }
-            while (!isValidDir && iterationsDir < 100);
+            while (!isValidDir && iterationsDir < 16);
+
+            randomPos = new Vector2(x, y);
+
+            //If this new location does not meet location requirements
+            if (iterationsDir >= 16
+                || takenPos.Contains(randomPos)
+                || x >= areaSizeX
+                || x < 0
+                || y >= areaSizeY
+                || y < 0)
+            {
+                validRandomPos = false;
+            }
+            else
+            {
+                validRandomPos = true;
+            }
+        }
+        while (!validRandomPos);
+
+        return randomPos;
+    }
+
+    //Gets a random position that's adjacent to only one random room (branching)
+    private Vector2 getRandomBranchPosition()
+    {
+        Vector2 randomPos;
+        bool validRandomPos;
+        int index;
+        int iterationsMain = 0; //Iterations of the main do while loop
+        int iterationsDir = 0; //Iterations of the do while loop that selects which direction to deviate from the random room
+
+        do
+        {
+            //Pick a random room that's already in the grid that has only one neighbor
+            index = Mathf.RoundToInt(Random.value * (singleNeighborTakenPos.Count - 1));
+
+            int x = (int)singleNeighborTakenPos[index].x;
+            int y = (int)singleNeighborTakenPos[index].y;
+
+            //Move one (random) direction over from the random room we selected
+            iterationsDir = 0;
+            bool isValidDir;
+            do
+            {
+                isValidDir = true;
+
+                float dir = Random.value;
+
+                if (dir < 0.25f && !(takenPos.Contains(new Vector2(x, y - 1)))) //Down
+                {
+                    y -= 1;
+                }
+                else if (dir < 0.50f && !(takenPos.Contains(new Vector2(x - 1, y)))) //Left
+                {
+                    x -= 1;
+                }
+                else if (dir < .75f && !(takenPos.Contains(new Vector2(x + 1, y)))) //Right
+                {
+                    x += 1;
+                }
+                else if (dir >= .75 && !(takenPos.Contains(new Vector2(x, y + 1)))) //Up
+                {
+                    y += 1;
+                }
+                else
+                {
+                    isValidDir = false;
+                    iterationsDir++;
+                }
+            }
+            while (!isValidDir && iterationsDir < 16);
 
             randomPos = new Vector2(x, y);
 
             //If this new location does not meet branching requirements
-            if (iterationsRoom >= 100
-                || iterationsDir >= 100
+            if (iterationsDir >= 16
                 || takenPos.Contains(randomPos)
                 || getNumNeighbors(randomPos) > 1
                 || x >= areaSizeX
@@ -243,10 +316,10 @@ public class RoomGeneration : MonoBehaviour
                 validRandomPos = true;
             }
         }
-        while (!validRandomPos && iterationsMain < 100);
+        while (!validRandomPos && iterationsMain < (2 * numOfRooms));
 
         //If a branch position was unable to be found
-        if (iterationsMain >= 100)
+        if (iterationsMain >= (2 * numOfRooms))
         {
             return errorVector;
         }
@@ -255,7 +328,6 @@ public class RoomGeneration : MonoBehaviour
     }
 
     //Once all the rooms are put on the grid, mark each room connect to its neighbors
-    //TODO: Possibly make it so some rooms only have one entrance (ie. a room surrounded by 3 rooms can be entered from only one of the surrouding rooms)
     private void SetRoomDoors()
     {
         for (int x = 0; x < areaSizeX; x++)
@@ -337,28 +409,6 @@ public class RoomGeneration : MonoBehaviour
 
     }
 
-    //Solely to visualize the randomized rooms until we actually implement it
-    private void DebugPrintArray()
-    {
-        string line = "";
-        for (int x = 0; x < areaSizeX; x++)
-        {
-            for (int y = 0; y < areaSizeY; y++)
-            {
-                if (rooms[x, y] != null)
-                {
-                    line += "[R] ";
-                }
-                else
-                {
-                    line += "[X] ";
-                }
-            }
-            Debug.Log(line);
-            line = "";
-        }
-    }
-
     //Instatiates the rooms and offsets them to build out the map
     private void BuildPrimitives()
     {
@@ -367,6 +417,10 @@ public class RoomGeneration : MonoBehaviour
 
         Quaternion rot = Quaternion.identity;
 
+        //1. For efficiency, could loop through "takenPos" array (?), which has the position of every room, instead of looping through the entire grid
+        //2. getNumNeighbors(Vector2 location) returns the number of neighbors/doors surrounding a room
+        //   I don't know if this can be used here since you need to update "rot" depending on where the doors are
+        //3. Right type of door is used 95% of the time, but sometimes the rotation is off. I'll try and mess with it later if I get to it before you :)
         for (int x = 0; x < areaSizeX; x++)
         {
             for (int y = 0; y < areaSizeY; y++)
