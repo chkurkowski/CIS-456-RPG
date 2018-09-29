@@ -388,19 +388,19 @@ public class RoomGeneration : MonoBehaviour
     {
         int numRooms = 0;
 
-        if (takenPos.Contains(location + Vector2.down))
+        if (hasBottomNeighbor(location))
         {
             numRooms++;
         }
-        if (takenPos.Contains(location + Vector2.left))
+        if (hasLeftNeighbor(location))
         {
             numRooms++;
         }
-        if (takenPos.Contains(location + Vector2.right))
+        if (hasRightNeighbor(location))
         {
             numRooms++;
         }
-        if (takenPos.Contains(location + Vector2.up))
+        if (hasUpperNeighbor(location))
         {
             numRooms++;
         }
@@ -409,92 +409,169 @@ public class RoomGeneration : MonoBehaviour
 
     }
 
-    //Instatiates the rooms and offsets them to build out the map
+    private bool hasBottomNeighbor(Vector2 location)
+    {
+        return (takenPos.Contains(location + Vector2.down));
+    }
+
+    private bool hasLeftNeighbor(Vector2 location)
+    {
+        return (takenPos.Contains(location + Vector2.left));
+    }
+
+    private bool hasRightNeighbor(Vector2 location)
+    {
+        return (takenPos.Contains(location + Vector2.right));
+    }
+
+    private bool hasUpperNeighbor(Vector2 location)
+    {
+        return (takenPos.Contains(location + Vector2.up));
+    }
+
     private void BuildPrimitives()
     {
-        float offsetX = 0;
-        float offsetZ = 0;
+        Vector3 rot;
+        int roomSize = 10; //Will have to be gotten for every room if we add different sizes down the line
 
-        Quaternion rot = Quaternion.identity;
-
-        //1. For efficiency, could loop through "takenPos" array (?), which has the position of every room, instead of looping through the entire grid
-        //2. getNumNeighbors(Vector2 location) returns the number of neighbors/doors surrounding a room
-        //   I don't know if this can be used here since you need to update "rot" depending on where the doors are
-        //3. Right type of door is used 95% of the time, but sometimes the rotation is off. I'll try and mess with it later if I get to it before you :)
-        for (int x = 0; x < areaSizeX; x++)
+        for (int i = 0; i < takenPos.Count; i++)
         {
-            for (int y = 0; y < areaSizeY; y++)
+            float offsetX = takenPos[i].x * roomSize;
+            float offsetZ = takenPos[i].y * roomSize;
+
+            int doorCount = getNumNeighbors(takenPos[i]);
+
+            if (doorCount > 3)
             {
-                if (rooms[x, y] != null)
-                {
-                    //Checks how many doors a room has
-                    int doorCount = 0;
-                    if (rooms[x, y].doorTop)
-                    {
-                        doorCount++;
-                        rot = Quaternion.LookRotation(Vector3.back);
-                    }
-                    if (rooms[x, y].doorBottom)
-                    {
-                        doorCount++;
-                        rot = Quaternion.LookRotation(Vector3.forward);
-                    }
-                    if (rooms[x, y].doorLeft)
-                    {
-                        doorCount++;
-                        rot = Quaternion.LookRotation(Vector3.right);
-                    }
-                    if (rooms[x, y].doorRight)
-                    {
-                        doorCount++;
-                        rot = Quaternion.LookRotation(Vector3.left);
-                    }
-
-                    //Spawns a different room based on the amount of doors/neighboring rooms then parents them to the map object in the world.
-
-                    if(doorCount > 3)
-                    {
-                        GameObject rm = Instantiate(roomDoorAll, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
-                        rm.transform.parent = map;
-                        FillNavBaker(rm);
-                    }
-                    else if(doorCount > 2)
-                    {
-                        GameObject rm = Instantiate(roomTri, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
-                        rm.transform.parent = map;
-                        FillNavBaker(rm);
-                    }
-                    else if(doorCount > 1)
-                    {
-                        if((rooms[x, y].doorTop && rooms[x, y].doorBottom) || (rooms[x, y].doorLeft && rooms[x, y].doorRight))
-                        {
-                            GameObject rm = Instantiate(roomCorridor, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
-                            rm.transform.parent = map;
-                            FillNavBaker(rm);
-                        }
-                        else
-                        {
-                            GameObject rm = Instantiate(roomCorner, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
-                            rm.transform.parent = map;
-                            FillNavBaker(rm);
-                        }
-                    }
-                    else
-                    {
-                        GameObject rm = Instantiate(roomDoorOne, new Vector3(offsetX, 0, offsetZ), rot);
-                        rm.transform.parent = map;
-                        FillNavBaker(rm);
-                    }
-
-                }
-                offsetZ += 10;
+                GameObject rm = Instantiate(roomDoorAll, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                rm.transform.parent = map;
+                FillNavBaker(rm);
             }
-            offsetX += 10;
-            offsetZ = 0;
-
+            else if (doorCount > 2)
+            {
+                rot = getTriRotation(takenPos[i]);
+                GameObject rm = Instantiate(roomTri, new Vector3(offsetX, 0, offsetZ), Quaternion.Euler(rot));
+                rm.transform.parent = map;
+                FillNavBaker(rm);
+            }
+            else if (doorCount > 1)
+            {
+                if ((hasUpperNeighbor(takenPos[i]) && hasBottomNeighbor(takenPos[i]))
+                    || (hasLeftNeighbor(takenPos[i]) && hasRightNeighbor(takenPos[i])))
+                {
+                    rot = getCorridorRotation(takenPos[i]);
+                    GameObject rm = Instantiate(roomCorridor, new Vector3(offsetX, 0, offsetZ), Quaternion.Euler(rot));
+                    rm.transform.parent = map;
+                    FillNavBaker(rm);
+                }
+                else
+                {
+                    rot = getCornerRotation(takenPos[i]);
+                    GameObject rm = Instantiate(roomCorner, new Vector3(offsetX, 0, offsetZ), Quaternion.Euler(rot));
+                    rm.transform.parent = map;
+                    FillNavBaker(rm);
+                }
+            }
+            else
+            {
+                rot = getSingleRotation(takenPos[i]);
+                GameObject rm = Instantiate(roomDoorOne, new Vector3(offsetX, 0, offsetZ), Quaternion.Euler(rot));
+                rm.transform.parent = map;
+                FillNavBaker(rm);
+            }
         }
+
         map.transform.position = Vector3.zero;
         SetCharToMap();
+    }
+
+    private Vector3 getTriRotation(Vector2 location)
+    {
+        bool bottom = hasBottomNeighbor(location);
+        bool left = hasLeftNeighbor(location);
+        bool right = hasRightNeighbor(location);
+        bool upper = hasUpperNeighbor(location);
+
+        if (right && bottom && left)
+        {
+            return new Vector3(0, 0, 0);
+        }
+        else if (bottom && left && upper)
+        {
+            return new Vector3(0, 90, 0);
+        }
+        else if (left && upper && right)
+        {
+            return new Vector3(0, 180, 0);
+        }
+        else
+        {
+            return new Vector3(0, 270, 0);
+        }
+    }
+
+    private Vector3 getCorridorRotation(Vector2 location)
+    {
+        bool bottom = hasBottomNeighbor(location);
+        bool upper = hasUpperNeighbor(location);
+
+        if (bottom && upper)
+        {
+            return new Vector3(0, 0, 0);
+        }
+        else
+        {
+            return new Vector3(0, 90, 0);
+        }
+    }
+
+    private Vector3 getCornerRotation(Vector2 location)
+    {
+        bool bottom = hasBottomNeighbor(location);
+        bool left = hasLeftNeighbor(location);
+        bool right = hasRightNeighbor(location);
+        bool upper = hasUpperNeighbor(location);
+
+        if (bottom && left)
+        {
+            return new Vector3(0, 0, 0);
+        }
+        else if (left && upper)
+        {
+            return new Vector3(0, 90, 0);
+        }
+        else if (upper && right)
+        {
+            return new Vector3(0, 180, 0);
+        }
+        else
+        {
+            return new Vector3(0, 270, 0);
+        }
+    }
+
+    private Vector3 getSingleRotation(Vector2 location)
+    {
+        bool bottom = hasBottomNeighbor(location);
+        bool left = hasLeftNeighbor(location);
+        bool upper = hasUpperNeighbor(location);
+
+        if (bottom)
+        {
+            return new Vector3(0, 0, 0);
+        }
+        else if (left)
+        {
+            return new Vector3(0, 90, 0);
+        }
+        else if (upper)
+        {
+            return new Vector3(0, 180, 0);
+        }
+        else
+        {
+            return new Vector3(0, 270, 0);
+        }
     }
 
     private void FillNavBaker(GameObject rm)
