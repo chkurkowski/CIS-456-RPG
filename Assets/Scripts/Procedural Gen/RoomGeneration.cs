@@ -21,14 +21,13 @@ public class RoomGeneration : MonoBehaviour
     float changeInProb; //The difference between startBranchProb and endBranchProb
     bool decreasing; //Whether the branchProb is decreasing or increasing
 
-    //2D array where the rooms are added
-    Room[,] rooms;
-
-    //List of all rooms and their locations in the "rooms" array
+    //List of all rooms
+    List<Room> rooms = new List<Room>();
+    //List of all room locations
     List<Vector2> takenPos = new List<Vector2>();
-    //List of all rooms that have at least one open neighboring position
+    //List of all room locations that have at least one open neighboring position
     List<Vector2> openTakenPos = new List<Vector2>();
-    //List of all rooms that have at most one neighboring position
+    //List of all room locations that have at most one neighboring position
     List<Vector2> singleNeighborTakenPos = new List<Vector2>();
 
     //Placeholder vector in case a randomBranchPosition can't be found in a timely manner
@@ -66,21 +65,23 @@ public class RoomGeneration : MonoBehaviour
     //Populates the "rooms" array with rooms
     private void CreateRooms()
     {
-        //Initializes the rooms array
-        rooms = new Room[areaSizeX, areaSizeY];
-
-        //Add starter room in middle (TODO: probably want a different type for the starter room)
-        Vector2 startRoom = new Vector2((int)(areaSizeX / 2), (int)(areaSizeY / 2));
-        rooms[((int)(areaSizeX / 2)), ((int)(areaSizeY / 2))] = new Room(startRoom, 0);
-        takenPos.Insert(0, startRoom);
-        openTakenPos.Insert(0, startRoom);
-        singleNeighborTakenPos.Insert(0, startRoom);
+        //Add starter room in middle
+        //TODO: Different type for starter room (Change 0 to another number)
+        Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), 0);
+        rooms.Insert(0, startRoom);
+        takenPos.Insert(0, startRoom.location);
+        openTakenPos.Insert(0, startRoom.location);
+        singleNeighborTakenPos.Insert(0, startRoom.location);
 
         //Add each room to the grid
         for (int i = 0; i < numOfRooms - 1; i++)
         {
+            //Determine type of new Room (somehow)
+            int tempType = 0;
+
             //Get temp position of new room
-            Vector2 temp = getRandomPosition();
+            Vector2 tempLoc = getRandomPosition();
+            Room tempRoom = new Room(tempLoc, tempType);
 
             //Decreases/Increases branchProb for this iteration
             if (decreasing)
@@ -94,37 +95,39 @@ public class RoomGeneration : MonoBehaviour
                 branchProb = Mathf.Clamp((startBranchProb + (changeInProb - (changeInProb * num))), startBranchProb, endBranchProb);
             }
 
-            int tempNeighbors = getNumNeighbors(temp);
+            int tempNeighbors = getNumNeighbors(tempRoom);
 
             //Determines if the random position of the new room will have more than one neighbor and uses branchProb to
             //decide whether or not to force the new room to be a branch position (a position with only one neighbor)
             if (tempNeighbors > 1 && branchProb > Random.value)
             {
-                Vector2 tempBranch = getRandomBranchPosition();
+                Vector2 tempBranchLoc = getRandomBranchPosition();
+                Room tempBranchRoom = new Room(tempBranchLoc, tempType);
 
                 //If it isn't the error vector, a branch position was found and it will be the position of the new room
-                if (tempBranch != errorVector)
+                if (tempBranchLoc != errorVector)
                 {
-                    temp = tempBranch;
-                    tempNeighbors = getNumNeighbors(temp);
+                    tempLoc = tempBranchLoc;
+                    tempNeighbors = getNumNeighbors(tempBranchRoom);
                 }
             }
 
-            //Actually insert the room to the "rooms" array
-            rooms[((int)temp.x), ((int)temp.y)] = new Room(temp, 0);
-            takenPos.Insert(0, temp);
+            //Actually insert the room
+            Room newRoom = new Room(tempLoc, tempType);
+            rooms.Insert(0, newRoom);
+            takenPos.Insert(0, newRoom.location);
 
             if (tempNeighbors < 4)
             {
-                openTakenPos.Insert(0, temp);
+                openTakenPos.Insert(0, newRoom.location);
             }
             if (tempNeighbors <= 1)
             {
-                singleNeighborTakenPos.Insert(0, temp);
+                singleNeighborTakenPos.Insert(0, newRoom.location);
             }
 
-            removeNotOpenTakenPos(temp);
-            removeNotSingleNeighborTakenPos(temp);
+            removeNotOpenTakenPos(newRoom);
+            removeNotSingleNeighborTakenPos(newRoom);
         }
     }
 
@@ -135,44 +138,54 @@ public class RoomGeneration : MonoBehaviour
     }
 
     //Removes rooms that do not have an opening neighboring position from the openTakenPos list
-    private void removeNotOpenTakenPos(Vector2 location)
+    private void removeNotOpenTakenPos(Room room)
     {
-        if (openTakenPos.Contains(location + Vector2.down) && getNumNeighbors(location + Vector2.down) >= 4)
+        Room tempBottomRoom = new Room(room.location + Vector2.down, room.type);
+        Room tempLeftRoom = new Room(room.location + Vector2.left, room.type);
+        Room tempRightRoom = new Room(room.location + Vector2.right, room.type);
+        Room tempUpperRoom = new Room(room.location + Vector2.up, room.type);
+
+        if (openTakenPos.Contains(tempBottomRoom.location) && getNumNeighbors(tempBottomRoom) >= 4)
         {
-            openTakenPos.Remove(location + Vector2.down);
+            openTakenPos.Remove(tempBottomRoom.location);
         }
-        if (openTakenPos.Contains(location + Vector2.left) && getNumNeighbors(location + Vector2.left) >= 4)
+        if (openTakenPos.Contains(tempLeftRoom.location) && getNumNeighbors(tempLeftRoom) >= 4)
         {
-            openTakenPos.Remove(location + Vector2.left);
+            openTakenPos.Remove(tempLeftRoom.location);
         }
-        if (openTakenPos.Contains(location + Vector2.right) && getNumNeighbors(location + Vector2.right) >= 4)
+        if (openTakenPos.Contains(tempRightRoom.location) && getNumNeighbors(tempRightRoom) >= 4)
         {
-            openTakenPos.Remove(location + Vector2.right);
+            openTakenPos.Remove(tempRightRoom.location);
         }
-        if (openTakenPos.Contains(location + Vector2.up) && getNumNeighbors(location + Vector2.up) >= 4)
+        if (openTakenPos.Contains(tempUpperRoom.location) && getNumNeighbors(tempUpperRoom) >= 4)
         {
-            openTakenPos.Remove(location + Vector2.up);
+            openTakenPos.Remove(tempUpperRoom.location);
         }
     }
 
     //Removes rooms that do not have at most one neighboring position from the singleNeighborTakenPos list
-    private void removeNotSingleNeighborTakenPos(Vector2 location)
+    private void removeNotSingleNeighborTakenPos(Room room)
     {
-        if (singleNeighborTakenPos.Contains(location + Vector2.down) && getNumNeighbors(location + Vector2.down) > 1)
+        Room tempBottomRoom = new Room(room.location + Vector2.down, room.type);
+        Room tempLeftRoom = new Room(room.location + Vector2.left, room.type);
+        Room tempRightRoom = new Room(room.location + Vector2.right, room.type);
+        Room tempUpperRoom = new Room(room.location + Vector2.up, room.type);
+
+        if (singleNeighborTakenPos.Contains(tempBottomRoom.location) && getNumNeighbors(tempBottomRoom) > 1)
         {
-            singleNeighborTakenPos.Remove(location + Vector2.down);
+            singleNeighborTakenPos.Remove(tempBottomRoom.location);
         }
-        if (singleNeighborTakenPos.Contains(location + Vector2.left) && getNumNeighbors(location + Vector2.left) > 1)
+        if (singleNeighborTakenPos.Contains(tempLeftRoom.location) && getNumNeighbors(tempLeftRoom) > 1)
         {
-            singleNeighborTakenPos.Remove(location + Vector2.left);
+            singleNeighborTakenPos.Remove(tempLeftRoom.location);
         }
-        if (singleNeighborTakenPos.Contains(location + Vector2.right) && getNumNeighbors(location + Vector2.right) > 1)
+        if (singleNeighborTakenPos.Contains(tempRightRoom.location) && getNumNeighbors(tempRightRoom) > 1)
         {
-            singleNeighborTakenPos.Remove(location + Vector2.right);
+            singleNeighborTakenPos.Remove(tempRightRoom.location);
         }
-        if (singleNeighborTakenPos.Contains(location + Vector2.up) && getNumNeighbors(location + Vector2.up) > 1)
+        if (singleNeighborTakenPos.Contains(tempUpperRoom.location) && getNumNeighbors(tempUpperRoom) > 1)
         {
-            singleNeighborTakenPos.Remove(location + Vector2.up);
+            singleNeighborTakenPos.Remove(tempUpperRoom.location);
         }
     }
 
@@ -226,10 +239,11 @@ public class RoomGeneration : MonoBehaviour
             while (!isValidDir && iterationsDir < 16);
 
             randomPos = new Vector2(x, y);
+            Room newRoom = new Room(randomPos, 0);
 
             //If this new location does not meet location requirements
             if (iterationsDir >= 16
-                || takenPos.Contains(randomPos)
+                || takenPos.Contains(newRoom.location)
                 || x >= areaSizeX
                 || x < 0
                 || y >= areaSizeY
@@ -298,11 +312,12 @@ public class RoomGeneration : MonoBehaviour
             while (!isValidDir && iterationsDir < 16);
 
             randomPos = new Vector2(x, y);
+            Room newRoom = new Room(randomPos, 0);
 
             //If this new location does not meet branching requirements
             if (iterationsDir >= 16
-                || takenPos.Contains(randomPos)
-                || getNumNeighbors(randomPos) > 1
+                || takenPos.Contains(newRoom.location)
+                || getNumNeighbors(newRoom) > 1
                 || x >= areaSizeX
                 || x < 0
                 || y >= areaSizeY
@@ -327,80 +342,66 @@ public class RoomGeneration : MonoBehaviour
         return randomPos;
     }
 
-    //Once all the rooms are put on the grid, mark each room connect to its neighbors
     private void SetRoomDoors()
     {
-        for (int x = 0; x < areaSizeX; x++)
+        for (int i = 0; i < rooms.Count; i++)
         {
-            for (int y = 0; y < areaSizeY; y++)
+            if (hasBottomNeighbor(rooms[i]))
             {
-                //If there is no room at the position
-                if (rooms[x, y] == null)
-                {
-                    continue;
-                }
+                rooms[i].doorBottom = true;
+            }
+            else
+            {
+                rooms[i].doorBottom = false;
+            }
 
-                //Check if room below
-                if (y - 1 < 0)
-                {
-                    rooms[x, y].doorBottom = false;
-                }
-                else
-                {
-                    rooms[x, y].doorBottom = (rooms[x, y - 1] != null);
-                }
+            if (hasLeftNeighbor(rooms[i]))
+            {
+                rooms[i].doorLeft = true;
+            }
+            else
+            {
+                rooms[i].doorLeft = false;
+            }
 
-                //Check if room left
-                if (x - 1 < 0)
-                {
-                    rooms[x, y].doorLeft = false;
-                }
-                else
-                {
-                    rooms[x, y].doorLeft = (rooms[x - 1, y] != null);
-                }
+            if (hasRightNeighbor(rooms[i]))
+            {
+                rooms[i].doorRight = true;
+            }
+            else
+            {
+                rooms[i].doorRight = false;
+            }
 
-                //Check if room right
-                if (x + 1 >= areaSizeX)
-                {
-                    rooms[x, y].doorRight = false;
-                }
-                else
-                {
-                    rooms[x, y].doorRight = (rooms[x + 1, y] != null);
-                }
-
-                //Check if room above
-                if (y + 1 >= areaSizeY)
-                {
-                    rooms[x, y].doorTop = false;
-                }
-                else
-                {
-                    rooms[x, y].doorTop = (rooms[x, y + 1] != null);
-                }
+            if (hasUpperNeighbor(rooms[i]))
+            {
+                rooms[i].doorUpper = true;
+            }
+            else
+            {
+                rooms[i].doorUpper = false;
             }
         }
     }
 
     //Gets the number of neighboring rooms surrounding a given room
-    private int getNumNeighbors(Vector2 location)
+    private int getNumNeighbors(Room room)
     {
         int numRooms = 0;
 
-        if (hasBottomNeighbor(location))
+        if (hasBottomNeighbor(room))
         {
             numRooms++;
         }
-        if (hasLeftNeighbor(location))
+        if (hasLeftNeighbor(room))
         {
             numRooms++;
         }
-        if (hasRightNeighbor(location))
+        if (hasRightNeighbor(room))
         {
             numRooms++;
         }
-        if (hasUpperNeighbor(location))
+        if (hasUpperNeighbor(room))
         {
             numRooms++;
         }
@@ -409,37 +410,37 @@ public class RoomGeneration : MonoBehaviour
 
     }
 
-    private bool hasBottomNeighbor(Vector2 location)
+    private bool hasBottomNeighbor(Room room)
     {
-        return (takenPos.Contains(location + Vector2.down));
+        return (takenPos.Contains(room.location + Vector2.down));
     }
 
-    private bool hasLeftNeighbor(Vector2 location)
+    private bool hasLeftNeighbor(Room room)
     {
-        return (takenPos.Contains(location + Vector2.left));
+        return (takenPos.Contains(room.location + Vector2.left));
     }
 
-    private bool hasRightNeighbor(Vector2 location)
+    private bool hasRightNeighbor(Room room)
     {
-        return (takenPos.Contains(location + Vector2.right));
+        return (takenPos.Contains(room.location + Vector2.right));
     }
 
-    private bool hasUpperNeighbor(Vector2 location)
+    private bool hasUpperNeighbor(Room room)
     {
-        return (takenPos.Contains(location + Vector2.up));
+        return (takenPos.Contains(room.location + Vector2.up));
     }
 
     private void BuildPrimitives()
     {
         Vector3 rot;
-        int roomSize = 10; //Will have to be gotten for every room if we add different sizes down the line
+        int gridSize = 10;
 
-        for (int i = 0; i < takenPos.Count; i++)
+        for (int i = 0; i < rooms.Count; i++)
         {
-            float offsetX = takenPos[i].x * roomSize;
-            float offsetZ = takenPos[i].y * roomSize;
+            float offsetX = rooms[i].location.x * gridSize;
+            float offsetZ = rooms[i].location.y * gridSize;
 
-            int doorCount = getNumNeighbors(takenPos[i]);
+            int doorCount = getNumNeighbors(rooms[i]);
 
             if (doorCount > 3)
             {
@@ -449,24 +450,24 @@ public class RoomGeneration : MonoBehaviour
             }
             else if (doorCount > 2)
             {
-                rot = getTriRotation(takenPos[i]);
+                rot = getTriRotation(rooms[i]);
                 GameObject rm = Instantiate(roomTri, new Vector3(offsetX, 0, offsetZ), Quaternion.Euler(rot));
                 rm.transform.parent = map;
                 FillNavBaker(rm);
             }
             else if (doorCount > 1)
             {
-                if ((hasUpperNeighbor(takenPos[i]) && hasBottomNeighbor(takenPos[i]))
-                    || (hasLeftNeighbor(takenPos[i]) && hasRightNeighbor(takenPos[i])))
+                if ((hasUpperNeighbor(rooms[i]) && hasBottomNeighbor(rooms[i]))
+                    || (hasLeftNeighbor(rooms[i]) && hasRightNeighbor(rooms[i])))
                 {
-                    rot = getCorridorRotation(takenPos[i]);
+                    rot = getCorridorRotation(rooms[i]);
                     GameObject rm = Instantiate(roomCorridor, new Vector3(offsetX, 0, offsetZ), Quaternion.Euler(rot));
                     rm.transform.parent = map;
                     FillNavBaker(rm);
                 }
                 else
                 {
-                    rot = getCornerRotation(takenPos[i]);
+                    rot = getCornerRotation(rooms[i]);
                     GameObject rm = Instantiate(roomCorner, new Vector3(offsetX, 0, offsetZ), Quaternion.Euler(rot));
                     rm.transform.parent = map;
                     FillNavBaker(rm);
@@ -474,7 +475,7 @@ public class RoomGeneration : MonoBehaviour
             }
             else
             {
-                rot = getSingleRotation(takenPos[i]);
+                rot = getSingleRotation(rooms[i]);
                 GameObject rm = Instantiate(roomDoorOne, new Vector3(offsetX, 0, offsetZ), Quaternion.Euler(rot));
                 rm.transform.parent = map;
                 FillNavBaker(rm);
@@ -485,12 +486,12 @@ public class RoomGeneration : MonoBehaviour
         SetCharToMap();
     }
 
-    private Vector3 getTriRotation(Vector2 location)
+    private Vector3 getTriRotation(Room room)
     {
-        bool bottom = hasBottomNeighbor(location);
-        bool left = hasLeftNeighbor(location);
-        bool right = hasRightNeighbor(location);
-        bool upper = hasUpperNeighbor(location);
+        bool bottom = hasBottomNeighbor(room);
+        bool left = hasLeftNeighbor(room);
+        bool right = hasRightNeighbor(room);
+        bool upper = hasUpperNeighbor(room);
 
         if (right && bottom && left)
         {
@@ -510,10 +511,10 @@ public class RoomGeneration : MonoBehaviour
         }
     }
 
-    private Vector3 getCorridorRotation(Vector2 location)
+    private Vector3 getCorridorRotation(Room room)
     {
-        bool bottom = hasBottomNeighbor(location);
-        bool upper = hasUpperNeighbor(location);
+        bool bottom = hasBottomNeighbor(room);
+        bool upper = hasUpperNeighbor(room);
 
         if (bottom && upper)
         {
@@ -525,12 +526,12 @@ public class RoomGeneration : MonoBehaviour
         }
     }
 
-    private Vector3 getCornerRotation(Vector2 location)
+    private Vector3 getCornerRotation(Room room)
     {
-        bool bottom = hasBottomNeighbor(location);
-        bool left = hasLeftNeighbor(location);
-        bool right = hasRightNeighbor(location);
-        bool upper = hasUpperNeighbor(location);
+        bool bottom = hasBottomNeighbor(room);
+        bool left = hasLeftNeighbor(room);
+        bool right = hasRightNeighbor(room);
+        bool upper = hasUpperNeighbor(room);
 
         if (bottom && left)
         {
@@ -550,11 +551,11 @@ public class RoomGeneration : MonoBehaviour
         }
     }
 
-    private Vector3 getSingleRotation(Vector2 location)
+    private Vector3 getSingleRotation(Room room)
     {
-        bool bottom = hasBottomNeighbor(location);
-        bool left = hasLeftNeighbor(location);
-        bool upper = hasUpperNeighbor(location);
+        bool bottom = hasBottomNeighbor(room);
+        bool left = hasLeftNeighbor(room);
+        bool upper = hasUpperNeighbor(room);
 
         if (bottom)
         {
