@@ -39,18 +39,21 @@ public class EnemyHealth : MonoBehaviour {
 
     private void Move()
     {
-        timer += Time.deltaTime;
-        if (right)
-            this.transform.position += new Vector3(.75f * Time.deltaTime, 0, 0);
-         else
-            this.transform.position += new Vector3(-.75f * Time.deltaTime, 0, 0);
-        if (timer >= 2f)
+        if(gameObject.name == "Target")
         {
-            timer = 0;
+            timer += Time.deltaTime;
             if (right)
-                right = false;
+                this.transform.position += new Vector3(.75f * Time.deltaTime, 0, 0);
             else
-                right = true;
+                this.transform.position += new Vector3(-.75f * Time.deltaTime, 0, 0);
+            if (timer >= 2f)
+            {
+                timer = 0;
+                if (right)
+                    right = false;
+                else
+                    right = true;
+            }
         }
     }
 }

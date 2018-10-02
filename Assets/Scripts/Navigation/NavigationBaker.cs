@@ -20,9 +20,5 @@ public class NavigationBaker : MonoBehaviour {
                 surfaces[i].BuildNavMesh();
             }
         }
-        else if (generated)
-        {
-            this.enabled = false;
-        }
     }
 }
