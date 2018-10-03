@@ -53,8 +53,16 @@ public class RoomGeneration : MonoBehaviour
     {
         errorRoom = new Room(errorVector);
 
+        //If there are more rooms than can fit in the grid
+        if (numOfRooms >= (areaSizeX * areaSizeY))
+        {
+            numOfRooms = Mathf.RoundToInt(areaSizeX * areaSizeY);
+        }
+
+        Debug.Log(numOfRooms);
+
         baker = FindObjectOfType<NavigationBaker>();
-        baker.roomCount = numOfRooms;
+        //baker.roomCount = numOfRooms;
 
         branchProb = startBranchProb;
         changeInProb = Mathf.Abs(startBranchProb - endBranchProb);
@@ -68,14 +76,8 @@ public class RoomGeneration : MonoBehaviour
             decreasing = false;
         }
 
-        //If there are more rooms than can fit in the grid
-        if (numOfRooms >= (areaSizeX * areaSizeY))
-        {
-            numOfRooms = Mathf.RoundToInt(areaSizeX * areaSizeY);
-        }
-
-        //CreateRooms();
-        CreateManualRooms();
+        CreateRooms();
+        //CreateManualRooms();
         BuildPrimitives();
     }
 
@@ -1145,6 +1147,10 @@ public class RoomGeneration : MonoBehaviour
     //Gets a random position that's adjacent to a random room
     private Vector2 getRandomPosition()
     {
+        if (openRooms.Count == 0)
+        {
+            throw new System.Exception("There are no open rooms!");
+        }
         Vector2 randomPos;
         bool validRandomPos;
         int index;
@@ -1153,7 +1159,8 @@ public class RoomGeneration : MonoBehaviour
         do
         {
             //Pick a random room that's already in the grid that doesn't have four neighbors
-            index = Mathf.RoundToInt(Random.value * (openRooms.Count - 1));
+            index = Mathf.Clamp(Mathf.RoundToInt(Random.value * (openRooms.Count)), 0, openRooms.Count - 1);
+            index = Mathf.Clamp(index, 0, openRooms.Count);
 
             int x = (int)openRooms[index].location.x;
             int y = (int)openRooms[index].location.y;
@@ -1217,6 +1224,11 @@ public class RoomGeneration : MonoBehaviour
     //Gets a random position that's adjacent to only one random room (branching)
     private Vector2 getRandomBranchPosition()
     {
+        if (singleNeighborRooms.Count == 0)
+        {
+            return errorVector;
+        }
+
         Vector2 randomPos;
         bool validRandomPos;
         int index;
@@ -1226,7 +1238,8 @@ public class RoomGeneration : MonoBehaviour
         do
         {
             //Pick a random room that's already in the grid that has only one neighbor
-            index = Mathf.RoundToInt(Random.value * (singleNeighborRooms.Count - 1));
+            index = Mathf.Clamp(Mathf.RoundToInt(Random.value * (singleNeighborRooms.Count)), 0, singleNeighborRooms.Count - 1);
+            index = Mathf.Clamp(index, 0, singleNeighborRooms.Count);
 
             int x = (int)singleNeighborRooms[index].location.x;
             int y = (int)singleNeighborRooms[index].location.y;
@@ -1299,54 +1312,54 @@ public class RoomGeneration : MonoBehaviour
     {
         if (room.size == OnexOne)
         {
-            room.setDoorBottom(hasBottomNeighbor(room));
-            room.setDoorLeft(hasLeftNeighbor(room));
-            room.setDoorRight(hasRightNeighbor(room));
-            room.setDoorTop(hasTopNeighbor(room));
+            room.setDoorBottom(!hasBottomNeighbor(room));
+            room.setDoorLeft(!hasLeftNeighbor(room));
+            room.setDoorRight(!hasRightNeighbor(room));
+            room.setDoorTop(!hasTopNeighbor(room));
         }
         else if (room.size == OnexTwo)
         {
-            room.setDoorBottomLeft(hasBottomLeftNeighbor(room));
-            room.setDoorBottomRight(hasBottomRightNeighbor(room));
-            room.setDoorLeft(hasLeftNeighbor(room));
-            room.setDoorRight(hasRightNeighbor(room));
-            room.setDoorTopLeft(hasTopLeftNeighbor(room));
-            room.setDoorTopRight(hasTopRightNeighbor(room));
+            room.setDoorBottomLeft(!hasBottomLeftNeighbor(room));
+            room.setDoorBottomRight(!hasBottomRightNeighbor(room));
+            room.setDoorLeft(!hasLeftNeighbor(room));
+            room.setDoorRight(!hasRightNeighbor(room));
+            room.setDoorTopLeft(!hasTopLeftNeighbor(room));
+            room.setDoorTopRight(!hasTopRightNeighbor(room));
         }
         else if (room.size == TwoxOne)
         {
-            room.setDoorBottom(hasBottomNeighbor(room));
-            room.setDoorLeftBottom(hasLeftBottomNeighbor(room));
-            room.setDoorLeftTop(hasLeftTopNeighbor(room));
-            room.setDoorRightBottom(hasRightBottomNeighbor(room));
-            room.setDoorRightTop(hasRightTopNeighbor(room));
-            room.setDoorTop(hasTopNeighbor(room));
+            room.setDoorBottom(!hasBottomNeighbor(room));
+            room.setDoorLeftBottom(!hasLeftBottomNeighbor(room));
+            room.setDoorLeftTop(!hasLeftTopNeighbor(room));
+            room.setDoorRightBottom(!hasRightBottomNeighbor(room));
+            room.setDoorRightTop(!hasRightTopNeighbor(room));
+            room.setDoorTop(!hasTopNeighbor(room));
         }
         else if (room.size == TwoxTwo)
         {
-            room.setDoorBottomLeft(hasBottomLeftNeighbor(room));
-            room.setDoorBottomRight(hasBottomRightNeighbor(room));
-            room.setDoorLeftBottom(hasLeftBottomNeighbor(room));
-            room.setDoorLeftTop(hasLeftTopNeighbor(room));
-            room.setDoorRightBottom(hasRightBottomNeighbor(room));
-            room.setDoorRightTop(hasRightTopNeighbor(room));
-            room.setDoorTopLeft(hasTopLeftNeighbor(room));
-            room.setDoorTopRight(hasTopRightNeighbor(room));
+            room.setDoorBottomLeft(!hasBottomLeftNeighbor(room));
+            room.setDoorBottomRight(!hasBottomRightNeighbor(room));
+            room.setDoorLeftBottom(!hasLeftBottomNeighbor(room));
+            room.setDoorLeftTop(!hasLeftTopNeighbor(room));
+            room.setDoorRightBottom(!hasRightBottomNeighbor(room));
+            room.setDoorRightTop(!hasRightTopNeighbor(room));
+            room.setDoorTopLeft(!hasTopLeftNeighbor(room));
+            room.setDoorTopRight(!hasTopRightNeighbor(room));
         }
         else
         {
-            room.setDoorBottomLeft(hasBottomLeftNeighbor(room));
-            room.setDoorBottom(hasBottomNeighbor(room));
-            room.setDoorBottomRight(hasBottomRightNeighbor(room));
-            room.setDoorLeftBottom(hasLeftBottomNeighbor(room));
-            room.setDoorLeft(hasLeftNeighbor(room));
-            room.setDoorLeftTop(hasLeftTopNeighbor(room));
-            room.setDoorRightBottom(hasRightBottomNeighbor(room));
-            room.setDoorRight(hasRightNeighbor(room));
-            room.setDoorRightTop(hasRightTopNeighbor(room));
-            room.setDoorTopLeft(hasTopLeftNeighbor(room));
-            room.setDoorTop(hasTopNeighbor(room));
-            room.setDoorTopRight(hasTopRightNeighbor(room));
+            room.setDoorBottomLeft(!hasBottomLeftNeighbor(room));
+            room.setDoorBottom(!hasBottomNeighbor(room));
+            room.setDoorBottomRight(!hasBottomRightNeighbor(room));
+            room.setDoorLeftBottom(!hasLeftBottomNeighbor(room));
+            room.setDoorLeft(!hasLeftNeighbor(room));
+            room.setDoorLeftTop(!hasLeftTopNeighbor(room));
+            room.setDoorRightBottom(!hasRightBottomNeighbor(room));
+            room.setDoorRight(!hasRightNeighbor(room));
+            room.setDoorRightTop(!hasRightTopNeighbor(room));
+            room.setDoorTopLeft(!hasTopLeftNeighbor(room));
+            room.setDoorTop(!hasTopNeighbor(room));
+            room.setDoorTopRight(!hasTopRightNeighbor(room));
         }
     }
 
@@ -1720,7 +1733,6 @@ public class RoomGeneration : MonoBehaviour
 
     private void BuildPrimitives()
     {
-        Vector3 rot;
         int gridSize = 10;
 
         for (int i = 0; i < rooms.Count; i++)
@@ -1733,127 +1745,41 @@ public class RoomGeneration : MonoBehaviour
             {
                 GameObject rm = Instantiate(OnexOneRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
 
-                if (!rooms[i].getDoorBottom())
+                if (rooms[i].getDoorBottom())
                 {
                     GameObject bottomDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
                     bottomDoor.transform.parent = rm.transform;
-                    bottomDoor.transform.localPosition = new Vector3(0f, 1f, 24.5f);
+                    bottomDoor.transform.localPosition = new Vector3(0f, 1f, -24.5f);
                 }
-                if (!rooms[i].getDoorLeft())
+                if (rooms[i].getDoorLeft())
                 {
                     GameObject leftDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
                     leftDoor.transform.parent = rm.transform;
-                    leftDoor.transform.localPosition = new Vector3(24.5f, 1f, 0f);
+                    leftDoor.transform.localPosition = new Vector3(-24.5f, 1f, 0f);
                     leftDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
-                if (!rooms[i].getDoorRight())
+                if (rooms[i].getDoorRight())
                 {
                     GameObject rightDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
                     rightDoor.transform.parent = rm.transform;
-                    rightDoor.transform.localPosition = new Vector3(-24.5f, 1f, 0f);
+                    rightDoor.transform.localPosition = new Vector3(24.5f, 1f, 0f);
                     rightDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
-                if (!rooms[i].getDoorTop())
+                if (rooms[i].getDoorTop())
                 {
                     GameObject topDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
                     topDoor.transform.parent = rm.transform;
-                    topDoor.transform.localPosition = new Vector3(0f, 1f, -24.5f);
+                    topDoor.transform.localPosition = new Vector3(0f, 1f, 24.5f);
                 }
+
                 rm.transform.parent = map;
                 FillNavBaker(rm);
             }
         }
+
         map.transform.position = Vector3.zero;
+        baker.generate();
         SetCharToMap();
-    }
-
-    private Vector3 getTriRotation(Room room)
-    {
-        bool bottom = hasBottomNeighbor(room);
-        bool left = hasLeftNeighbor(room);
-        bool right = hasRightNeighbor(room);
-        bool top = hasTopNeighbor(room);
-
-        if (right && bottom && left)
-        {
-            return new Vector3(0, 0, 0);
-        }
-        else if (bottom && left && top)
-        {
-            return new Vector3(0, 90, 0);
-        }
-        else if (left && top && right)
-        {
-            return new Vector3(0, 180, 0);
-        }
-        else
-        {
-            return new Vector3(0, 270, 0);
-        }
-    }
-
-    private Vector3 getCorridorRotation(Room room)
-    {
-        bool bottom = hasBottomNeighbor(room);
-        bool top = hasTopNeighbor(room);
-
-        if (bottom && top)
-        {
-            return new Vector3(0, 0, 0);
-        }
-        else
-        {
-            return new Vector3(0, 90, 0);
-        }
-    }
-
-    private Vector3 getCornerRotation(Room room)
-    {
-        bool bottom = hasBottomNeighbor(room);
-        bool left = hasLeftNeighbor(room);
-        bool right = hasRightNeighbor(room);
-        bool top = hasTopNeighbor(room);
-
-        if (bottom && left)
-        {
-            return new Vector3(0, 0, 0);
-        }
-        else if (left && top)
-        {
-            return new Vector3(0, 90, 0);
-        }
-        else if (top && right)
-        {
-            return new Vector3(0, 180, 0);
-        }
-        else
-        {
-            return new Vector3(0, 270, 0);
-        }
-    }
-
-    private Vector3 getSingleRotation(Room room)
-    {
-        bool bottom = hasBottomNeighbor(room);
-        bool left = hasLeftNeighbor(room);
-        bool top = hasTopNeighbor(room);
-
-        if (bottom)
-        {
-            return new Vector3(0, 0, 0);
-        }
-        else if (left)
-        {
-            return new Vector3(0, 90, 0);
-        }
-        else if (top)
-        {
-            return new Vector3(0, 180, 0);
-        }
-        else
-        {
-            return new Vector3(0, 270, 0);
-        }
     }
 
     private void FillNavBaker(GameObject rm)
