@@ -5,20 +5,34 @@ using System.Collections.Generic;
 public class NavigationBaker : MonoBehaviour {
 
     public List<NavMeshSurface> surfaces = new List<NavMeshSurface>();
-    public int roomCount = 0;
+    //public int roomCount = 0;
 
-    public bool generated;
+    //public bool generated;
 
     // Use this for initialization
-    void Update()
+    //void Update()
+    //{
+        //if (surfaces.Count >= roomCount && !generated)
+        //{
+        //    generated = true;
+        //    for (int i = 0; i < surfaces.Count; i++)
+        //    {
+        //        surfaces[i].BuildNavMesh();
+        //    }
+        //}
+        //else if (generated)
+        //{
+        //    this.enabled = false;
+        //}
+    //}
+
+    public void generate()
     {
-        if (surfaces.Count >= roomCount && !generated)
+        for (int i = 0; i < surfaces.Count; i++)
         {
-            generated = true;
-            for (int i = 0; i < surfaces.Count; i++)
-            {
-                surfaces[i].BuildNavMesh();
-            }
+            surfaces[i].BuildNavMesh();
         }
+
+        this.enabled = false;
     }
 }
