@@ -7,7 +7,12 @@ public class RoomGeneration : MonoBehaviour
 {
 
     public Transform map;
-    public GameObject room, roomDoorAll, roomTri, roomCorner, roomCorridor, roomDoorOne;
+    public GameObject OnexOneRoom;
+    public GameObject OnexTwoRoom;
+    public GameObject TwoxOneRoom;
+    public GameObject TwoxTwoRoom;
+    public GameObject ThreexThreeRoom;
+    public GameObject RoomDoor;
     public GameObject character;
     private NavigationBaker baker;
 
@@ -69,8 +74,37 @@ public class RoomGeneration : MonoBehaviour
             numOfRooms = Mathf.RoundToInt(areaSizeX * areaSizeY);
         }
 
-        CreateRooms();
+        //CreateRooms();
+        CreateManualRooms();
         BuildPrimitives();
+    }
+
+    private void CreateManualRooms()
+    {
+        Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), 0);
+        rooms.Insert(0, startRoom);
+        takenPos.Insert(0, startRoom.location);
+        openRooms.Insert(0, startRoom);
+        singleNeighborRooms.Insert(0, startRoom);
+
+        Room newRoom = new Room(startRoom.location + Vector2.up);
+        rooms.Insert(0, newRoom);
+
+        addLocationsToTakenPos(newRoom);
+        setRoomDoors(newRoom);
+        setNeighboringRooms(newRoom);
+
+        if (getNumNeighbors(newRoom) < newRoom.maxNeighbors)
+        {
+            openRooms.Insert(0, newRoom);
+        }
+        if (getNumNeighbors(newRoom) <= 1)
+        {
+            singleNeighborRooms.Insert(0, newRoom);
+        }
+
+        removeNotOpenRooms(newRoom);
+        removeNotSingleNeighborRooms(newRoom);
     }
 
     //Populates the "rooms" array with rooms
@@ -78,17 +112,17 @@ public class RoomGeneration : MonoBehaviour
     {
         //Add starter room in middle
         //TODO: Different type for starter room (Change 0 to another number)
-        //Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), 0);
-        //rooms.Insert(0, startRoom);
-        //takenPos.Insert(0, startRoom.location);
-        //openRooms.Insert(0, startRoom);
-        //singleNeighborRooms.Insert(0, startRoom);
-
-        Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), ThreexThree, 0);
+        Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), 0);
         rooms.Insert(0, startRoom);
-        addLocationsToTakenPos(startRoom);
+        takenPos.Insert(0, startRoom.location);
         openRooms.Insert(0, startRoom);
         singleNeighborRooms.Insert(0, startRoom);
+
+        //Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), ThreexThree, 0);
+        //rooms.Insert(0, startRoom);
+        //addLocationsToTakenPos(startRoom);
+        //openRooms.Insert(0, startRoom);
+        //singleNeighborRooms.Insert(0, startRoom);
 
         //Add each room to the grid
         for (int i = 0; i < numOfRooms - 1; i++)
@@ -96,7 +130,6 @@ public class RoomGeneration : MonoBehaviour
             //Determine type and size of new Room (somehow)
             int tempType = 0;
             Vector2 tempSize = OnexOne;
-
 
             //Get temp position of new room
             Vector2 tempLoc = getRandomPosition();
@@ -1694,60 +1727,45 @@ public class RoomGeneration : MonoBehaviour
         {
             float offsetX = rooms[i].location.x * gridSize;
             float offsetZ = rooms[i].location.y * gridSize;
-
-            if (i == 0)
-            {
-                GameObject rm = Instantiate(roomDoorAll, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
-                rm.transform.localScale.Set(3, 1, 3);
-                rm.transform.parent = map;
-                FillNavBaker(rm);
-                return;
-            }
-
             int doorCount = getNumNeighbors(rooms[i]);
 
-            if (doorCount > 3)
+            if (rooms[i].size == OnexOne)
             {
-                GameObject rm = Instantiate(roomDoorAll, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
-                rm.transform.parent = map;
-                FillNavBaker(rm);
-            }
-            else if (doorCount > 2)
-            {
-                rot = getTriRotation(rooms[i]);
-                GameObject rm = Instantiate(roomTri, new Vector3(offsetX, 0, offsetZ), Quaternion.Euler(rot));
-                rm.transform.parent = map;
-                FillNavBaker(rm);
-            }
-            else if (doorCount > 1)
-            {
-                if ((hasTopNeighbor(rooms[i]) && hasBottomNeighbor(rooms[i]))
-                    || (hasLeftNeighbor(rooms[i]) && hasRightNeighbor(rooms[i])))
-                {
-                    rot = getCorridorRotation(rooms[i]);
-                    GameObject rm = Instantiate(roomCorridor, new Vector3(offsetX, 0, offsetZ), Quaternion.Euler(rot));
-                    rm.transform.parent = map;
-                    FillNavBaker(rm);
-                }
-                else
-                {
-                    rot = getCornerRotation(rooms[i]);
-                    GameObject rm = Instantiate(roomCorner, new Vector3(offsetX, 0, offsetZ), Quaternion.Euler(rot));
-                    rm.transform.parent = map;
-                    FillNavBaker(rm);
-                }
-            }
-            else
-            {
-                rot = getSingleRotation(rooms[i]);
-                GameObject rm = Instantiate(roomDoorOne, new Vector3(offsetX, 0, offsetZ), Quaternion.Euler(rot));
-                rm.transform.parent = map;
-                FillNavBaker(rm);
-            }
-        }
+                GameObject rm = Instantiate(OnexOneRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
 
-        map.transform.position = Vector3.zero;
-        SetCharToMap();
+                if (!rooms[i].getDoorBottom())
+                {
+                    GameObject bottomDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    bottomDoor.transform.parent = rm.transform;
+                    bottomDoor.transform.localPosition = new Vector3(0f, 1f, 24.5f);
+                }
+                if (!rooms[i].getDoorLeft())
+                {
+                    GameObject leftDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    leftDoor.transform.parent = rm.transform;
+                    leftDoor.transform.localPosition = new Vector3(24.5f, 1f, 0f);
+                    leftDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
+                }
+                if (!rooms[i].getDoorRight())
+                {
+                    GameObject rightDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    rightDoor.transform.parent = rm.transform;
+                    rightDoor.transform.localPosition = new Vector3(-24.5f, 1f, 0f);
+                    rightDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
+                }
+                if (!rooms[i].getDoorTop())
+                {
+                    GameObject topDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    topDoor.transform.parent = rm.transform;
+                    topDoor.transform.localPosition = new Vector3(0f, 1f, -24.5f);
+                }
+
+                rm.transform.parent = map;
+                FillNavBaker(rm);
+            }
+            map.transform.position = Vector3.zero;
+            SetCharToMap();
+        }
     }
 
     private Vector3 getTriRotation(Room room)
