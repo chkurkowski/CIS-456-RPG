@@ -1759,13 +1759,12 @@ public class RoomGeneration : MonoBehaviour
                     topDoor.transform.parent = rm.transform;
                     topDoor.transform.localPosition = new Vector3(0f, 1f, -24.5f);
                 }
-
                 rm.transform.parent = map;
                 FillNavBaker(rm);
             }
-            map.transform.position = Vector3.zero;
-            SetCharToMap();
         }
+        map.transform.position = Vector3.zero;
+        SetCharToMap();
     }
 
     private Vector3 getTriRotation(Room room)
