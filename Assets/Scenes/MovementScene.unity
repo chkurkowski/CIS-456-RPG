@@ -370,7 +370,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.1
   m_BuildHeightMesh: 0
-  m_NavMeshData: {fileID: 0}
+  m_NavMeshData: {fileID: 23800000, guid: 9e6f1ffeb45731a41be495a4c475cb8d, type: 2}
 --- !u!4 &129274554
 Transform:
   m_ObjectHideFlags: 0
@@ -767,15 +767,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   map: {fileID: 1653424545}
-  room: {fileID: 1311974410015160, guid: d09ea76072e49495a91a2d0a8096537f, type: 2}
-  roomDoorAll: {fileID: 1094071686088998, guid: a83a922f5730d4b2184c7a479726cc73,
+  OnexOneRoom: {fileID: 1314456083299362, guid: 84874434824f4414f9a47c2ef699c477,
     type: 2}
-  roomTri: {fileID: 1184047401792974, guid: 32a497d07579a4b37ace02f530a196d6, type: 2}
-  roomCorner: {fileID: 1126764092855898, guid: 628844e878c8349b38404645849bb768, type: 2}
-  roomCorridor: {fileID: 1792552989271508, guid: 4fb342e806c3041f1a4569ea8058fa0d,
-    type: 2}
-  roomDoorOne: {fileID: 1923619413720996, guid: d4a30815606ab42249609f3199cea4ef,
-    type: 2}
+  OnexTwoRoom: {fileID: 0}
+  TwoxOneRoom: {fileID: 0}
+  TwoxTwoRoom: {fileID: 0}
+  ThreexThreeRoom: {fileID: 0}
+  RoomDoor: {fileID: 1008004099394498, guid: b023f08085389244986bb48fa49d437a, type: 2}
   character: {fileID: 42301132}
   areaSizeX: 25
   areaSizeY: 25
@@ -808,8 +806,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   surfaces:
   - {fileID: 129274553}
-  roomCount: 0
-  generated: 0
 --- !u!1 &729227796
 GameObject:
   m_ObjectHideFlags: 0
@@ -980,6 +976,50 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 838598429}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &977783028
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 977783030}
+  - component: {fileID: 977783029}
+  m_Layer: 0
+  m_Name: TestSpawnObj
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &977783029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 977783028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d77369b97b282734cbe6c06360e482fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnexOneRoom: {fileID: 1314456083299362, guid: 84874434824f4414f9a47c2ef699c477,
+    type: 2}
+  RoomDoor: {fileID: 1008004099394498, guid: b023f08085389244986bb48fa49d437a, type: 2}
+  map: {fileID: 1653424545}
+--- !u!4 &977783030
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 977783028}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 115.78617, y: 33.554676, z: 138.59245}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1435157633
 GameObject:
   m_ObjectHideFlags: 0

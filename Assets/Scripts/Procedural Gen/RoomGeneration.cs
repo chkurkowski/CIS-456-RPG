@@ -1775,6 +1775,160 @@ public class RoomGeneration : MonoBehaviour
                 rm.transform.parent = map;
                 FillNavBaker(rm);
             }
+            else if (rooms[i].size == OnexTwo)
+            {
+                GameObject rm = Instantiate(OnexTwoRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+
+                if (rooms[i].getDoorBottomLeft())
+                {
+
+                }
+                if (rooms[i].getDoorBottomRight())
+                {
+
+                }
+                if (rooms[i].getDoorLeft())
+                {
+
+                }
+                if (rooms[i].getDoorRight())
+                {
+
+                }
+                if (rooms[i].getDoorTopLeft())
+                {
+
+                }
+                if (rooms[i].getDoorTopRight())
+                {
+
+                }
+
+                rm.transform.parent = map;
+                FillNavBaker(rm);
+            }
+            else if (rooms[i].size == TwoxOne)
+            {
+                GameObject rm = Instantiate(TwoxOneRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+
+                if (rooms[i].getDoorBottom())
+                {
+
+                }
+                if (rooms[i].getDoorLeftBottom())
+                {
+
+                }
+                if (rooms[i].getDoorLeftTop())
+                {
+
+                }
+                if (rooms[i].getDoorRightBottom())
+                {
+
+                }
+                if (rooms[i].getDoorRightTop())
+                {
+
+                }
+                if (rooms[i].getDoorTop())
+                {
+
+                }
+
+                rm.transform.parent = map;
+                FillNavBaker(rm);
+            }
+            else if (rooms[i].size == TwoxTwo)
+            {
+                GameObject rm = Instantiate(OnexTwoRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+
+                if (rooms[i].getDoorBottomLeft())
+                {
+
+                }
+                if (rooms[i].getDoorBottomRight())
+                {
+
+                }
+                if (rooms[i].getDoorLeftBottom())
+                {
+
+                }
+                if (rooms[i].getDoorLeftTop())
+                {
+
+                }
+                if (rooms[i].getDoorRightBottom())
+                {
+
+                }
+                if (rooms[i].getDoorRightTop())
+                {
+
+                }
+                if (rooms[i].getDoorTopLeft())
+                {
+
+                }
+                if (rooms[i].getDoorTopRight())
+                {
+
+                }
+            }
+            else
+            {
+                GameObject rm = Instantiate(OnexTwoRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+
+                if (rooms[i].getDoorBottomLeft())
+                {
+
+                }
+                if (rooms[i].getDoorBottom())
+                {
+
+                }
+                if (rooms[i].getDoorBottomRight())
+                {
+
+                }
+                if (rooms[i].getDoorLeftBottom())
+                {
+
+                }
+                if (rooms[i].getDoorLeft())
+                {
+
+                }
+                if (rooms[i].getDoorLeftTop())
+                {
+
+                }
+                if (rooms[i].getDoorRightBottom())
+                {
+
+                }
+                if (rooms[i].getDoorRight())
+                {
+
+                }
+                if (rooms[i].getDoorRightTop())
+                {
+
+                }
+                if (rooms[i].getDoorTopLeft())
+                {
+
+                }
+                if (rooms[i].getDoorTop())
+                {
+
+                }
+                if (rooms[i].getDoorTopRight())
+                {
+
+                }
+            }
         }
 
         map.transform.position = Vector3.zero;
