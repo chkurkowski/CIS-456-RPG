@@ -17,10 +17,11 @@ public class EnemyAI : MonoBehaviour
     public State state;
 
     //Waypoint values
-    private GameObject[] waypoints;
-    private int watpointInd;
-    private float patrolSpeed = 1.0f;
+    public GameObject[] waypoints;
+    private int waypointInd;
+    private float patrolSpeed = 1f;
     private float chaseSpeed = 1.8f;
+    private float offset = 5f;
 
     //Transform for targeting
     private Transform targetedTransform;
@@ -31,6 +32,8 @@ public class EnemyAI : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         target = GameObject.Find("Character");
+
+        waypointInd = Random.Range(0, waypoints.Length);
 
         alive = true;
 
@@ -62,21 +65,32 @@ public class EnemyAI : MonoBehaviour
     private void Patrol()
     {
         agent.speed = patrolSpeed;
-        agent.destination = transform.position;
-        print("Patrolling");
-        state = State.CHASE;
-        //if()
+        agent.destination = RandomPosition();
+        if(Vector3.Distance(transform.position, waypoints[waypointInd].transform.position) >= 1)
+        {
+            agent.SetDestination(waypoints[waypointInd].transform.position);
+            agent.isStopped = false;
+            print("Patrolling");
+        }
+        else if(Vector3.Distance(transform.position, waypoints[waypointInd].transform.position) < 1)
+        {
+            waypointInd = Random.Range(0, waypoints.Length);
+        }
+
+        if(Vector3.Distance(target.transform.position, transform.position) <= 5)
+        {
+            state = State.CHASE;
+        }
     }
 
     private void Chase()
     {
         agent.speed = chaseSpeed;
-        print("Chasing");
         if (Vector3.Distance(target.transform.position, transform.position) <= 5)
         {
             targetedTransform = target.transform;
             agent.destination = new Vector3(targetedTransform.position.x, transform.position.y, targetedTransform.position.z);
-            agent.isStopped = false;
+            print("Chasing");
         }
         else
             state = State.PATROL;
@@ -85,5 +99,15 @@ public class EnemyAI : MonoBehaviour
     private void Attack()
     {
 
+    }
+
+    private Vector3 RandomPosition()
+    {
+        Vector3 newPos = Vector3.zero; 
+        while(Vector3.Distance(newPos, transform.position) < 3)
+        {
+            newPos = new Vector3(Random.Range(transform.position.x - offset, transform.position.x + offset), transform.position.y, Random.Range(transform.position.z - offset, transform.position.z + offset));
+        }
+        return newPos;
     }
 }
