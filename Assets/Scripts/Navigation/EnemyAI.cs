@@ -39,6 +39,7 @@ public class EnemyAI : MonoBehaviour
         target = GameObject.Find("Character");
         baker = FindObjectOfType<NavigationBaker>();
         gen = FindObjectOfType<RoomGeneration>();
+        patrolBase.Find("Map");
 
         waypointInd = Random.Range(0, waypoints.Length);
         agent.destination = RandomPosition();
@@ -135,8 +136,8 @@ public class EnemyAI : MonoBehaviour
         bool validPos = false;
         RaycastHit hit;
 
-        float newX = Random.Range(0f, gen.areaSizeX);
-        float newZ = Random.Range(0f, gen.areaSizeY);
+        float newX = Random.Range(0f, gen.areaSizeX) + patrolBase.transform.position.x;
+        float newZ = Random.Range(0f, gen.areaSizeY) + patrolBase.transform.position.y;
 
         newPos = new Vector3(newX, transform.position.y, newZ);
 

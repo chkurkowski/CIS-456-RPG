@@ -61,10 +61,8 @@ public class RoomGeneration : MonoBehaviour
             numOfRooms = Mathf.RoundToInt(areaSizeX * areaSizeY);
         }
 
-        Debug.Log(numOfRooms);
-
         baker = FindObjectOfType<NavigationBaker>();
-        //baker.roomCount = numOfRooms;
+        baker.roomCount = numOfRooms;
 
         branchProb = startBranchProb;
         changeInProb = Mathf.Abs(startBranchProb - endBranchProb);
