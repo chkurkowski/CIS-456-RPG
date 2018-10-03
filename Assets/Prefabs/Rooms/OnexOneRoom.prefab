@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 33371593246498576}
   - component: {fileID: 23246844513856100}
   - component: {fileID: 114956216187026632}
+  - component: {fileID: 64022108844096552}
   m_Layer: 0
   m_Name: OnexOneRoom
   m_TagString: Walkable
@@ -83,6 +84,20 @@ MeshFilter:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1314456083299362}
+  m_Mesh: {fileID: 4300000, guid: f5f72102626342c47b61aebc57041e87, type: 3}
+--- !u!64 &64022108844096552
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1314456083299362}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 0
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
   m_Mesh: {fileID: 4300000, guid: f5f72102626342c47b61aebc57041e87, type: 3}
 --- !u!114 &114956216187026632
 MonoBehaviour:
