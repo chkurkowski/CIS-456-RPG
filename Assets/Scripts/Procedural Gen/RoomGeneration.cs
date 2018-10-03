@@ -16,8 +16,10 @@ public class RoomGeneration : MonoBehaviour
     public GameObject character;
     private NavigationBaker baker;
 
-    [SerializeField] int areaSizeX = 5; //Size of the grid on the x axis
-    [SerializeField] int areaSizeY = 5; //Size of the grid on the y axis
+    public GameObject tempEnemy;
+
+    public int areaSizeX = 5; //Size of the grid on the x axis
+    public int areaSizeY = 5; //Size of the grid on the y axis
     [SerializeField] int numOfRooms = 20; //Number of rooms to add to the grid
 
     [SerializeField] float startBranchProb = 1.0f; //Branch probability when the first rooms are being created
@@ -1932,7 +1934,7 @@ public class RoomGeneration : MonoBehaviour
         }
 
         map.transform.position = Vector3.zero;
-        baker.generate();
+        //baker.generate();
         SetCharToMap();
     }
 
@@ -1945,5 +1947,7 @@ public class RoomGeneration : MonoBehaviour
     private void SetCharToMap()
     {
         character.transform.position = baker.surfaces[Random.Range(0, baker.surfaces.Count)].gameObject.transform.position;
+
+        tempEnemy.transform.position = baker.surfaces[Random.Range(0, baker.surfaces.Count)].gameObject.transform.position;
     }
 }
