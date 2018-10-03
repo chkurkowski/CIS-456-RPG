@@ -1930,7 +1930,7 @@ public class RoomGeneration : MonoBehaviour
         }
 
         map.transform.position = Vector3.zero;
-        baker.generate();
+        //baker.generate();
         SetCharToMap();
     }
 
