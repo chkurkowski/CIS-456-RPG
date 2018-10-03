@@ -583,6 +583,6 @@ public class RoomGeneration : MonoBehaviour
 
     private void SetCharToMap()
     {
-        character.transform.position = baker.surfaces[Random.Range(0, baker.surfaces.Count)].gameObject.transform.position;
+        //character.transform.position = baker.surfaces[Random.Range(0, baker.surfaces.Count)].gameObject.transform.position;
     }
 }
