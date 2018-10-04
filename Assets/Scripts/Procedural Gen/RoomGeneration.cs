@@ -1317,47 +1317,385 @@ public class RoomGeneration : MonoBehaviour
         }
         else if (room.size == OnexTwo)
         {
-            room.setDoorBottomLeft(!hasBottomLeftNeighbor(room));
-            room.setDoorBottomRight(!hasBottomRightNeighbor(room));
+            bool doorBottomLeft = !hasBottomLeftNeighbor(room);
+            bool doorBottomRight = !hasBottomRightNeighbor(room);
+            bool doorTopLeft = !hasTopLeftNeighbor(room);
+            bool doorTopRight = !hasTopRightNeighbor(room);
+
+            if (!doorBottomLeft && !doorBottomRight && room.getRoomBottomLeft().Equals(room.getRoomBottomRight()))
+            {
+                float random = Random.value;
+                if (random < 0.5f)
+                {
+                    room.setDoorBottomLeft(false);
+                    room.setDoorBottomRight(true);
+                }
+                else
+                {
+                    room.setDoorBottomLeft(true);
+                    room.setDoorBottomRight(false);
+                }
+            }
+            else
+            {
+                room.setDoorBottomLeft(doorBottomLeft);
+                room.setDoorBottomRight(doorBottomRight);
+            }
+            if (!doorTopLeft && !doorTopRight && room.getRoomTopLeft().Equals(room.getRoomTopRight()))
+            {
+                float random = Random.value;
+                if (random < 0.5f)
+                {
+                    room.setDoorTopLeft(false);
+                    room.setDoorTopRight(true);
+                }
+                else
+                {
+                    room.setDoorTopLeft(true);
+                    room.setDoorTopRight(false);
+                }
+            }
+            else
+            {
+                room.setDoorTopLeft(doorTopLeft);
+                room.setDoorTopRight(doorTopRight);
+            }
+
             room.setDoorLeft(!hasLeftNeighbor(room));
             room.setDoorRight(!hasRightNeighbor(room));
-            room.setDoorTopLeft(!hasTopLeftNeighbor(room));
-            room.setDoorTopRight(!hasTopRightNeighbor(room));
         }
         else if (room.size == TwoxOne)
         {
+            bool doorLeftBottom = !hasLeftBottomNeighbor(room);
+            bool doorLeftTop = !hasLeftTopNeighbor(room);
+            bool doorRightBottom = !hasRightBottomNeighbor(room);
+            bool doorRightTop = !hasRightTopNeighbor(room);
+
+            if (!doorLeftBottom && !doorLeftTop && room.getRoomLeftBottom().Equals(room.getRoomLeftTop()))
+            {
+                float random = Random.value;
+                if (random < 0.5f)
+                {
+                    room.setDoorLeftBottom(false);
+                    room.setDoorLeftTop(true);
+                }
+                else
+                {
+                    room.setDoorLeftBottom(true);
+                    room.setDoorLeftTop(false);
+                }
+            }
+            else
+            {
+                room.setDoorLeftBottom(doorLeftBottom);
+                room.setDoorLeftTop(doorLeftTop);
+            }
+            if (!doorRightBottom && !doorRightTop && room.getRoomRightBottom().Equals(room.getRoomRightTop()))
+            {
+                float random = Random.value;
+                if (random < 0.5f)
+                {
+                    room.setDoorRightBottom(false);
+                    room.setDoorRightTop(true);
+                }
+                else
+                {
+                    room.setDoorRightBottom(true);
+                    room.setDoorRightTop(false);
+                }
+            }
+            else
+            {
+                room.setDoorRightBottom(doorRightBottom);
+                room.setDoorRightTop(doorRightTop);
+            }
+
             room.setDoorBottom(!hasBottomNeighbor(room));
-            room.setDoorLeftBottom(!hasLeftBottomNeighbor(room));
-            room.setDoorLeftTop(!hasLeftTopNeighbor(room));
-            room.setDoorRightBottom(!hasRightBottomNeighbor(room));
-            room.setDoorRightTop(!hasRightTopNeighbor(room));
             room.setDoorTop(!hasTopNeighbor(room));
         }
         else if (room.size == TwoxTwo)
         {
-            room.setDoorBottomLeft(!hasBottomLeftNeighbor(room));
-            room.setDoorBottomRight(!hasBottomRightNeighbor(room));
-            room.setDoorLeftBottom(!hasLeftBottomNeighbor(room));
-            room.setDoorLeftTop(!hasLeftTopNeighbor(room));
-            room.setDoorRightBottom(!hasRightBottomNeighbor(room));
-            room.setDoorRightTop(!hasRightTopNeighbor(room));
-            room.setDoorTopLeft(!hasTopLeftNeighbor(room));
-            room.setDoorTopRight(!hasTopRightNeighbor(room));
+            bool doorBottomLeft = !hasBottomLeftNeighbor(room);
+            bool doorBottomRight = !hasBottomRightNeighbor(room);
+            bool doorLeftBottom = !hasLeftBottomNeighbor(room);
+            bool doorLeftTop = !hasLeftTopNeighbor(room);
+            bool doorRightBottom = !hasRightBottomNeighbor(room);
+            bool doorRightTop = !hasRightTopNeighbor(room);
+            bool doorTopLeft = !hasTopLeftNeighbor(room);
+            bool doorTopRight = !hasTopRightNeighbor(room);
+
+            if (!doorBottomLeft && !doorBottomRight && room.getRoomBottomLeft().Equals(room.getRoomBottomRight()))
+            {
+                float random = Random.value;
+                if (random < 0.5f)
+                {
+                    room.setDoorBottomLeft(false);
+                    room.setDoorBottomRight(true);
+                }
+                else
+                {
+                    room.setDoorBottomLeft(true);
+                    room.setDoorBottomRight(false);
+                }
+            }
+            else
+            {
+                room.setDoorBottomLeft(doorBottomLeft);
+                room.setDoorBottomRight(doorBottomRight);
+            }
+            if (!doorLeftBottom && !doorLeftTop && room.getRoomLeftBottom().Equals(room.getRoomLeftTop()))
+            {
+                float random = Random.value;
+                if (random < 0.5f)
+                {
+                    room.setDoorLeftBottom(false);
+                    room.setDoorLeftTop(true);
+                }
+                else
+                {
+                    room.setDoorLeftBottom(true);
+                    room.setDoorLeftTop(false);
+                }
+            }
+            else
+            {
+                room.setDoorLeftBottom(doorLeftBottom);
+                room.setDoorLeftTop(doorLeftTop);
+            }
+            if (!doorRightBottom && !doorRightTop && room.getRoomRightBottom().Equals(room.getRoomRightTop()))
+            {
+                float random = Random.value;
+                if (random < 0.5f)
+                {
+                    room.setDoorRightBottom(false);
+                    room.setDoorRightTop(true);
+                }
+                else
+                {
+                    room.setDoorRightBottom(true);
+                    room.setDoorRightTop(false);
+                }
+            }
+            else
+            {
+                room.setDoorRightBottom(doorRightBottom);
+                room.setDoorRightTop(doorRightTop);
+            }
+            if (!doorTopLeft && !doorTopRight && room.getRoomTopLeft().Equals(room.getRoomTopRight()))
+            {
+                float random = Random.value;
+                if (random < 0.5f)
+                {
+                    room.setDoorTopLeft(false);
+                    room.setDoorTopRight(true);
+                }
+                else
+                {
+                    room.setDoorTopLeft(true);
+                    room.setDoorTopRight(false);
+                }
+            }
+            else
+            {
+                room.setDoorTopLeft(doorTopLeft);
+                room.setDoorTopRight(doorTopRight);
+            }
         }
         else
         {
-            room.setDoorBottomLeft(!hasBottomLeftNeighbor(room));
-            room.setDoorBottom(!hasBottomNeighbor(room));
-            room.setDoorBottomRight(!hasBottomRightNeighbor(room));
-            room.setDoorLeftBottom(!hasLeftBottomNeighbor(room));
-            room.setDoorLeft(!hasLeftNeighbor(room));
-            room.setDoorLeftTop(!hasLeftTopNeighbor(room));
-            room.setDoorRightBottom(!hasRightBottomNeighbor(room));
-            room.setDoorRight(!hasRightNeighbor(room));
-            room.setDoorRightTop(!hasRightTopNeighbor(room));
-            room.setDoorTopLeft(!hasTopLeftNeighbor(room));
-            room.setDoorTop(!hasTopNeighbor(room));
-            room.setDoorTopRight(!hasTopRightNeighbor(room));
+            //Check all 3, then left middle, then right middle
+            bool doorBottomLeft = !hasBottomLeftNeighbor(room);
+            bool doorBottom = !hasBottomNeighbor(room);
+            bool doorBottomRight = !hasBottomRightNeighbor(room);
+            bool doorLeftBottom = !hasLeftBottomNeighbor(room);
+            bool doorLeft = !hasLeftNeighbor(room);
+            bool doorLeftTop = !hasLeftTopNeighbor(room);
+            bool doorRightBottom = !hasRightBottomNeighbor(room);
+            bool doorRight = !hasRightNeighbor(room);
+            bool doorRightTop = !hasRightTopNeighbor(room);
+            bool doorTopLeft = !hasTopLeftNeighbor(room);
+            bool doorTop = !hasTopNeighbor(room);
+            bool doorTopRight = !hasTopRightNeighbor(room);
+
+            if (!doorBottomLeft && !doorBottom && !doorBottomRight
+                && room.getRoomBottomLeft().Equals(room.getRoomBottom()) 
+                && room.getRoomBottom().Equals(room.getRoomBottomRight()))
+            {
+                room.setDoorBottomLeft(true);
+                room.setDoorBottom(false);
+                room.setDoorBottomRight(true);
+            }
+            else if (!doorBottomLeft && !doorBottom && room.getRoomBottomLeft().Equals(room.getRoomBottom()))
+            {
+                float random = Random.value;
+                if (random < 0.5f)
+                {
+                    room.setDoorBottomLeft(false);
+                    room.setDoorBottom(true);
+                }
+                else
+                {
+                    room.setDoorBottomLeft(true);
+                    room.setDoorBottom(false);
+                }
+                room.setDoorBottomRight(doorBottomRight);
+            }
+            else if (!doorBottom && !doorBottomRight && room.getRoomBottom().Equals(room.getRoomBottomRight()))
+            {
+                float random = Random.value;
+                if (random < 0.5f)
+                {
+                    room.setDoorBottom(false);
+                    room.setDoorBottomRight(true);
+                }
+                else
+                {
+                    room.setDoorBottom(true);
+                    room.setDoorBottomRight(false);
+                }
+                room.setDoorBottomLeft(doorBottomLeft);
+            }
+            else
+            {
+                room.setDoorBottomLeft(doorBottomLeft);
+                room.setDoorBottom(doorBottom);
+                room.setDoorBottomRight(doorBottomRight);
+            }
+
+            if (!doorLeftBottom && !doorLeft && !doorLeftTop
+                && room.getRoomLeftBottom().Equals(room.getRoomLeft())
+                && room.getRoomLeft().Equals(room.getRoomLeftTop()))
+            {
+                room.setDoorLeftBottom(true);
+                room.setDoorLeft(false);
+                room.setDoorLeftTop(true);
+            }
+            else if (!doorLeftBottom && !doorLeft && room.getLeftBottom().Equals(room.getRoomLeft()))
+            {
+                float random = Random.value;
+                if (random < 0.5f)
+                {
+                    room.setDoorLeftBottom(false);
+                    room.setDoorLeft(true);
+                }
+                else
+                {
+                    room.setDoorLeftBottom(true);
+                    room.setDoorLeft(false);
+                }
+                room.setDoorLeftTop(doorLeftTop);
+            }
+            else if (!doorLeft && !doorLeftTop && room.getRoomLeft().Equals(room.getRoomLeftTop()))
+            {
+                float random = Random.value;
+                if (random < 0.5f)
+                {
+                    room.setDoorLeft(false);
+                    room.setDoorLeftTop(true);
+                }
+                else
+                {
+                    room.setDoorLeft(true);
+                    room.setDoorLeftTop(false);
+                }
+                room.setDoorLeftBottom(doorLeftBottom);
+            }
+            else
+            {
+                room.setDoorLeftBottom(doorLeftBottom);
+                room.setDoorLeft(doorLeft);
+                room.setDoorLeftTop(doorLeftTop);
+            }
+
+            if (!doorRightBottom && !doorRight && !doorRightTop
+                && room.getRoomRightBottom().Equals(room.getRoomRight())
+                && room.getRoomRight().Equals(room.getRoomRightTop()))
+            {
+                room.setDoorRightBottom(true);
+                room.setDoorRight(false);
+                room.setDoorRightTop(true);
+            }
+            else if (!doorRightBottom && !doorRight && room.getRightBottom().Equals(room.getRoomRight()))
+            {
+                float random = Random.value;
+                if (random < 0.5f)
+                {
+                    room.setDoorRightBottom(false);
+                    room.setDoorRight(true);
+                }
+                else
+                {
+                    room.setDoorRightBottom(true);
+                    room.setDoorRight(false);
+                }
+                room.setDoorRightTop(doorRightTop);
+            }
+            else if (!doorRight && !doorRightTop && room.getRoomRight().Equals(room.getRoomRightTop()))
+            {
+                float random = Random.value;
+                if (random < 0.5f)
+                {
+                    room.setDoorRight(false);
+                    room.setDoorRightTop(true);
+                }
+                else
+                {
+                    room.setDoorRight(true);
+                    room.setDoorRightTop(false);
+                }
+                room.setDoorRightBottom(doorRightBottom);
+            }
+            else
+            {
+                room.setDoorRightBottom(doorRightBottom);
+                room.setDoorRight(doorRight);
+                room.setDoorRightTop(doorRightTop);
+            }
+
+            if (!doorTopLeft && !doorTop && !doorTopRight
+                && room.getRoomTopLeft().Equals(room.getRoomTop())
+                && room.getRoomTop().Equals(room.getRoomTopRight()))
+            {
+                room.setDoorTopLeft(true);
+                room.setDoorTop(false);
+                room.setDoorTopRight(true);
+            }
+            else if (!doorTopLeft && !doorTop && room.getRoomTopLeft().Equals(room.getRoomTop()))
+            {
+                float random = Random.value;
+                if (random < 0.5f)
+                {
+                    room.setDoorTopLeft(false);
+                    room.setDoorTop(true);
+                }
+                else
+                {
+                    room.setDoorTopLeft(true);
+                    room.setDoorTop(false);
+                }
+                room.setDoorTopRight(doorTopRight);
+            }
+            else if (!doorTop && !doorTopRight && room.getRoomTop().Equals(room.getRoomTopRight()))
+            {
+                float random = Random.value;
+                if (random < 0.5f)
+                {
+                    room.setDoorTop(false);
+                    room.setDoorTopRight(true);
+                }
+                else
+                {
+                    room.setDoorTop(true);
+                    room.setDoorTopRight(false);
+                }
+                room.setDoorTopLeft(doorTopLeft);
+            }
+            else
+            {
+                room.setDoorTopLeft(doorTopLeft);
+                room.setDoorTop(doorTop);
+                room.setDoorTopRight(doorTopRight);
+            }
         }
     }
 
