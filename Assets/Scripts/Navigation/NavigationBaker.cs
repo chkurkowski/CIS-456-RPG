@@ -25,14 +25,4 @@ public class NavigationBaker : MonoBehaviour
             this.enabled = false;
         }
     }
-
-    //public void generate()
-    //{
-    //    for (int i = 0; i < surfaces.Count; i++)
-    //    {
-    //        surfaces[i].BuildNavMesh();
-    //    }
-
-    //    this.enabled = false;
-    //}
 }
