@@ -534,6 +534,15 @@ MonoBehaviour:
   agent: {fileID: 0}
   target: {fileID: 0}
   state: 0
+  patrolArea:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 0
+    height: 0
+  patrolBase: {fileID: 0}
+  baker: {fileID: 0}
+  gen: {fileID: 0}
   waypoints:
   - {fileID: 1742507576}
   - {fileID: 1246749077}
@@ -950,6 +959,7 @@ MonoBehaviour:
   ThreexThreeRoom: {fileID: 0}
   RoomDoor: {fileID: 1008004099394498, guid: b023f08085389244986bb48fa49d437a, type: 2}
   character: {fileID: 42301132}
+  tempEnemy: {fileID: 204039343}
   areaSizeX: 25
   areaSizeY: 25
   numOfRooms: 50
@@ -981,6 +991,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   surfaces:
   - {fileID: 129274553}
+  roomCount: 0
+  generated: 0
 --- !u!1 &729227796
 GameObject:
   m_ObjectHideFlags: 0
