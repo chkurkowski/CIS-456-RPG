@@ -5,6 +5,7 @@ using UnityEngine.AI;
 
 public class RoomGeneration : MonoBehaviour
 {
+    //*MOVE LOGIC FOR CHANGING REMOVING ROOM DOORS TO WHEN WE SPAWN IN THE ROOMS, AND MAKE SURE TO UPDATE ACTUAL VARIAABLES THERE AS WELL (both rooms!!!!!)
 
     public Transform map;
     public GameObject OnexOneRoom;
@@ -83,11 +84,12 @@ public class RoomGeneration : MonoBehaviour
 
     private void CreateManualRooms()
     {
-        Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), 0);
+        Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), new Vector2(3f, 3f), 0);
         rooms.Insert(0, startRoom);
-        takenPos.Insert(0, startRoom.topLeftInnerLocation);
+        addLocationsToTakenPos(startRoom);
         openRooms.Insert(0, startRoom);
         singleNeighborRooms.Insert(0, startRoom);
+
 
         float offsetX = (startRoom.topLeftInnerLocation.x - 2f);
         float offsetY = (startRoom.topLeftInnerLocation.y - 1f);
@@ -96,8 +98,8 @@ public class RoomGeneration : MonoBehaviour
         rooms.Insert(0, newRoom);
 
         addLocationsToTakenPos(newRoom);
-        setRoomDoors(newRoom);
         setNeighboringRooms(newRoom);
+        setRoomDoors(newRoom);
 
         if (getNumNeighbors(newRoom) < newRoom.maxNeighbors)
         {
@@ -113,7 +115,6 @@ public class RoomGeneration : MonoBehaviour
 
         Debug.Log("StartRoomCenter: " + startRoom.center);
         Debug.Log("NewRoomCenter: " + newRoom.center);
-
     }
 
     //Populates the "rooms" array with rooms
@@ -123,7 +124,7 @@ public class RoomGeneration : MonoBehaviour
         //TODO: Different type for starter room (Change 0 to another number)
         Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), 0);
         rooms.Insert(0, startRoom);
-        takenPos.Insert(0, startRoom.topLeftInnerLocation);
+        takenPos.Insert(0, startRoom.topLeftInnerLocation); //INSERT ALL LCOATIONS IF BIGGER
         openRooms.Insert(0, startRoom);
         singleNeighborRooms.Insert(0, startRoom);
 
@@ -187,6 +188,8 @@ public class RoomGeneration : MonoBehaviour
             removeNotOpenRooms(newRoom);
             removeNotSingleNeighborRooms(newRoom);
 
+            setRoomDoors(startRoom);
+
             //**Test with manual additions
         }
     }
@@ -201,6 +204,7 @@ public class RoomGeneration : MonoBehaviour
     {
         for (int i = 0; i < room.locations.Count; i++)
         {
+
             takenPos.Insert(0, room.locations[i]);
         }
     }
@@ -422,6 +426,7 @@ public class RoomGeneration : MonoBehaviour
             Vector2 tempBottomRight = room.getBottomRight() + Vector2.down;
             Vector2 tempLeftBottom = room.getLeftBottom() + Vector2.left;
             Vector2 tempLeft = room.getLeft() + Vector2.left;
+            Debug.Log("******TempLeft: " + tempLeft);
             Vector2 tempLeftTop = room.getLeftTop() + Vector2.left;
             Vector2 tempRightBottom = room.getRightBottom() + Vector2.right;
             Vector2 tempRight = room.getRight() + Vector2.right;
@@ -1301,7 +1306,7 @@ public class RoomGeneration : MonoBehaviour
             bool doorTopLeft = !hasTopLeftNeighbor(room);
             bool doorTopRight = !hasTopRightNeighbor(room);
 
-            if (!doorBottomLeft && !doorBottomRight && room.getRoomBottomLeft().Equals(room.getRoomBottomRight()))
+            if (!doorBottomLeft && !doorBottomRight && room.getRoomBottomLeft() == room.getRoomBottomRight())
             {
                 float random = Random.value;
                 if (random < 0.5f)
@@ -1320,7 +1325,7 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorBottomLeft(doorBottomLeft);
                 room.setDoorBottomRight(doorBottomRight);
             }
-            if (!doorTopLeft && !doorTopRight && room.getRoomTopLeft().Equals(room.getRoomTopRight()))
+            if (!doorTopLeft && !doorTopRight && room.getRoomTopLeft() == room.getRoomTopRight())
             {
                 float random = Random.value;
                 if (random < 0.5f)
@@ -1350,7 +1355,7 @@ public class RoomGeneration : MonoBehaviour
             bool doorRightBottom = !hasRightBottomNeighbor(room);
             bool doorRightTop = !hasRightTopNeighbor(room);
 
-            if (!doorLeftBottom && !doorLeftTop && room.getRoomLeftBottom().Equals(room.getRoomLeftTop()))
+            if (!doorLeftBottom && !doorLeftTop && room.getRoomLeftBottom() == room.getRoomLeftTop())
             {
                 float random = Random.value;
                 if (random < 0.5f)
@@ -1369,7 +1374,7 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorLeftBottom(doorLeftBottom);
                 room.setDoorLeftTop(doorLeftTop);
             }
-            if (!doorRightBottom && !doorRightTop && room.getRoomRightBottom().Equals(room.getRoomRightTop()))
+            if (!doorRightBottom && !doorRightTop && room.getRoomRightBottom() == room.getRoomRightTop())
             {
                 float random = Random.value;
                 if (random < 0.5f)
@@ -1403,7 +1408,7 @@ public class RoomGeneration : MonoBehaviour
             bool doorTopLeft = !hasTopLeftNeighbor(room);
             bool doorTopRight = !hasTopRightNeighbor(room);
 
-            if (!doorBottomLeft && !doorBottomRight && room.getRoomBottomLeft().Equals(room.getRoomBottomRight()))
+            if (!doorBottomLeft && !doorBottomRight && room.getRoomBottomLeft() == room.getRoomBottomRight())
             {
                 float random = Random.value;
                 if (random < 0.5f)
@@ -1422,7 +1427,7 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorBottomLeft(doorBottomLeft);
                 room.setDoorBottomRight(doorBottomRight);
             }
-            if (!doorLeftBottom && !doorLeftTop && room.getRoomLeftBottom().Equals(room.getRoomLeftTop()))
+            if (!doorLeftBottom && !doorLeftTop && room.getRoomLeftBottom() == room.getRoomLeftTop())
             {
                 float random = Random.value;
                 if (random < 0.5f)
@@ -1441,7 +1446,7 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorLeftBottom(doorLeftBottom);
                 room.setDoorLeftTop(doorLeftTop);
             }
-            if (!doorRightBottom && !doorRightTop && room.getRoomRightBottom().Equals(room.getRoomRightTop()))
+            if (!doorRightBottom && !doorRightTop && room.getRoomRightBottom() == room.getRoomRightTop())
             {
                 float random = Random.value;
                 if (random < 0.5f)
@@ -1460,7 +1465,7 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorRightBottom(doorRightBottom);
                 room.setDoorRightTop(doorRightTop);
             }
-            if (!doorTopLeft && !doorTopRight && room.getRoomTopLeft().Equals(room.getRoomTopRight()))
+            if (!doorTopLeft && !doorTopRight && room.getRoomTopLeft() == room.getRoomTopRight())
             {
                 float random = Random.value;
                 if (random < 0.5f)
@@ -1482,7 +1487,6 @@ public class RoomGeneration : MonoBehaviour
         }
         else
         {
-            //Check all 3, then left middle, then right middle
             bool doorBottomLeft = !hasBottomLeftNeighbor(room);
             bool doorBottom = !hasBottomNeighbor(room);
             bool doorBottomRight = !hasBottomRightNeighbor(room);
@@ -1497,14 +1501,14 @@ public class RoomGeneration : MonoBehaviour
             bool doorTopRight = !hasTopRightNeighbor(room);
 
             if (!doorBottomLeft && !doorBottom && !doorBottomRight
-                && room.getRoomBottomLeft().Equals(room.getRoomBottom()) 
-                && room.getRoomBottom().Equals(room.getRoomBottomRight()))
+                && room.getRoomBottomLeft() == room.getRoomBottom() 
+                && room.getRoomBottom() == room.getRoomBottomRight())
             {
                 room.setDoorBottomLeft(true);
                 room.setDoorBottom(false);
                 room.setDoorBottomRight(true);
             }
-            else if (!doorBottomLeft && !doorBottom && room.getRoomBottomLeft().Equals(room.getRoomBottom()))
+            else if (!doorBottomLeft && !doorBottom && room.getRoomBottomLeft() == room.getRoomBottom())
             {
                 float random = Random.value;
                 if (random < 0.5f)
@@ -1519,7 +1523,7 @@ public class RoomGeneration : MonoBehaviour
                 }
                 room.setDoorBottomRight(doorBottomRight);
             }
-            else if (!doorBottom && !doorBottomRight && room.getRoomBottom().Equals(room.getRoomBottomRight()))
+            else if (!doorBottom && !doorBottomRight && room.getRoomBottom() == room.getRoomBottomRight())
             {
                 float random = Random.value;
                 if (random < 0.5f)
@@ -1541,15 +1545,40 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorBottomRight(doorBottomRight);
             }
 
-            if (!doorLeftBottom && !doorLeft && !doorLeftTop
-                && room.getRoomLeftBottom().Equals(room.getRoomLeft())
-                && room.getRoomLeft().Equals(room.getRoomLeftTop()))
+            //Get Left is null... why??
+            Debug.Log("doorLeftBottom: " + doorLeftBottom);
+            Debug.Log("doorLeft: " + doorLeft);
+            Debug.Log("doorLeftTop: " + doorLeftTop);
+            bool testOne = room.getRoomLeftBottom() == room.getRoomLeft();
+            bool testTwo = room.getRoomLeft() == room.getRoomLeftTop();
+            if (!doorLeftBottom && !doorLeft && !doorLeftTop)
             {
+                Debug.Log("hasLeftBottomneighbor: " + hasLeftBottomNeighbor(room));
+                Debug.Log("hasLeftneighbor: " + hasLeftNeighbor(room));
+                Debug.Log("hasLeftTopneighbor: " + hasLeftTopNeighbor(room));
+                Debug.Log("******************************");
+                Debug.Log("room.getRoomLeftBottom() == room.getRoomLeft(): " + testOne);
+                Debug.Log("room.getRoomLeft() == room.getRoomLeftTop(): " + testTwo);
+                if (room.getRoomLeftBottom().center != null)
+                {
+                    Debug.Log("room.getLeftBottom(): " + room.getRoomLeftBottom().center);
+                    Debug.Log("LEFT LOC: " + room.getRoomLeft().getLeft());
+                    Debug.Log("room.getLeft(): " + room.getRoomLeft().center);
+                    Debug.Log("room.getLeftTop(): " + room.getRoomLeftTop().center);
+                }
+                
+                Debug.Log("Angry");
+            }
+            if (!doorLeftBottom && !doorLeft && !doorLeftTop
+                && room.getRoomLeftBottom() == room.getRoomLeft()
+                && room.getRoomLeft() == room.getRoomLeftTop())
+            {
+                Debug.Log("This ran!");
                 room.setDoorLeftBottom(true);
                 room.setDoorLeft(false);
                 room.setDoorLeftTop(true);
             }
-            else if (!doorLeftBottom && !doorLeft && room.getLeftBottom().Equals(room.getRoomLeft()))
+            else if (!doorLeftBottom && !doorLeft && room.getRoomLeftBottom() == room.getRoomLeft())
             {
                 float random = Random.value;
                 if (random < 0.5f)
@@ -1564,7 +1593,7 @@ public class RoomGeneration : MonoBehaviour
                 }
                 room.setDoorLeftTop(doorLeftTop);
             }
-            else if (!doorLeft && !doorLeftTop && room.getRoomLeft().Equals(room.getRoomLeftTop()))
+            else if (!doorLeft && !doorLeftTop && room.getRoomLeft() == room.getRoomLeftTop())
             {
                 float random = Random.value;
                 if (random < 0.5f)
@@ -1587,14 +1616,14 @@ public class RoomGeneration : MonoBehaviour
             }
 
             if (!doorRightBottom && !doorRight && !doorRightTop
-                && room.getRoomRightBottom().Equals(room.getRoomRight())
-                && room.getRoomRight().Equals(room.getRoomRightTop()))
+                && room.getRoomRightBottom() == room.getRoomRight()
+                && room.getRoomRight() == room.getRoomRightTop())
             {
                 room.setDoorRightBottom(true);
                 room.setDoorRight(false);
                 room.setDoorRightTop(true);
             }
-            else if (!doorRightBottom && !doorRight && room.getRightBottom().Equals(room.getRoomRight()))
+            else if (!doorRightBottom && !doorRight && room.getRoomRightBottom() == room.getRoomRight())
             {
                 float random = Random.value;
                 if (random < 0.5f)
@@ -1609,7 +1638,7 @@ public class RoomGeneration : MonoBehaviour
                 }
                 room.setDoorRightTop(doorRightTop);
             }
-            else if (!doorRight && !doorRightTop && room.getRoomRight().Equals(room.getRoomRightTop()))
+            else if (!doorRight && !doorRightTop && room.getRoomRight() == room.getRoomRightTop())
             {
                 float random = Random.value;
                 if (random < 0.5f)
@@ -1632,14 +1661,14 @@ public class RoomGeneration : MonoBehaviour
             }
 
             if (!doorTopLeft && !doorTop && !doorTopRight
-                && room.getRoomTopLeft().Equals(room.getRoomTop())
-                && room.getRoomTop().Equals(room.getRoomTopRight()))
+                && room.getRoomTopLeft() == room.getRoomTop()
+                && room.getRoomTop() == room.getRoomTopRight())
             {
                 room.setDoorTopLeft(true);
                 room.setDoorTop(false);
                 room.setDoorTopRight(true);
             }
-            else if (!doorTopLeft && !doorTop && room.getRoomTopLeft().Equals(room.getRoomTop()))
+            else if (!doorTopLeft && !doorTop && room.getRoomTopLeft() == room.getRoomTop())
             {
                 float random = Random.value;
                 if (random < 0.5f)
@@ -1654,7 +1683,7 @@ public class RoomGeneration : MonoBehaviour
                 }
                 room.setDoorTopRight(doorTopRight);
             }
-            else if (!doorTop && !doorTopRight && room.getRoomTop().Equals(room.getRoomTopRight()))
+            else if (!doorTop && !doorTopRight && room.getRoomTop() == room.getRoomTopRight())
             {
                 float random = Random.value;
                 if (random < 0.5f)
@@ -1943,7 +1972,7 @@ public class RoomGeneration : MonoBehaviour
         {
             return takenPos.Contains(room.getBottom() + Vector2.right);
         }
-        
+
         return takenPos.Contains(room.getBottomRight() + Vector2.right);
     }
 
