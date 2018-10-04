@@ -1,16 +1,16 @@
 fileFormatVersion: 2
-guid: 5e931c26978217943982a4c07821a746
+guid: 13466f732dd3d6e4aae869a9e71e67e8
 ModelImporter:
   serializedVersion: 23
   fileIDToRecycleName:
-    100000: OnexTwoAndTwoxOneRoom
+    100000: TwoxOneRoom
     100002: //RootNode
-    400000: OnexTwoAndTwoxOneRoom
+    400000: TwoxOneRoom
     400002: //RootNode
-    2100000: OnexTwoAndTwoxOneRoomMat
-    2300000: OnexTwoAndTwoxOneRoom
-    3300000: OnexTwoAndTwoxOneRoom
-    4300000: OnexTwoAndTwoxOneRoom
+    2100000: TwoxOneRoomMat
+    2300000: TwoxOneRoom
+    3300000: TwoxOneRoom
+    4300000: TwoxOneRoom
   externalObjects: {}
   materials:
     importMaterials: 1

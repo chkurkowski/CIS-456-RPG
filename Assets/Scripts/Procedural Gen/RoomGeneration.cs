@@ -76,8 +76,8 @@ public class RoomGeneration : MonoBehaviour
             decreasing = false;
         }
 
-        CreateRooms();
-        //CreateManualRooms();
+        //CreateRooms();
+        CreateManualRooms();
         BuildPrimitives();
     }
 
@@ -85,11 +85,14 @@ public class RoomGeneration : MonoBehaviour
     {
         Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), 0);
         rooms.Insert(0, startRoom);
-        takenPos.Insert(0, startRoom.location);
+        takenPos.Insert(0, startRoom.topLeftInnerLocation);
         openRooms.Insert(0, startRoom);
         singleNeighborRooms.Insert(0, startRoom);
 
-        Room newRoom = new Room(startRoom.location + Vector2.up);
+        float offsetX = (startRoom.topLeftInnerLocation.x - 2f);
+        float offsetY = (startRoom.topLeftInnerLocation.y - 1f);
+
+        Room newRoom = new Room(new Vector2(offsetX, offsetY), ThreexThree);
         rooms.Insert(0, newRoom);
 
         addLocationsToTakenPos(newRoom);
@@ -107,6 +110,10 @@ public class RoomGeneration : MonoBehaviour
 
         removeNotOpenRooms(newRoom);
         removeNotSingleNeighborRooms(newRoom);
+
+        Debug.Log("StartRoomCenter: " + startRoom.center);
+        Debug.Log("NewRoomCenter: " + newRoom.center);
+
     }
 
     //Populates the "rooms" array with rooms
@@ -116,15 +123,9 @@ public class RoomGeneration : MonoBehaviour
         //TODO: Different type for starter room (Change 0 to another number)
         Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), 0);
         rooms.Insert(0, startRoom);
-        takenPos.Insert(0, startRoom.location);
+        takenPos.Insert(0, startRoom.topLeftInnerLocation);
         openRooms.Insert(0, startRoom);
         singleNeighborRooms.Insert(0, startRoom);
-
-        //Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), ThreexThree, 0);
-        //rooms.Insert(0, startRoom);
-        //addLocationsToTakenPos(startRoom);
-        //openRooms.Insert(0, startRoom);
-        //singleNeighborRooms.Insert(0, startRoom);
 
         //Add each room to the grid
         for (int i = 0; i < numOfRooms - 1; i++)
@@ -1116,32 +1117,6 @@ public class RoomGeneration : MonoBehaviour
                 singleNeighborRooms.Remove(tempTopRight);
             }
         }
-
-
-
-
-
-        Room tempBottomRoom = new Room(room.location + Vector2.down, room.type);
-        Room tempLeftRoom = new Room(room.location + Vector2.left, room.type);
-        Room tempRightRoom = new Room(room.location + Vector2.right, room.type);
-        Room tempTopRoom = new Room(room.location + Vector2.up, room.type);
-
-        if (singleNeighborRooms.Contains(tempBottomRoom) && getNumNeighbors(tempBottomRoom) > 1)
-        {
-            singleNeighborRooms.Remove(tempBottomRoom);
-        }
-        if (singleNeighborRooms.Contains(tempLeftRoom) && getNumNeighbors(tempLeftRoom) > 1)
-        {
-            singleNeighborRooms.Remove(tempLeftRoom);
-        }
-        if (singleNeighborRooms.Contains(tempRightRoom) && getNumNeighbors(tempRightRoom) > 1)
-        {
-            singleNeighborRooms.Remove(tempRightRoom);
-        }
-        if (singleNeighborRooms.Contains(tempTopRoom) && getNumNeighbors(tempTopRoom) > 1)
-        {
-            singleNeighborRooms.Remove(tempTopRoom);
-        }
     }
 
     //Gets a random position that's adjacent to a random room
@@ -1162,8 +1137,9 @@ public class RoomGeneration : MonoBehaviour
             index = Mathf.Clamp(Mathf.RoundToInt(Random.value * (openRooms.Count)), 0, openRooms.Count - 1);
             index = Mathf.Clamp(index, 0, openRooms.Count);
 
-            int x = (int)openRooms[index].location.x;
-            int y = (int)openRooms[index].location.y;
+            //TODO: CHANGE
+            int x = (int)openRooms[index].topLeftInnerLocation.x;
+            int y = (int)openRooms[index].topLeftInnerLocation.y;
 
             //Move one (random) direction over from the random room we selected
             iterationsDir = 0;
@@ -1203,7 +1179,7 @@ public class RoomGeneration : MonoBehaviour
 
             //If this new location does not meet location requirements
             if (iterationsDir >= 16
-                || takenPos.Contains(newRoom.location)
+                || takenPos.Contains(newRoom.topLeftInnerLocation)
                 || x >= areaSizeX
                 || x < 0
                 || y >= areaSizeY
@@ -1241,8 +1217,9 @@ public class RoomGeneration : MonoBehaviour
             index = Mathf.Clamp(Mathf.RoundToInt(Random.value * (singleNeighborRooms.Count)), 0, singleNeighborRooms.Count - 1);
             index = Mathf.Clamp(index, 0, singleNeighborRooms.Count);
 
-            int x = (int)singleNeighborRooms[index].location.x;
-            int y = (int)singleNeighborRooms[index].location.y;
+            //TODO: CHANGE
+            int x = (int)singleNeighborRooms[index].topLeftInnerLocation.x;
+            int y = (int)singleNeighborRooms[index].topLeftInnerLocation.y;
 
             //Move one (random) direction over from the random room we selected
             iterationsDir = 0;
@@ -1282,7 +1259,7 @@ public class RoomGeneration : MonoBehaviour
 
             //If this new location does not meet branching requirements
             if (iterationsDir >= 16
-                || takenPos.Contains(newRoom.location)
+                || takenPos.Contains(newRoom.topLeftInnerLocation)
                 || getNumNeighbors(newRoom) > 1
                 || x >= areaSizeX
                 || x < 0
@@ -1878,15 +1855,10 @@ public class RoomGeneration : MonoBehaviour
 
         if (room.size == OnexTwo)
         {
-            return takenPos.Contains(room.location + Vector2.down);
+            return takenPos.Contains(room.getLeft() + Vector2.down);
         }
 
-        if (room.size == TwoxTwo)
-        {
-            return takenPos.Contains(room.location + (2 * Vector2.down));
-        }
-
-        return takenPos.Contains(room.location + (3 * Vector2.down));
+        return takenPos.Contains(room.getBottomLeft() + Vector2.down);
     }
 
     private bool hasBottomNeighbor(Room room)
@@ -1898,15 +1870,10 @@ public class RoomGeneration : MonoBehaviour
 
         if (room.size == OnexOne)
         {
-            return takenPos.Contains(room.location + Vector2.down);
+            return takenPos.Contains(room.getMiddle() + Vector2.down);
         }
 
-        if (room.size == TwoxOne)
-        {
-            return takenPos.Contains(room.location + (2 * Vector2.down));
-        }
-
-        return takenPos.Contains(room.location + (3 * Vector2.down) + Vector2.right);
+        return takenPos.Contains(room.getBottom() + Vector2.down);
     }
 
     private bool hasBottomRightNeighbor(Room room)
@@ -1918,15 +1885,11 @@ public class RoomGeneration : MonoBehaviour
 
         if (room.size == OnexTwo)
         {
-            return takenPos.Contains(room.location + Vector2.down + Vector2.right);
+            return takenPos.Contains(room.getRight() + Vector2.down);
         }
 
-        if (room.size == TwoxTwo)
-        {
-            return takenPos.Contains(room.location + (2 * Vector2.down) + Vector2.right);
-        }
+        return takenPos.Contains(room.getBottomRight() + Vector2.down);
 
-        return takenPos.Contains(room.location + (3 * Vector2.down) + (2 * Vector2.right));
     }
 
     private bool hasLeftBottomNeighbor(Room room)
@@ -1936,12 +1899,12 @@ public class RoomGeneration : MonoBehaviour
             throw new System.ArgumentException("Use hasLeftNeighbor(Room) instead!");
         }
 
-        if (room.size == TwoxOne || room.size == TwoxTwo)
+        if (room.size == TwoxOne)
         {
-            return takenPos.Contains(room.location + Vector2.down + Vector2.left);
+            return takenPos.Contains(room.getBottom() + Vector2.left);
         }
 
-        return takenPos.Contains(room.location + (2 * Vector2.down) + Vector2.left);
+        return takenPos.Contains(room.getBottomLeft() + Vector2.left);
     }
 
     private bool hasLeftNeighbor(Room room)
@@ -1951,12 +1914,12 @@ public class RoomGeneration : MonoBehaviour
             throw new System.ArgumentException("Use hasLeftTop/BottomNeighbor(Room) instead!");
         }
 
-        if (room.size == OnexOne || room.size == OnexTwo)
+        if (room.size == OnexOne)
         {
-            return takenPos.Contains(room.location + Vector2.left);
+            return takenPos.Contains(room.getMiddle() + Vector2.left);
         }
 
-        return takenPos.Contains(room.location + Vector2.down + Vector2.left);
+        return takenPos.Contains(room.getLeft() + Vector2.left);
     }
 
     private bool hasLeftTopNeighbor(Room room)
@@ -1966,7 +1929,7 @@ public class RoomGeneration : MonoBehaviour
             throw new System.ArgumentException("Use hasLeftNeighbor(Room) instead!");
         }
 
-        return takenPos.Contains(room.location + Vector2.left);
+        return takenPos.Contains(room.topLeftInnerLocation + Vector2.left);
     }
 
     private bool hasRightBottomNeighbor(Room room)
@@ -1978,15 +1941,10 @@ public class RoomGeneration : MonoBehaviour
 
         if (room.size == TwoxOne)
         {
-            return takenPos.Contains(room.location + Vector2.down + Vector2.right);
-        }
-
-        if (room.size == TwoxTwo)
-        {
-            return takenPos.Contains(room.location + Vector2.down + (2 * Vector2.right));
+            return takenPos.Contains(room.getBottom() + Vector2.right);
         }
         
-        return takenPos.Contains(room.location + (2 * Vector2.down) + (3 * Vector2.right));
+        return takenPos.Contains(room.getBottomRight() + Vector2.right);
     }
 
     private bool hasRightNeighbor(Room room)
@@ -1998,15 +1956,10 @@ public class RoomGeneration : MonoBehaviour
 
         if (room.size == OnexOne)
         {
-            return takenPos.Contains(room.location + Vector2.right);
+            return takenPos.Contains(room.getMiddle() + Vector2.right);
         }
 
-        if (room.size == OnexTwo)
-        {
-            return takenPos.Contains(room.location + (2 * Vector2.right));
-        }
-
-        return takenPos.Contains(room.location + Vector2.down + (3 * Vector2.right));
+        return takenPos.Contains(room.getRight() + Vector2.right);
     }
 
     private bool hasRightTopNeighbor(Room room)
@@ -2018,15 +1971,10 @@ public class RoomGeneration : MonoBehaviour
 
         if (room.size == TwoxOne)
         {
-            return takenPos.Contains(room.location + Vector2.right);
+            return takenPos.Contains(room.getTop() + Vector2.right);
         }
 
-        if (room.size == TwoxTwo)
-        {
-            return takenPos.Contains(room.location + (2 * Vector2.right));
-        }
-
-        return takenPos.Contains(room.location + (3 * Vector2.right));
+        return takenPos.Contains(room.getTopRight() + Vector2.right);
     }
 
     private bool hasTopLeftNeighbor(Room room)
@@ -2036,7 +1984,7 @@ public class RoomGeneration : MonoBehaviour
             throw new System.ArgumentException("Use hasTopNeighbor(Room) instead!");
         }
 
-        return takenPos.Contains(room.location + Vector2.up);
+        return takenPos.Contains(room.topLeftInnerLocation + Vector2.up);
     }
 
     private bool hasTopNeighbor(Room room)
@@ -2046,12 +1994,12 @@ public class RoomGeneration : MonoBehaviour
             throw new System.ArgumentException("Use hasTopLeft/RightNeighbor(Room) instead!");
         }
 
-        if (room.size == OnexOne || room.size == TwoxOne)
+        if (room.size == OnexOne)
         {
-            return takenPos.Contains(room.location + Vector2.up);
+            return takenPos.Contains(room.getMiddle() + Vector2.up);
         }
 
-        return takenPos.Contains(room.location + Vector2.right + Vector2.up);
+        return takenPos.Contains(room.getTop() + Vector2.up);
     }
 
     private bool hasTopRightNeighbor(Room room)
@@ -2061,12 +2009,12 @@ public class RoomGeneration : MonoBehaviour
             throw new System.ArgumentException("Use hasTopNeighbor(Room) instead!");
         }
 
-        if (room.size == OnexTwo || room.size == TwoxTwo)
+        if (room.size == OnexTwo)
         {
-            return takenPos.Contains(room.location + Vector2.right + Vector2.up);
+            return takenPos.Contains(room.getRight() + Vector2.up);
         }
 
-        return takenPos.Contains(room.location + (2 * Vector2.right) + Vector2.up);
+        return takenPos.Contains(room.getTopRight() + Vector2.up);
     }
 
     private void BuildPrimitives()
@@ -2075,8 +2023,9 @@ public class RoomGeneration : MonoBehaviour
 
         for (int i = 0; i < rooms.Count; i++)
         {
-            float offsetX = rooms[i].location.x * gridSize;
-            float offsetZ = rooms[i].location.y * gridSize;
+            //TODO: CHANGE
+            float offsetX = rooms[i].center.x * gridSize;
+            float offsetZ = rooms[i].center.y * gridSize;
             int doorCount = getNumNeighbors(rooms[i]);
 
             if (rooms[i].size == OnexOne)
@@ -2087,7 +2036,47 @@ public class RoomGeneration : MonoBehaviour
                 {
                     GameObject bottomDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
                     bottomDoor.transform.parent = rm.transform;
-                    bottomDoor.transform.localPosition = new Vector3(0f, 1f, -24.5f);
+                    bottomDoor.transform.localPosition = new Vector3(0f, 1f, -12f);
+                }
+                if (rooms[i].getDoorLeft())
+                {
+                    GameObject leftDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    leftDoor.transform.parent = rm.transform;
+                    leftDoor.transform.localPosition = new Vector3(-12f, 1f, 0f);
+                    leftDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
+                }
+                if (rooms[i].getDoorRight())
+                {
+                    GameObject rightDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    rightDoor.transform.parent = rm.transform;
+                    rightDoor.transform.localPosition = new Vector3(12f, 1f, 0f);
+                    rightDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
+                }
+                if (rooms[i].getDoorTop())
+                {
+                    GameObject topDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    topDoor.transform.parent = rm.transform;
+                    topDoor.transform.localPosition = new Vector3(0f, 1f, 12f);
+                }
+
+                rm.transform.parent = map;
+                FillNavBaker(rm);
+            }
+            else if (rooms[i].size == OnexTwo)
+            {
+                GameObject rm = Instantiate(OnexTwoRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+
+                if (rooms[i].getDoorBottomLeft())
+                {
+                    GameObject bottomLeftDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    bottomLeftDoor.transform.parent = rm.transform;
+                    bottomLeftDoor.transform.localPosition = new Vector3(-12.5f, 1f, -12f);
+                }
+                if (rooms[i].getDoorBottomRight())
+                {
+                    GameObject bottomRightDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    bottomRightDoor.transform.parent = rm.transform;
+                    bottomRightDoor.transform.localPosition = new Vector3(12.5f, 1f, -12f);
                 }
                 if (rooms[i].getDoorLeft())
                 {
@@ -2103,43 +2092,17 @@ public class RoomGeneration : MonoBehaviour
                     rightDoor.transform.localPosition = new Vector3(24.5f, 1f, 0f);
                     rightDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
-                if (rooms[i].getDoorTop())
-                {
-                    GameObject topDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
-                    topDoor.transform.parent = rm.transform;
-                    topDoor.transform.localPosition = new Vector3(0f, 1f, 24.5f);
-                }
-
-                rm.transform.parent = map;
-                FillNavBaker(rm);
-            }
-            else if (rooms[i].size == OnexTwo)
-            {
-                GameObject rm = Instantiate(OnexTwoRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
-
-                if (rooms[i].getDoorBottomLeft())
-                {
-
-                }
-                if (rooms[i].getDoorBottomRight())
-                {
-
-                }
-                if (rooms[i].getDoorLeft())
-                {
-
-                }
-                if (rooms[i].getDoorRight())
-                {
-
-                }
                 if (rooms[i].getDoorTopLeft())
                 {
-
+                    GameObject topLeftDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    topLeftDoor.transform.parent = rm.transform;
+                    topLeftDoor.transform.localPosition = new Vector3(-12.5f, 1f, 12f);
                 }
                 if (rooms[i].getDoorTopRight())
                 {
-
+                    GameObject topRightDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    topRightDoor.transform.parent = rm.transform;
+                    topRightDoor.transform.localPosition = new Vector3(12.5f, 1f, 12f);
                 }
 
                 rm.transform.parent = map;
@@ -2151,27 +2114,43 @@ public class RoomGeneration : MonoBehaviour
 
                 if (rooms[i].getDoorBottom())
                 {
-
+                    GameObject bottomDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    bottomDoor.transform.parent = rm.transform;
+                    bottomDoor.transform.localPosition = new Vector3(0f, 1f, -24.5f);
                 }
                 if (rooms[i].getDoorLeftBottom())
                 {
-
+                    GameObject leftBottomDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    leftBottomDoor.transform.parent = rm.transform;
+                    leftBottomDoor.transform.localPosition = new Vector3(-12f, 1f, -12.5f);
+                    leftBottomDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
                 if (rooms[i].getDoorLeftTop())
                 {
-
+                    GameObject leftTopDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    leftTopDoor.transform.parent = rm.transform;
+                    leftTopDoor.transform.localPosition = new Vector3(-12f, 1f, 12.5f);
+                    leftTopDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
                 if (rooms[i].getDoorRightBottom())
                 {
-
+                    GameObject rightBottomDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    rightBottomDoor.transform.parent = rm.transform;
+                    rightBottomDoor.transform.localPosition = new Vector3(12f, 1f, -12.5f);
+                    rightBottomDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
                 if (rooms[i].getDoorRightTop())
                 {
-
+                    GameObject rightTopDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    rightTopDoor.transform.parent = rm.transform;
+                    rightTopDoor.transform.localPosition = new Vector3(12f, 1f, 12.5f);
+                    rightTopDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
                 if (rooms[i].getDoorTop())
                 {
-
+                    GameObject topDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    topDoor.transform.parent = rm.transform;
+                    topDoor.transform.localPosition = new Vector3(0f, 1f, 24.5f);
                 }
 
                 rm.transform.parent = map;
@@ -2179,92 +2158,142 @@ public class RoomGeneration : MonoBehaviour
             }
             else if (rooms[i].size == TwoxTwo)
             {
-                GameObject rm = Instantiate(OnexTwoRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                GameObject rm = Instantiate(TwoxTwoRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
 
                 if (rooms[i].getDoorBottomLeft())
                 {
-
+                    GameObject bottomLeftDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    bottomLeftDoor.transform.parent = rm.transform;
+                    bottomLeftDoor.transform.localPosition = new Vector3(-12.5f, 1f, -24.5f);
                 }
                 if (rooms[i].getDoorBottomRight())
                 {
-
+                    GameObject bottomRightDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    bottomRightDoor.transform.parent = rm.transform;
+                    bottomRightDoor.transform.localPosition = new Vector3(12.5f, 1f, -24.5f);
                 }
                 if (rooms[i].getDoorLeftBottom())
                 {
-
+                    GameObject leftBottomDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    leftBottomDoor.transform.parent = rm.transform;
+                    leftBottomDoor.transform.localPosition = new Vector3(-24.5f, 1f, -12.5f);
+                    leftBottomDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
                 if (rooms[i].getDoorLeftTop())
                 {
-
+                    GameObject leftTopDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    leftTopDoor.transform.parent = rm.transform;
+                    leftTopDoor.transform.localPosition = new Vector3(-24.5f, 1f, 12.5f);
+                    leftTopDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
                 if (rooms[i].getDoorRightBottom())
                 {
-
+                    GameObject rightBottomDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    rightBottomDoor.transform.parent = rm.transform;
+                    rightBottomDoor.transform.localPosition = new Vector3(24.5f, 1f, -12.5f);
+                    rightBottomDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
                 if (rooms[i].getDoorRightTop())
                 {
-
+                    GameObject rightTopDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    rightTopDoor.transform.parent = rm.transform;
+                    rightTopDoor.transform.localPosition = new Vector3(24.5f, 1f, 12.5f);
+                    rightTopDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
                 if (rooms[i].getDoorTopLeft())
                 {
-
+                    GameObject topLeftDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    topLeftDoor.transform.parent = rm.transform;
+                    topLeftDoor.transform.localPosition = new Vector3(-12.5f, 1f, 24.5f);
                 }
                 if (rooms[i].getDoorTopRight())
                 {
-
+                    GameObject topRightDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    topRightDoor.transform.parent = rm.transform;
+                    topRightDoor.transform.localPosition = new Vector3(12.5f, 1f, 24.5f);
                 }
             }
             else
             {
-                GameObject rm = Instantiate(OnexTwoRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                GameObject rm = Instantiate(ThreexThreeRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
 
                 if (rooms[i].getDoorBottomLeft())
                 {
-
+                    GameObject bottomLeftDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    bottomLeftDoor.transform.parent = rm.transform;
+                    bottomLeftDoor.transform.localPosition = new Vector3(-25f, 1f, -37f);
                 }
                 if (rooms[i].getDoorBottom())
                 {
-
+                    GameObject bottomDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    bottomDoor.transform.parent = rm.transform;
+                    bottomDoor.transform.localPosition = new Vector3(0f, 1f, -37f);
                 }
                 if (rooms[i].getDoorBottomRight())
                 {
-
+                    GameObject bottomRightDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    bottomRightDoor.transform.parent = rm.transform;
+                    bottomRightDoor.transform.localPosition = new Vector3(25f, 1f, -37f);
                 }
                 if (rooms[i].getDoorLeftBottom())
                 {
-
+                    GameObject leftBottomDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    leftBottomDoor.transform.parent = rm.transform;
+                    leftBottomDoor.transform.localPosition = new Vector3(-37f, 1f, -25f);
+                    leftBottomDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
                 if (rooms[i].getDoorLeft())
                 {
-
+                    GameObject leftDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    leftDoor.transform.parent = rm.transform;
+                    leftDoor.transform.localPosition = new Vector3(-37f, 1f, 0f);
+                    leftDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
                 if (rooms[i].getDoorLeftTop())
                 {
-
+                    GameObject leftTopDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    leftTopDoor.transform.parent = rm.transform;
+                    leftTopDoor.transform.localPosition = new Vector3(-37f, 1f, 25f);
+                    leftTopDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
                 if (rooms[i].getDoorRightBottom())
                 {
-
+                    GameObject rightBottomDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    rightBottomDoor.transform.parent = rm.transform;
+                    rightBottomDoor.transform.localPosition = new Vector3(37f, 1f, -25f);
+                    rightBottomDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
                 if (rooms[i].getDoorRight())
                 {
-
+                    GameObject rightDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    rightDoor.transform.parent = rm.transform;
+                    rightDoor.transform.localPosition = new Vector3(37f, 1f, 0f);
+                    rightDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
                 if (rooms[i].getDoorRightTop())
                 {
-
+                    GameObject rightTopDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    rightTopDoor.transform.parent = rm.transform;
+                    rightTopDoor.transform.localPosition = new Vector3(37f, 1f, 25f);
+                    rightTopDoor.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, 0));
                 }
                 if (rooms[i].getDoorTopLeft())
                 {
-
+                    GameObject topLeftDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    topLeftDoor.transform.parent = rm.transform;
+                    topLeftDoor.transform.localPosition = new Vector3(-25f, 1f, 37f);
                 }
                 if (rooms[i].getDoorTop())
                 {
-
+                    GameObject topDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    topDoor.transform.parent = rm.transform;
+                    topDoor.transform.localPosition = new Vector3(0f, 1f, 37f);
                 }
                 if (rooms[i].getDoorTopRight())
                 {
-
+                    GameObject topRightDoor = Instantiate(RoomDoor, rm.transform.position, Quaternion.identity);
+                    topRightDoor.transform.parent = rm.transform;
+                    topRightDoor.transform.localPosition = new Vector3(25f, 1f, 37f);
                 }
             }
         }
