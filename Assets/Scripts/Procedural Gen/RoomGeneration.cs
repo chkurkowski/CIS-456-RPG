@@ -113,8 +113,43 @@ public class RoomGeneration : MonoBehaviour
         removeNotOpenRooms(newRoom);
         removeNotSingleNeighborRooms(newRoom);
 
-        Debug.Log("StartRoomCenter: " + startRoom.center);
-        Debug.Log("NewRoomCenter: " + newRoom.center);
+        Room newRoom2 = new Room(new Vector2(startRoom.topLeftInnerLocation.x + 3.5f, startRoom.topLeftInnerLocation.y - 0.5f), TwoxTwo);
+        rooms.Insert(0, newRoom2);
+
+        addLocationsToTakenPos(newRoom2);
+        setNeighboringRooms(newRoom2);
+        setRoomDoors(newRoom2);
+
+        if (getNumNeighbors(newRoom2) < newRoom2.maxNeighbors)
+        {
+            openRooms.Insert(0, newRoom2);
+        }
+        if (getNumNeighbors(newRoom2) <= 1)
+        {
+            singleNeighborRooms.Insert(0, newRoom2);
+        }
+
+        removeNotOpenRooms(newRoom2);
+        removeNotSingleNeighborRooms(newRoom2);
+
+        Room newRoom3 = new Room(new Vector2(startRoom.topLeftInnerLocation.x + 3.5f, startRoom.topLeftInnerLocation.y - 2.5f), TwoxTwo);
+        rooms.Insert(0, newRoom3);
+
+        addLocationsToTakenPos(newRoom3);
+        setNeighboringRooms(newRoom3);
+        setRoomDoors(newRoom3);
+
+        if (getNumNeighbors(newRoom3) < newRoom3.maxNeighbors)
+        {
+            openRooms.Insert(0, newRoom3);
+        }
+        if (getNumNeighbors(newRoom3) <= 1)
+        {
+            singleNeighborRooms.Insert(0, newRoom3);
+        }
+
+        removeNotOpenRooms(newRoom3);
+        removeNotSingleNeighborRooms(newRoom3);
     }
 
     //Populates the "rooms" array with rooms
@@ -426,7 +461,6 @@ public class RoomGeneration : MonoBehaviour
             Vector2 tempBottomRight = room.getBottomRight() + Vector2.down;
             Vector2 tempLeftBottom = room.getLeftBottom() + Vector2.left;
             Vector2 tempLeft = room.getLeft() + Vector2.left;
-            Debug.Log("******TempLeft: " + tempLeft);
             Vector2 tempLeftTop = room.getLeftTop() + Vector2.left;
             Vector2 tempRightBottom = room.getRightBottom() + Vector2.right;
             Vector2 tempRight = room.getRight() + Vector2.right;
@@ -534,7 +568,7 @@ public class RoomGeneration : MonoBehaviour
             {
                 room.setRoomBottomLeft(neighbor);
             }
-            else
+            if (neighbor.locations.Contains(room.getRight() + Vector2.down))
             {
                 room.setRoomBottomRight(neighbor);
             }
@@ -545,7 +579,7 @@ public class RoomGeneration : MonoBehaviour
             {
                 room.setRoomBottomLeft(neighbor);
             }
-            else
+            if (neighbor.locations.Contains(room.getBottomRight() + Vector2.down))
             {
                 room.setRoomBottomRight(neighbor);
             }
@@ -556,11 +590,11 @@ public class RoomGeneration : MonoBehaviour
             {
                 room.setRoomBottomLeft(neighbor);
             }
-            else if (neighbor.locations.Contains(room.getBottom() + Vector2.down))
+            if (neighbor.locations.Contains(room.getBottom() + Vector2.down))
             {
                 room.setRoomBottom(neighbor);
             }
-            else
+            if (neighbor.locations.Contains(room.getBottomRight() + Vector2.down))
             {
                 room.setRoomBottomRight(neighbor);
             }
@@ -579,7 +613,7 @@ public class RoomGeneration : MonoBehaviour
             {
                 room.setRoomLeftBottom(neighbor);
             }
-            else
+            if (neighbor.locations.Contains(room.getTop() + Vector2.left))
             {
                 room.setRoomLeftTop(neighbor);
             }
@@ -590,7 +624,7 @@ public class RoomGeneration : MonoBehaviour
             {
                 room.setRoomLeftBottom(neighbor);
             }
-            else
+            if (neighbor.locations.Contains(room.getTopLeft() + Vector2.left))
             {
                 room.setRoomLeftTop(neighbor);
             }
@@ -601,13 +635,13 @@ public class RoomGeneration : MonoBehaviour
             {
                 room.setRoomLeftBottom(neighbor);
             }
-            else if (neighbor.locations.Contains(room.getLeft() + Vector2.left))
+            if (neighbor.locations.Contains(room.getLeft() + Vector2.left))
             {
                 room.setRoomLeft(neighbor);
             }
-            else
+            if (neighbor.locations.Contains(room.getTopLeft() + Vector2.left))
             {
-                room.setRoomTopLeft(neighbor);
+                room.setRoomLeftTop(neighbor);
             }
         }
     }
@@ -624,7 +658,7 @@ public class RoomGeneration : MonoBehaviour
             {
                 room.setRoomRightBottom(neighbor);
             }
-            else
+            if (neighbor.locations.Contains(room.getTop() + Vector2.right))
             {
                 room.setRoomRightTop(neighbor);
             }
@@ -635,7 +669,7 @@ public class RoomGeneration : MonoBehaviour
             {
                 room.setRoomRightBottom(neighbor);
             }
-            else
+            if (neighbor.locations.Contains(room.getTopRight() + Vector2.right))
             {
                 room.setRoomRightTop(neighbor);
             }
@@ -646,13 +680,13 @@ public class RoomGeneration : MonoBehaviour
             {
                 room.setRoomRightBottom(neighbor);
             }
-            else if (neighbor.locations.Contains(room.getRight() + Vector2.right))
+            if (neighbor.locations.Contains(room.getRight() + Vector2.right))
             {
                 room.setRoomRight(neighbor);
             }
-            else
+            if (neighbor.locations.Contains(room.getTopRight() + Vector2.right))
             {
-                room.setRoomTopRight(neighbor);
+                room.setRoomRightTop(neighbor);
             }
         }
     }
@@ -669,7 +703,7 @@ public class RoomGeneration : MonoBehaviour
             {
                 room.setRoomTopLeft(neighbor);
             }
-            else
+            if (neighbor.locations.Contains(room.getRight() + Vector2.up))
             {
                 room.setRoomTopRight(neighbor);
             }
@@ -680,7 +714,7 @@ public class RoomGeneration : MonoBehaviour
             {
                 room.setRoomTopLeft(neighbor);
             }
-            else
+            if (neighbor.locations.Contains(room.getTopRight() + Vector2.up))
             {
                 room.setRoomTopRight(neighbor);
             }
@@ -691,11 +725,11 @@ public class RoomGeneration : MonoBehaviour
             {
                 room.setRoomTopLeft(neighbor);
             }
-            else if (neighbor.locations.Contains(room.getTop() + Vector2.up))
+            if (neighbor.locations.Contains(room.getTop() + Vector2.up))
             {
                 room.setRoomTop(neighbor);
             }
-            else
+            if (neighbor.locations.Contains(room.getTopRight() + Vector2.up))
             {
                 room.setRoomTopRight(neighbor);
             }
@@ -1308,16 +1342,79 @@ public class RoomGeneration : MonoBehaviour
 
             if (!doorBottomLeft && !doorBottomRight && room.getRoomBottomLeft() == room.getRoomBottomRight())
             {
-                float random = Random.value;
-                if (random < 0.5f)
+                Room bottomLeftRoom = room.getRoomBottomLeft();
+                if (bottomLeftRoom.size == OnexTwo || bottomLeftRoom.size == TwoxTwo)
                 {
-                    room.setDoorBottomLeft(false);
-                    room.setDoorBottomRight(true);
+                    if (bottomLeftRoom.getDoorTopLeft() != bottomLeftRoom.getDoorTopRight())
+                    {
+                        room.setDoorBottomLeft(bottomLeftRoom.getDoorTopLeft());
+                        room.setDoorBottomRight(bottomLeftRoom.getDoorTopRight());
+                    }
+                    else
+                    {
+                        float random = Random.value;
+                        if (random < 0.5f)
+                        {
+                            room.setDoorBottomLeft(false);
+                            room.setDoorBottomRight(true);
+                        }
+                        else
+                        {
+                            room.setDoorBottomLeft(true);
+                            room.setDoorBottomRight(false);
+                        }
+                    }
                 }
-                else
+                else if (bottomLeftRoom.size == ThreexThree)
                 {
-                    room.setDoorBottomLeft(true);
-                    room.setDoorBottomRight(false);
+                    Room topLeftRoomOfBottomLeftRoom = bottomLeftRoom.getRoomTopLeft();
+                    Room topRoomOfBottomLeftRoom = bottomLeftRoom.getRoomTop();
+                    Room topRightRoomOfBottomLeftRoom = bottomLeftRoom.getRoomTopRight();
+
+                    if (topLeftRoomOfBottomLeftRoom == topRoomOfBottomLeftRoom)
+                    {
+                        if (bottomLeftRoom.getDoorTopLeft() != bottomLeftRoom.getDoorTop())
+                        {
+                            room.setDoorBottomLeft(bottomLeftRoom.getDoorTopLeft());
+                            room.setDoorBottomRight(bottomLeftRoom.getDoorTop());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorBottomLeft(false);
+                                room.setDoorBottomRight(true);
+                            }
+                            else
+                            {
+                                room.setDoorBottomLeft(true);
+                                room.setDoorBottomRight(false);
+                            }
+                        }
+                    }
+                    else if (topRoomOfBottomLeftRoom == topRightRoomOfBottomLeftRoom)
+                    {
+                        if (bottomLeftRoom.getDoorTop() != bottomLeftRoom.getDoorTopRight())
+                        {
+                            room.setDoorBottomLeft(bottomLeftRoom.getDoorTop());
+                            room.setDoorBottomRight(bottomLeftRoom.getDoorTopRight());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorBottomLeft(false);
+                                room.setDoorBottomRight(true);
+                            }
+                            else
+                            {
+                                room.setDoorBottomLeft(true);
+                                room.setDoorBottomRight(false);
+                            }
+                        }
+                    }
                 }
             }
             else
@@ -1325,18 +1422,83 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorBottomLeft(doorBottomLeft);
                 room.setDoorBottomRight(doorBottomRight);
             }
+
+
             if (!doorTopLeft && !doorTopRight && room.getRoomTopLeft() == room.getRoomTopRight())
             {
-                float random = Random.value;
-                if (random < 0.5f)
+                Room topLeftRoom = room.getRoomTopLeft();
+                if (topLeftRoom.size == OnexTwo || topLeftRoom.size == TwoxTwo)
                 {
-                    room.setDoorTopLeft(false);
-                    room.setDoorTopRight(true);
+                    if (topLeftRoom.getDoorBottomLeft() != topLeftRoom.getDoorBottomRight())
+                    {
+                        room.setDoorTopLeft(topLeftRoom.getDoorBottomLeft());
+                        room.setDoorTopRight(topLeftRoom.getDoorBottomRight());
+                    }
+                    else
+                    {
+                        float random = Random.value;
+                        if (random < 0.5f)
+                        {
+                            room.setDoorTopLeft(false);
+                            room.setDoorTopRight(true);
+                        }
+                        else
+                        {
+                            room.setDoorTopLeft(true);
+                            room.setDoorTopRight(false);
+                        }
+                    }
                 }
-                else
+                else if (topLeftRoom.size == ThreexThree)
                 {
-                    room.setDoorTopLeft(true);
-                    room.setDoorTopRight(false);
+                    Room bottomLeftRoomOfTopLeftRoom = topLeftRoom.getRoomBottomLeft();
+                    Room bottomRoomOfTopLeftRoom = topLeftRoom.getRoomBottom();
+                    Room bottomRightRoomOfTopLeftRoom = topLeftRoom.getRoomBottomRight();
+
+                    if (bottomLeftRoomOfTopLeftRoom == bottomRoomOfTopLeftRoom)
+                    {
+                        if (topLeftRoom.getDoorBottomLeft() != topLeftRoom.getDoorBottom())
+                        {
+                            room.setDoorTopLeft(topLeftRoom.getDoorBottomLeft());
+                            room.setDoorTopRight(topLeftRoom.getDoorBottom());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorTopLeft(false);
+                                room.setDoorTopRight(true);
+                            }
+                            else
+                            {
+                                room.setDoorTopLeft(true);
+                                room.setDoorTopRight(false);
+                            }
+                        }
+                    }
+                    else if (bottomRoomOfTopLeftRoom == bottomRightRoomOfTopLeftRoom)
+                    {
+                        if (topLeftRoom.getDoorBottom() != topLeftRoom.getDoorBottomRight())
+                        {
+                            room.setDoorTopLeft(topLeftRoom.getDoorBottom());
+                            room.setDoorTopRight(topLeftRoom.getDoorBottomRight());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorTopLeft(false);
+                                room.setDoorTopRight(true);
+                            }
+                            else
+                            {
+                                room.setDoorTopLeft(true);
+                                room.setDoorTopRight(false);
+                            }
+                        }
+                    }
                 }
             }
             else
@@ -1357,16 +1519,79 @@ public class RoomGeneration : MonoBehaviour
 
             if (!doorLeftBottom && !doorLeftTop && room.getRoomLeftBottom() == room.getRoomLeftTop())
             {
-                float random = Random.value;
-                if (random < 0.5f)
+                Room leftBottomRoom = room.getRoomLeftBottom();
+                if (leftBottomRoom.size == TwoxOne || leftBottomRoom.size == TwoxTwo)
                 {
-                    room.setDoorLeftBottom(false);
-                    room.setDoorLeftTop(true);
+                    if (leftBottomRoom.getDoorRightBottom() != leftBottomRoom.getDoorRightTop())
+                    {
+                        room.setDoorLeftBottom(leftBottomRoom.getDoorRightBottom());
+                        room.setDoorLeftTop(leftBottomRoom.getDoorRightTop());
+                    }
+                    else
+                    {
+                        float random = Random.value;
+                        if (random < 0.5f)
+                        {
+                            room.setDoorLeftBottom(false);
+                            room.setDoorLeftTop(true);
+                        }
+                        else
+                        {
+                            room.setDoorLeftBottom(true);
+                            room.setDoorLeftTop(false);
+                        }
+                    }
                 }
-                else
+                else if (leftBottomRoom.size == ThreexThree)
                 {
-                    room.setDoorLeftBottom(true);
-                    room.setDoorLeftTop(false);
+                    Room rightBottomRoomOfLeftBottomRoom = leftBottomRoom.getRoomRightBottom();
+                    Room rightRoomOfLeftBottomRoom = leftBottomRoom.getRoomRight();
+                    Room rightTopRoomOfLeftBottomRoom = leftBottomRoom.getRoomRightTop();
+
+                    if (rightBottomRoomOfLeftBottomRoom == rightRoomOfLeftBottomRoom)
+                    {
+                        if (leftBottomRoom.getDoorRightBottom() != leftBottomRoom.getDoorRight())
+                        {
+                            room.setDoorLeftBottom(leftBottomRoom.getDoorRightBottom());
+                            room.setDoorLeftTop(leftBottomRoom.getDoorRight());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorLeftBottom(false);
+                                room.setDoorLeftTop(true);
+                            }
+                            else
+                            {
+                                room.setDoorLeftBottom(true);
+                                room.setDoorLeftTop(false);
+                            }
+                        }
+                    }
+                    else if (rightRoomOfLeftBottomRoom == rightTopRoomOfLeftBottomRoom)
+                    {
+                        if (leftBottomRoom.getDoorRight() != leftBottomRoom.getDoorRightTop())
+                        {
+                            room.setDoorLeftBottom(leftBottomRoom.getDoorRight());
+                            room.setDoorLeftTop(leftBottomRoom.getDoorRightTop());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorLeftBottom(false);
+                                room.setDoorLeftTop(true);
+                            }
+                            else
+                            {
+                                room.setDoorLeftBottom(true);
+                                room.setDoorLeftTop(false);
+                            }
+                        }
+                    }
                 }
             }
             else
@@ -1374,18 +1599,82 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorLeftBottom(doorLeftBottom);
                 room.setDoorLeftTop(doorLeftTop);
             }
+
             if (!doorRightBottom && !doorRightTop && room.getRoomRightBottom() == room.getRoomRightTop())
             {
-                float random = Random.value;
-                if (random < 0.5f)
+                Room rightBottomRoom = room.getRoomRightBottom();
+                if (rightBottomRoom.size == TwoxOne || rightBottomRoom.size == TwoxTwo)
                 {
-                    room.setDoorRightBottom(false);
-                    room.setDoorRightTop(true);
+                    if (rightBottomRoom.getDoorLeftBottom() != rightBottomRoom.getDoorLeftTop())
+                    {
+                        room.setDoorRightBottom(rightBottomRoom.getDoorLeftBottom());
+                        room.setDoorRightTop(rightBottomRoom.getDoorLeftTop());
+                    }
+                    else
+                    {
+                        float random = Random.value;
+                        if (random < 0.5f)
+                        {
+                            room.setDoorRightBottom(false);
+                            room.setDoorRightTop(true);
+                        }
+                        else
+                        {
+                            room.setDoorRightBottom(true);
+                            room.setDoorRightTop(false);
+                        }
+                    }
                 }
-                else
+                else if (rightBottomRoom.size == ThreexThree)
                 {
-                    room.setDoorRightBottom(true);
-                    room.setDoorRightTop(false);
+                    Room leftBottomRoomOfRightBottomRoom = rightBottomRoom.getRoomLeftBottom();
+                    Room leftRoomOfRightBottomRoom = rightBottomRoom.getRoomLeft();
+                    Room leftTopRoomOfRightBottomRoom = rightBottomRoom.getRoomLeftTop();
+
+                    if (leftBottomRoomOfRightBottomRoom == leftRoomOfRightBottomRoom)
+                    {
+                        if (rightBottomRoom.getDoorLeftBottom() != rightBottomRoom.getDoorLeft())
+                        {
+                            room.setDoorRightBottom(rightBottomRoom.getDoorLeftBottom());
+                            room.setDoorRightTop(rightBottomRoom.getDoorLeft());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorRightBottom(false);
+                                room.setDoorRightTop(true);
+                            }
+                            else
+                            {
+                                room.setDoorRightBottom(true);
+                                room.setDoorRightTop(false);
+                            }
+                        }
+                    }
+                    else if (leftRoomOfRightBottomRoom == leftTopRoomOfRightBottomRoom)
+                    {
+                        if (rightBottomRoom.getDoorLeft() != rightBottomRoom.getDoorLeftTop())
+                        {
+                            room.setDoorRightBottom(rightBottomRoom.getDoorLeft());
+                            room.setDoorRightTop(rightBottomRoom.getDoorLeftTop());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorRightBottom(false);
+                                room.setDoorRightTop(true);
+                            }
+                            else
+                            {
+                                room.setDoorRightBottom(true);
+                                room.setDoorRightTop(false);
+                            }
+                        }
+                    }
                 }
             }
             else
@@ -1410,16 +1699,79 @@ public class RoomGeneration : MonoBehaviour
 
             if (!doorBottomLeft && !doorBottomRight && room.getRoomBottomLeft() == room.getRoomBottomRight())
             {
-                float random = Random.value;
-                if (random < 0.5f)
+                Room bottomLeftRoom = room.getRoomBottomLeft();
+                if (bottomLeftRoom.size == OnexTwo || bottomLeftRoom.size == TwoxTwo)
                 {
-                    room.setDoorBottomLeft(false);
-                    room.setDoorBottomRight(true);
+                    if (bottomLeftRoom.getDoorTopLeft() != bottomLeftRoom.getDoorTopRight())
+                    {
+                        room.setDoorBottomLeft(bottomLeftRoom.getDoorTopLeft());
+                        room.setDoorBottomRight(bottomLeftRoom.getDoorTopRight());
+                    }
+                    else
+                    {
+                        float random = Random.value;
+                        if (random < 0.5f)
+                        {
+                            room.setDoorBottomLeft(false);
+                            room.setDoorBottomRight(true);
+                        }
+                        else
+                        {
+                            room.setDoorBottomLeft(true);
+                            room.setDoorBottomRight(false);
+                        }
+                    }
                 }
-                else
+                else if (bottomLeftRoom.size == ThreexThree)
                 {
-                    room.setDoorBottomLeft(true);
-                    room.setDoorBottomRight(false);
+                    Room topLeftRoomOfBottomLeftRoom = bottomLeftRoom.getRoomTopLeft();
+                    Room topRoomOfBottomLeftRoom = bottomLeftRoom.getRoomTop();
+                    Room topRightRoomOfBottomLeftRoom = bottomLeftRoom.getRoomTopRight();
+
+                    if (topLeftRoomOfBottomLeftRoom == topRoomOfBottomLeftRoom)
+                    {
+                        if (bottomLeftRoom.getDoorTopLeft() != bottomLeftRoom.getDoorTop())
+                        {
+                            room.setDoorBottomLeft(bottomLeftRoom.getDoorTopLeft());
+                            room.setDoorBottomRight(bottomLeftRoom.getDoorTop());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorBottomLeft(false);
+                                room.setDoorBottomRight(true);
+                            }
+                            else
+                            {
+                                room.setDoorBottomLeft(true);
+                                room.setDoorBottomRight(false);
+                            }
+                        }
+                    }
+                    else if (topRoomOfBottomLeftRoom == topRightRoomOfBottomLeftRoom)
+                    {
+                        if (bottomLeftRoom.getDoorTop() != bottomLeftRoom.getDoorTopRight())
+                        {
+                            room.setDoorBottomLeft(bottomLeftRoom.getDoorTop());
+                            room.setDoorBottomRight(bottomLeftRoom.getDoorTopRight());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorBottomLeft(false);
+                                room.setDoorBottomRight(true);
+                            }
+                            else
+                            {
+                                room.setDoorBottomLeft(true);
+                                room.setDoorBottomRight(false);
+                            }
+                        }
+                    }
                 }
             }
             else
@@ -1427,18 +1779,82 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorBottomLeft(doorBottomLeft);
                 room.setDoorBottomRight(doorBottomRight);
             }
+
             if (!doorLeftBottom && !doorLeftTop && room.getRoomLeftBottom() == room.getRoomLeftTop())
             {
-                float random = Random.value;
-                if (random < 0.5f)
+                Room leftBottomRoom = room.getRoomLeftBottom();
+                if (leftBottomRoom.size == TwoxOne || leftBottomRoom.size == TwoxTwo)
                 {
-                    room.setDoorLeftBottom(false);
-                    room.setDoorLeftTop(true);
+                    if (leftBottomRoom.getDoorRightBottom() != leftBottomRoom.getDoorRightTop())
+                    {
+                        room.setDoorLeftBottom(leftBottomRoom.getDoorRightBottom());
+                        room.setDoorLeftTop(leftBottomRoom.getDoorRightTop());
+                    }
+                    else
+                    {
+                        float random = Random.value;
+                        if (random < 0.5f)
+                        {
+                            room.setDoorLeftBottom(false);
+                            room.setDoorLeftTop(true);
+                        }
+                        else
+                        {
+                            room.setDoorLeftBottom(true);
+                            room.setDoorLeftTop(false);
+                        }
+                    }
                 }
-                else
+                else if (leftBottomRoom.size == ThreexThree)
                 {
-                    room.setDoorLeftBottom(true);
-                    room.setDoorLeftTop(false);
+                    Room rightBottomRoomOfLeftBottomRoom = leftBottomRoom.getRoomRightBottom();
+                    Room rightRoomOfLeftBottomRoom = leftBottomRoom.getRoomRight();
+                    Room rightTopRoomOfLeftBottomRoom = leftBottomRoom.getRoomRightTop();
+
+                    if (rightBottomRoomOfLeftBottomRoom == rightRoomOfLeftBottomRoom)
+                    {
+                        if (leftBottomRoom.getDoorRightBottom() != leftBottomRoom.getDoorRight())
+                        {
+                            room.setDoorLeftBottom(leftBottomRoom.getDoorRightBottom());
+                            room.setDoorLeftTop(leftBottomRoom.getDoorRight());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorLeftBottom(false);
+                                room.setDoorLeftTop(true);
+                            }
+                            else
+                            {
+                                room.setDoorLeftBottom(true);
+                                room.setDoorLeftTop(false);
+                            }
+                        }
+                    }
+                    else if (rightRoomOfLeftBottomRoom == rightTopRoomOfLeftBottomRoom)
+                    {
+                        if (leftBottomRoom.getDoorRight() != leftBottomRoom.getDoorRightTop())
+                        {
+                            room.setDoorLeftBottom(leftBottomRoom.getDoorRight());
+                            room.setDoorLeftTop(leftBottomRoom.getDoorRightTop());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorLeftBottom(false);
+                                room.setDoorLeftTop(true);
+                            }
+                            else
+                            {
+                                room.setDoorLeftBottom(true);
+                                room.setDoorLeftTop(false);
+                            }
+                        }
+                    }
                 }
             }
             else
@@ -1446,18 +1862,82 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorLeftBottom(doorLeftBottom);
                 room.setDoorLeftTop(doorLeftTop);
             }
+
             if (!doorRightBottom && !doorRightTop && room.getRoomRightBottom() == room.getRoomRightTop())
             {
-                float random = Random.value;
-                if (random < 0.5f)
+                Room rightBottomRoom = room.getRoomRightBottom();
+                if (rightBottomRoom.size == TwoxOne || rightBottomRoom.size == TwoxTwo)
                 {
-                    room.setDoorRightBottom(false);
-                    room.setDoorRightTop(true);
+                    if (rightBottomRoom.getDoorLeftBottom() != rightBottomRoom.getDoorLeftTop())
+                    {
+                        room.setDoorRightBottom(rightBottomRoom.getDoorLeftBottom());
+                        room.setDoorRightTop(rightBottomRoom.getDoorLeftTop());
+                    }
+                    else
+                    {
+                        float random = Random.value;
+                        if (random < 0.5f)
+                        {
+                            room.setDoorRightBottom(false);
+                            room.setDoorRightTop(true);
+                        }
+                        else
+                        {
+                            room.setDoorRightBottom(true);
+                            room.setDoorRightTop(false);
+                        }
+                    }
                 }
-                else
+                else if (rightBottomRoom.size == ThreexThree)
                 {
-                    room.setDoorRightBottom(true);
-                    room.setDoorRightTop(false);
+                    Room leftBottomRoomOfRightBottomRoom = rightBottomRoom.getRoomLeftBottom();
+                    Room leftRoomOfRightBottomRoom = rightBottomRoom.getRoomLeft();
+                    Room leftTopRoomOfRightBottomRoom = rightBottomRoom.getRoomLeftTop();
+
+                    if (leftBottomRoomOfRightBottomRoom == leftRoomOfRightBottomRoom)
+                    {
+                        if (rightBottomRoom.getDoorLeftBottom() != rightBottomRoom.getDoorLeft())
+                        {
+                            room.setDoorRightBottom(rightBottomRoom.getDoorLeftBottom());
+                            room.setDoorRightTop(rightBottomRoom.getDoorLeft());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorRightBottom(false);
+                                room.setDoorRightTop(true);
+                            }
+                            else
+                            {
+                                room.setDoorRightBottom(true);
+                                room.setDoorRightTop(false);
+                            }
+                        }
+                    }
+                    else if (leftRoomOfRightBottomRoom == leftTopRoomOfRightBottomRoom)
+                    {
+                        if (rightBottomRoom.getDoorLeft() != rightBottomRoom.getDoorLeftTop())
+                        {
+                            room.setDoorRightBottom(rightBottomRoom.getDoorLeft());
+                            room.setDoorRightTop(rightBottomRoom.getDoorLeftTop());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorRightBottom(false);
+                                room.setDoorRightTop(true);
+                            }
+                            else
+                            {
+                                room.setDoorRightBottom(true);
+                                room.setDoorRightTop(false);
+                            }
+                        }
+                    }
                 }
             }
             else
@@ -1465,18 +1945,82 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorRightBottom(doorRightBottom);
                 room.setDoorRightTop(doorRightTop);
             }
+
             if (!doorTopLeft && !doorTopRight && room.getRoomTopLeft() == room.getRoomTopRight())
             {
-                float random = Random.value;
-                if (random < 0.5f)
+                Room topLeftRoom = room.getRoomTopLeft();
+                if (topLeftRoom.size == OnexTwo || topLeftRoom.size == TwoxTwo)
                 {
-                    room.setDoorTopLeft(false);
-                    room.setDoorTopRight(true);
+                    if (topLeftRoom.getDoorBottomLeft() != topLeftRoom.getDoorBottomRight())
+                    {
+                        room.setDoorTopLeft(topLeftRoom.getDoorBottomLeft());
+                        room.setDoorTopRight(topLeftRoom.getDoorBottomRight());
+                    }
+                    else
+                    {
+                        float random = Random.value;
+                        if (random < 0.5f)
+                        {
+                            room.setDoorTopLeft(false);
+                            room.setDoorTopRight(true);
+                        }
+                        else
+                        {
+                            room.setDoorTopLeft(true);
+                            room.setDoorTopRight(false);
+                        }
+                    }
                 }
-                else
+                else if (topLeftRoom.size == ThreexThree)
                 {
-                    room.setDoorTopLeft(true);
-                    room.setDoorTopRight(false);
+                    Room bottomLeftRoomOfTopLeftRoom = topLeftRoom.getRoomBottomLeft();
+                    Room bottomRoomOfTopLeftRoom = topLeftRoom.getRoomBottom();
+                    Room bottomRightRoomOfTopLeftRoom = topLeftRoom.getRoomBottomRight();
+
+                    if (bottomLeftRoomOfTopLeftRoom == bottomRoomOfTopLeftRoom)
+                    {
+                        if (topLeftRoom.getDoorBottomLeft() != topLeftRoom.getDoorBottom())
+                        {
+                            room.setDoorTopLeft(topLeftRoom.getDoorBottomLeft());
+                            room.setDoorTopRight(topLeftRoom.getDoorBottom());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorTopLeft(false);
+                                room.setDoorTopRight(true);
+                            }
+                            else
+                            {
+                                room.setDoorTopLeft(true);
+                                room.setDoorTopRight(false);
+                            }
+                        }
+                    }
+                    else if (bottomRoomOfTopLeftRoom == bottomRightRoomOfTopLeftRoom)
+                    {
+                        if (topLeftRoom.getDoorBottom() != topLeftRoom.getDoorBottomRight())
+                        {
+                            room.setDoorTopLeft(topLeftRoom.getDoorBottom());
+                            room.setDoorTopRight(topLeftRoom.getDoorBottomRight());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorTopLeft(false);
+                                room.setDoorTopRight(true);
+                            }
+                            else
+                            {
+                                room.setDoorTopLeft(true);
+                                room.setDoorTopRight(false);
+                            }
+                        }
+                    }
                 }
             }
             else
@@ -1500,7 +2044,7 @@ public class RoomGeneration : MonoBehaviour
             bool doorTop = !hasTopNeighbor(room);
             bool doorTopRight = !hasTopRightNeighbor(room);
 
-            if (!doorBottomLeft && !doorBottom && !doorBottomRight
+        if (!doorBottomLeft && !doorBottom && !doorBottomRight
                 && room.getRoomBottomLeft() == room.getRoomBottom() 
                 && room.getRoomBottom() == room.getRoomBottomRight())
             {
@@ -1510,32 +2054,116 @@ public class RoomGeneration : MonoBehaviour
             }
             else if (!doorBottomLeft && !doorBottom && room.getRoomBottomLeft() == room.getRoomBottom())
             {
-                float random = Random.value;
-                if (random < 0.5f)
+                Room bottomLeftRoom = room.getRoomBottomLeft();
+
+                if (bottomLeftRoom.size == OnexTwo || bottomLeftRoom.size == TwoxTwo)
                 {
-                    room.setDoorBottomLeft(false);
-                    room.setDoorBottom(true);
+                    if (bottomLeftRoom.getDoorTopLeft() != bottomLeftRoom.getDoorTopRight())
+                    {
+                        room.setDoorBottomLeft(bottomLeftRoom.getDoorTopLeft());
+                        room.setDoorBottom(bottomLeftRoom.getDoorTopRight());
+                    }
+                    else
+                    {
+                        float random = Random.value;
+                        if (random < 0.5f)
+                        {
+                            room.setDoorBottomLeft(false);
+                            room.setDoorBottom(true);
+                        }
+                        else
+                        {
+                            room.setDoorBottomLeft(true);
+                            room.setDoorBottom(false);
+                        }
+                    }
                 }
-                else
+                else if (bottomLeftRoom.size == ThreexThree)
                 {
-                    room.setDoorBottomLeft(true);
-                    room.setDoorBottom(false);
+                    Room topRoomOfBottomLeftRoom = bottomLeftRoom.getRoomTop();
+                    Room topRightRoomOfBottomLeftRoom = bottomLeftRoom.getRoomTopRight();
+
+                    if (topRoomOfBottomLeftRoom == topRightRoomOfBottomLeftRoom)
+                    {
+                        if (bottomLeftRoom.getDoorTop() != bottomLeftRoom.getDoorTopRight())
+                        {
+                            room.setDoorBottomLeft(bottomLeftRoom.getDoorTop());
+                            room.setDoorBottom(bottomLeftRoom.getDoorTopRight());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorBottomLeft(false);
+                                room.setDoorBottom(true);
+                            }
+                            else
+                            {
+                                room.setDoorBottomLeft(true);
+                                room.setDoorBottom(false);
+                            }
+                        }
+                    }
                 }
+
                 room.setDoorBottomRight(doorBottomRight);
             }
             else if (!doorBottom && !doorBottomRight && room.getRoomBottom() == room.getRoomBottomRight())
             {
-                float random = Random.value;
-                if (random < 0.5f)
+                Room bottomRoom = room.getRoomBottom();
+
+                if (bottomRoom.size == OnexTwo || bottomRoom.size == TwoxTwo)
                 {
-                    room.setDoorBottom(false);
-                    room.setDoorBottomRight(true);
+                    if (bottomRoom.getDoorTopLeft() != bottomRoom.getDoorTopRight())
+                    {
+                        room.setDoorBottom(bottomRoom.getDoorTopLeft());
+                        room.setDoorBottomRight(bottomRoom.getDoorTopRight());
+                    }
+                    else
+                    {
+                        float random = Random.value;
+                        if (random < 0.5f)
+                        {
+                            room.setDoorBottom(false);
+                            room.setDoorBottomRight(true);
+                        }
+                        else
+                        {
+                            room.setDoorBottom(true);
+                            room.setDoorBottomRight(false);
+                        }
+                    }
                 }
-                else
+                else if (bottomRoom.size == ThreexThree)
                 {
-                    room.setDoorBottom(true);
-                    room.setDoorBottomRight(false);
+                    Room topLeftRoomOfBottomRoom = bottomRoom.getRoomTopLeft();
+                    Room topRoomOfBottomRoom = bottomRoom.getRoomTop();
+
+                    if (topLeftRoomOfBottomRoom == topRoomOfBottomRoom)
+                    {
+                        if (bottomRoom.getDoorTopLeft() != bottomRoom.getDoorTop())
+                        {
+                            room.setDoorBottom(bottomRoom.getDoorTopLeft());
+                            room.setDoorBottomRight(bottomRoom.getDoorTop());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorBottom(false);
+                                room.setDoorBottomRight(true);
+                            }
+                            else
+                            {
+                                room.setDoorBottom(true);
+                                room.setDoorBottomRight(false);
+                            }
+                        }
+                    }
                 }
+
                 room.setDoorBottomLeft(doorBottomLeft);
             }
             else
@@ -1545,67 +2173,131 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorBottomRight(doorBottomRight);
             }
 
-            //Get Left is null... why??
-            Debug.Log("doorLeftBottom: " + doorLeftBottom);
-            Debug.Log("doorLeft: " + doorLeft);
-            Debug.Log("doorLeftTop: " + doorLeftTop);
-            bool testOne = room.getRoomLeftBottom() == room.getRoomLeft();
-            bool testTwo = room.getRoomLeft() == room.getRoomLeftTop();
-            if (!doorLeftBottom && !doorLeft && !doorLeftTop)
-            {
-                Debug.Log("hasLeftBottomneighbor: " + hasLeftBottomNeighbor(room));
-                Debug.Log("hasLeftneighbor: " + hasLeftNeighbor(room));
-                Debug.Log("hasLeftTopneighbor: " + hasLeftTopNeighbor(room));
-                Debug.Log("******************************");
-                Debug.Log("room.getRoomLeftBottom() == room.getRoomLeft(): " + testOne);
-                Debug.Log("room.getRoomLeft() == room.getRoomLeftTop(): " + testTwo);
-                if (room.getRoomLeftBottom().center != null)
-                {
-                    Debug.Log("room.getLeftBottom(): " + room.getRoomLeftBottom().center);
-                    Debug.Log("LEFT LOC: " + room.getRoomLeft().getLeft());
-                    Debug.Log("room.getLeft(): " + room.getRoomLeft().center);
-                    Debug.Log("room.getLeftTop(): " + room.getRoomLeftTop().center);
-                }
-                
-                Debug.Log("Angry");
-            }
+
+
+
+
+
             if (!doorLeftBottom && !doorLeft && !doorLeftTop
                 && room.getRoomLeftBottom() == room.getRoomLeft()
                 && room.getRoomLeft() == room.getRoomLeftTop())
             {
-                Debug.Log("This ran!");
                 room.setDoorLeftBottom(true);
                 room.setDoorLeft(false);
                 room.setDoorLeftTop(true);
             }
             else if (!doorLeftBottom && !doorLeft && room.getRoomLeftBottom() == room.getRoomLeft())
             {
-                float random = Random.value;
-                if (random < 0.5f)
+                Room leftBottomRoom = room.getRoomLeftBottom();
+
+                if (leftBottomRoom.size == TwoxOne || leftBottomRoom.size == TwoxTwo)
                 {
-                    room.setDoorLeftBottom(false);
-                    room.setDoorLeft(true);
+                    if (leftBottomRoom.getDoorRightBottom() != leftBottomRoom.getDoorRightTop())
+                    {
+                        room.setDoorLeftBottom(leftBottomRoom.getDoorRightBottom());
+                        room.setDoorLeft(leftBottomRoom.getDoorRightTop());
+                    }
+                    else
+                    {
+                        float random = Random.value;
+                        if (random < 0.5f)
+                        {
+                            room.setDoorLeftBottom(false);
+                            room.setDoorLeft(true);
+                        }
+                        else
+                        {
+                            room.setDoorLeftBottom(true);
+                            room.setDoorLeft(false);
+                        }
+                    }
                 }
-                else
+                else if (leftBottomRoom.size == ThreexThree)
                 {
-                    room.setDoorLeftBottom(true);
-                    room.setDoorLeft(false);
+                    Room rightRoomOfLeftBottomRoom = leftBottomRoom.getRoomRight();
+                    Room rightTopRoomOfLeftBottomRoom = leftBottomRoom.getRoomRightTop();
+
+                    if (rightRoomOfLeftBottomRoom == rightTopRoomOfLeftBottomRoom)
+                    {
+                        if (leftBottomRoom.getDoorRight() != leftBottomRoom.getDoorRightTop())
+                        {
+                            room.setDoorLeftBottom(leftBottomRoom.getDoorRight());
+                            room.setDoorLeft(leftBottomRoom.getDoorRightTop());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorLeftBottom(false);
+                                room.setDoorLeft(true);
+                            }
+                            else
+                            {
+                                room.setDoorLeftBottom(true);
+                                room.setDoorLeft(false);
+                            }
+                        }
+                    }
                 }
+
                 room.setDoorLeftTop(doorLeftTop);
             }
             else if (!doorLeft && !doorLeftTop && room.getRoomLeft() == room.getRoomLeftTop())
             {
-                float random = Random.value;
-                if (random < 0.5f)
+                Room leftRoom = room.getRoomLeft();
+
+                if (leftRoom.size == TwoxOne || leftRoom.size == TwoxTwo)
                 {
-                    room.setDoorLeft(false);
-                    room.setDoorLeftTop(true);
+                    if (leftRoom.getDoorRightBottom() != leftRoom.getDoorRightTop())
+                    {
+                        room.setDoorLeft(leftRoom.getDoorRightBottom());
+                        room.setDoorLeftTop(leftRoom.getDoorRightTop());
+                    }
+                    else
+                    {
+                        float random = Random.value;
+                        if (random < 0.5f)
+                        {
+                            room.setDoorLeft(false);
+                            room.setDoorLeftTop(true);
+                        }
+                        else
+                        {
+                            room.setDoorLeft(true);
+                            room.setDoorLeftTop(false);
+                        }
+                    }
                 }
-                else
+                else if (leftRoom.size == ThreexThree)
                 {
-                    room.setDoorLeft(true);
-                    room.setDoorLeftTop(false);
+                    Room rightBottomRoomOfLeftRoom = leftRoom.getRoomRightBottom();
+                    Room rightRoomOfLeftRoom = leftRoom.getRoomRight();
+
+                    if (rightBottomRoomOfLeftRoom == rightRoomOfLeftRoom)
+                    {
+                        if (leftRoom.getDoorRightBottom() != leftRoom.getDoorRight())
+                        {
+                            room.setDoorLeft(leftRoom.getDoorRightBottom());
+                            room.setDoorLeftTop(leftRoom.getDoorRight());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorLeft(false);
+                                room.setDoorLeftTop(true);
+                            }
+                            else
+                            {
+                                room.setDoorLeft(true);
+                                room.setDoorLeftTop(false);
+                            }
+                        }
+                    }
                 }
+
                 room.setDoorLeftBottom(doorLeftBottom);
             }
             else
@@ -1614,6 +2306,11 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorLeft(doorLeft);
                 room.setDoorLeftTop(doorLeftTop);
             }
+
+
+
+
+
 
             if (!doorRightBottom && !doorRight && !doorRightTop
                 && room.getRoomRightBottom() == room.getRoomRight()
@@ -1625,32 +2322,116 @@ public class RoomGeneration : MonoBehaviour
             }
             else if (!doorRightBottom && !doorRight && room.getRoomRightBottom() == room.getRoomRight())
             {
-                float random = Random.value;
-                if (random < 0.5f)
+                Room rightBottomRoom = room.getRoomRightBottom();
+
+                if (rightBottomRoom.size == TwoxOne || rightBottomRoom.size == TwoxTwo)
                 {
-                    room.setDoorRightBottom(false);
-                    room.setDoorRight(true);
+                    if (rightBottomRoom.getDoorLeftBottom() != rightBottomRoom.getDoorLeftTop())
+                    {
+                        room.setDoorRightBottom(rightBottomRoom.getDoorLeftBottom());
+                        room.setDoorRight(rightBottomRoom.getDoorLeftTop());
+                    }
+                    else
+                    {
+                        float random = Random.value;
+                        if (random < 0.5f)
+                        {
+                            room.setDoorRightBottom(false);
+                            room.setDoorRight(true);
+                        }
+                        else
+                        {
+                            room.setDoorRightBottom(true);
+                            room.setDoorRight(false);
+                        }
+                    }
                 }
-                else
+                else if (rightBottomRoom.size == ThreexThree)
                 {
-                    room.setDoorRightBottom(true);
-                    room.setDoorRight(false);
+                    Room leftRoomOfRightBottomRoom = rightBottomRoom.getRoomLeft();
+                    Room leftTopRoomOfRightBottomRoom = rightBottomRoom.getRoomLeftTop();
+
+                    if (leftRoomOfRightBottomRoom == leftTopRoomOfRightBottomRoom)
+                    {
+                        if (rightBottomRoom.getDoorLeft() != rightBottomRoom.getDoorLeftTop())
+                        {
+                            room.setDoorRightBottom(rightBottomRoom.getDoorLeft());
+                            room.setDoorRight(rightBottomRoom.getDoorLeftTop());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorRightBottom(false);
+                                room.setDoorRight(true);
+                            }
+                            else
+                            {
+                                room.setDoorRightBottom(true);
+                                room.setDoorRight(false);
+                            }
+                        }
+                    }
                 }
+
                 room.setDoorRightTop(doorRightTop);
             }
             else if (!doorRight && !doorRightTop && room.getRoomRight() == room.getRoomRightTop())
             {
-                float random = Random.value;
-                if (random < 0.5f)
+                Room rightRoom = room.getRoomRight();
+
+                if (rightRoom.size == TwoxOne || rightRoom.size == TwoxTwo)
                 {
-                    room.setDoorRight(false);
-                    room.setDoorRightTop(true);
+                    if (rightRoom.getDoorLeftBottom() != rightRoom.getDoorLeftTop())
+                    {
+                        room.setDoorRight(rightRoom.getDoorLeftBottom());
+                        room.setDoorRightTop(rightRoom.getDoorLeftTop());
+                    }
+                    else
+                    {
+                        float random = Random.value;
+                        if (random < 0.5f)
+                        {
+                            room.setDoorRight(false);
+                            room.setDoorRightTop(true);
+                        }
+                        else
+                        {
+                            room.setDoorRight(true);
+                            room.setDoorRightTop(false);
+                        }
+                    }
                 }
-                else
+                else if (rightRoom.size == ThreexThree)
                 {
-                    room.setDoorRight(true);
-                    room.setDoorRightTop(false);
+                    Room leftBottomRoomOfRightRoom = rightRoom.getRoomLeftBottom();
+                    Room leftRoomOfRightRoom = rightRoom.getRoomLeft();
+
+                    if (leftBottomRoomOfRightRoom == leftRoomOfRightRoom)
+                    {
+                        if (rightRoom.getDoorLeftBottom() != rightRoom.getDoorLeft())
+                        {
+                            room.setDoorRight(rightRoom.getDoorLeftBottom());
+                            room.setDoorRightTop(rightRoom.getDoorLeft());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorRight(false);
+                                room.setDoorRightTop(true);
+                            }
+                            else
+                            {
+                                room.setDoorRight(true);
+                                room.setDoorRightTop(false);
+                            }
+                        }
+                    }
                 }
+
                 room.setDoorRightBottom(doorRightBottom);
             }
             else
@@ -1659,6 +2440,12 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorRight(doorRight);
                 room.setDoorRightTop(doorRightTop);
             }
+
+
+
+
+
+
 
             if (!doorTopLeft && !doorTop && !doorTopRight
                 && room.getRoomTopLeft() == room.getRoomTop()
@@ -1670,32 +2457,116 @@ public class RoomGeneration : MonoBehaviour
             }
             else if (!doorTopLeft && !doorTop && room.getRoomTopLeft() == room.getRoomTop())
             {
-                float random = Random.value;
-                if (random < 0.5f)
+                Room topLeftRoom = room.getRoomTopLeft();
+
+                if (topLeftRoom.size == OnexTwo || topLeftRoom.size == TwoxTwo)
                 {
-                    room.setDoorTopLeft(false);
-                    room.setDoorTop(true);
+                    if (topLeftRoom.getDoorBottomLeft() != topLeftRoom.getDoorBottomRight())
+                    {
+                        room.setDoorTopLeft(topLeftRoom.getDoorBottomLeft());
+                        room.setDoorTop(topLeftRoom.getDoorBottomRight());
+                    }
+                    else
+                    {
+                        float random = Random.value;
+                        if (random < 0.5f)
+                        {
+                            room.setDoorTopLeft(false);
+                            room.setDoorTop(true);
+                        }
+                        else
+                        {
+                            room.setDoorTopLeft(true);
+                            room.setDoorTop(false);
+                        }
+                    }
                 }
-                else
+                else if (topLeftRoom.size == ThreexThree)
                 {
-                    room.setDoorTopLeft(true);
-                    room.setDoorTop(false);
+                    Room bottomRoomOfTopLeftRoom = topLeftRoom.getRoomBottom();
+                    Room bottomRightRoomOfTopLeftRoom = topLeftRoom.getRoomBottomRight();
+
+                    if (bottomRoomOfTopLeftRoom == bottomRightRoomOfTopLeftRoom)
+                    {
+                        if (topLeftRoom.getDoorBottom() != topLeftRoom.getDoorBottomRight())
+                        {
+                            room.setDoorTopLeft(topLeftRoom.getDoorBottom());
+                            room.setDoorTop(topLeftRoom.getDoorBottomRight());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorTopLeft(false);
+                                room.setDoorTop(true);
+                            }
+                            else
+                            {
+                                room.setDoorTopLeft(true);
+                                room.setDoorTop(false);
+                            }
+                        }
+                    }
                 }
+
                 room.setDoorTopRight(doorTopRight);
             }
             else if (!doorTop && !doorTopRight && room.getRoomTop() == room.getRoomTopRight())
             {
-                float random = Random.value;
-                if (random < 0.5f)
+                Room topRoom = room.getRoomTop();
+
+                if (topRoom.size == OnexTwo || topRoom.size == TwoxTwo)
                 {
-                    room.setDoorTop(false);
-                    room.setDoorTopRight(true);
+                    if (topRoom.getDoorBottomLeft() != topRoom.getDoorBottomRight())
+                    {
+                        room.setDoorTop(topRoom.getDoorBottomLeft());
+                        room.setDoorTopRight(topRoom.getDoorBottomRight());
+                    }
+                    else
+                    {
+                        float random = Random.value;
+                        if (random < 0.5f)
+                        {
+                            room.setDoorTop(false);
+                            room.setDoorTopRight(true);
+                        }
+                        else
+                        {
+                            room.setDoorTop(true);
+                            room.setDoorTopRight(false);
+                        }
+                    }
                 }
-                else
+                else if (topRoom.size == ThreexThree)
                 {
-                    room.setDoorTop(true);
-                    room.setDoorTopRight(false);
+                    Room bottomLeftRoomOfTopRoom = topRoom.getRoomBottomLeft();
+                    Room bottomRoomOfTopRoom = topRoom.getRoomBottom();
+
+                    if (bottomLeftRoomOfTopRoom == bottomRoomOfTopRoom)
+                    {
+                        if (topRoom.getDoorBottomLeft() != topRoom.getDoorBottom())
+                        {
+                            room.setDoorTop(topRoom.getDoorBottomLeft());
+                            room.setDoorTopRight(topRoom.getDoorBottom());
+                        }
+                        else
+                        {
+                            float random = Random.value;
+                            if (random < 0.5f)
+                            {
+                                room.setDoorTop(false);
+                                room.setDoorTopRight(true);
+                            }
+                            else
+                            {
+                                room.setDoorTop(true);
+                                room.setDoorTopRight(false);
+                            }
+                        }
+                    }
                 }
+
                 room.setDoorTopLeft(doorTopLeft);
             }
             else
@@ -2094,6 +2965,11 @@ public class RoomGeneration : MonoBehaviour
             else if (rooms[i].size == OnexTwo)
             {
                 GameObject rm = Instantiate(OnexTwoRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+
+                bool doorBottomLeft = !hasBottomLeftNeighbor(rooms[i]);
+                bool doorBottomRight = !hasBottomRightNeighbor(rooms[i]);
+                bool doorTopLeft = !hasTopLeftNeighbor(rooms[i]);
+                bool doorTopRight = !hasTopRightNeighbor(rooms[i]);
 
                 if (rooms[i].getDoorBottomLeft())
                 {
