@@ -29,12 +29,19 @@ public class RoomGeneration : MonoBehaviour
     private float changeInProb; //The difference between startBranchProb and endBranchProb
     private bool decreasing; //Whether the branchProb is decreasing or increasing
 
+    [SerializeField] float OnexOneRoomProb = 0.75f;
+    [SerializeField] float OnexTwoRoomProb = 0.09f;
+    [SerializeField] float TwoxOneRoomProb = 0.09f;
+    [SerializeField] float TwoxTwoRoomProb = 0.06f;
+    [SerializeField] float ThreexThreeRoomProb = 0.01f;
+
     //List of all rooms
     private List<Room> rooms = new List<Room>();
     //List of all rooms that have at least one open neighboring position
     //TODO: Sort by num of neighbors
     private List<Room> openRooms = new List<Room>();
     //List of all rooms that have at most one neighboring position
+    //TODO: Make seperate lists for each size to speed up efficiency
     private List<Room> singleNeighborRooms = new List<Room>();
 
     //List of all occupied locations in the area
@@ -77,25 +84,41 @@ public class RoomGeneration : MonoBehaviour
             decreasing = false;
         }
 
-        //CreateRooms();
-        CreateManualRooms();
+        if ((OnexOneRoomProb + OnexTwoRoomProb + TwoxOneRoomProb + TwoxTwoRoomProb + ThreexThreeRoomProb) > 1.01f)
+        {
+            throw new System.ArgumentOutOfRangeException("The sum of you room probabilities is greater than 1!");
+        }
+
+        float error = 0.05f;
+        if (((OnexOneRoomProb + error) * numOfRooms * OnexOne.x * OnexOne.y)
+            + ((OnexTwoRoomProb + error) * numOfRooms * OnexTwo.x * OnexTwo.y)
+            + ((TwoxOneRoomProb + error) * numOfRooms * TwoxOne.x * TwoxOne.y)
+            + ((TwoxTwoRoomProb + error) * numOfRooms * TwoxTwo.x * TwoxTwo.y)
+            + ((ThreexThreeRoomProb + error) * numOfRooms * ThreexThree.x * ThreexThree.y)
+            >= areaSizeX * areaSizeY)
+        {
+            throw new System.ArgumentOutOfRangeException("Your room probabilities are likely to exceed the area size!");
+        }
+
+        CreateRooms();
+        //CreateManualRooms();
         BuildPrimitives();
     }
 
     private void CreateManualRooms()
     {
-        Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), new Vector2(3f, 3f), 0);
-        rooms.Insert(0, startRoom);
+        Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), new Vector2(1f, 1f), 0);
+        rooms.Add(startRoom);
         addLocationsToTakenPos(startRoom);
-        openRooms.Insert(0, startRoom);
-        singleNeighborRooms.Insert(0, startRoom);
+        openRooms.Add(startRoom);
+        singleNeighborRooms.Add(startRoom);
 
 
         float offsetX = (startRoom.topLeftInnerLocation.x - 2f);
         float offsetY = (startRoom.topLeftInnerLocation.y - 1f);
 
-        Room newRoom = new Room(new Vector2(offsetX, offsetY), ThreexThree);
-        rooms.Insert(0, newRoom);
+        Room newRoom = new Room(new Vector2(12, 11), OnexOne);
+        rooms.Add(newRoom);
 
         addLocationsToTakenPos(newRoom);
         setNeighboringRooms(newRoom);
@@ -103,18 +126,18 @@ public class RoomGeneration : MonoBehaviour
 
         if (getNumNeighbors(newRoom) < newRoom.maxNeighbors)
         {
-            openRooms.Insert(0, newRoom);
+            openRooms.Add(newRoom);
         }
         if (getNumNeighbors(newRoom) <= 1)
         {
-            singleNeighborRooms.Insert(0, newRoom);
+            singleNeighborRooms.Add(newRoom);
         }
 
         removeNotOpenRooms(newRoom);
         removeNotSingleNeighborRooms(newRoom);
 
-        Room newRoom2 = new Room(new Vector2(startRoom.topLeftInnerLocation.x + 3.5f, startRoom.topLeftInnerLocation.y - 0.5f), TwoxTwo);
-        rooms.Insert(0, newRoom2);
+        Room newRoom2 = new Room(new Vector2(13.5f, 11.5f), TwoxTwo);
+        rooms.Add(newRoom2);
 
         addLocationsToTakenPos(newRoom2);
         setNeighboringRooms(newRoom2);
@@ -122,18 +145,18 @@ public class RoomGeneration : MonoBehaviour
 
         if (getNumNeighbors(newRoom2) < newRoom2.maxNeighbors)
         {
-            openRooms.Insert(0, newRoom2);
+            openRooms.Add(newRoom2);
         }
         if (getNumNeighbors(newRoom2) <= 1)
         {
-            singleNeighborRooms.Insert(0, newRoom2);
+            singleNeighborRooms.Add(newRoom2);
         }
 
         removeNotOpenRooms(newRoom2);
         removeNotSingleNeighborRooms(newRoom2);
 
         Room newRoom3 = new Room(new Vector2(startRoom.topLeftInnerLocation.x + 3.5f, startRoom.topLeftInnerLocation.y - 2.5f), TwoxTwo);
-        rooms.Insert(0, newRoom3);
+        rooms.Add(newRoom3);
 
         addLocationsToTakenPos(newRoom3);
         setNeighboringRooms(newRoom3);
@@ -141,11 +164,11 @@ public class RoomGeneration : MonoBehaviour
 
         if (getNumNeighbors(newRoom3) < newRoom3.maxNeighbors)
         {
-            openRooms.Insert(0, newRoom3);
+            openRooms.Add(newRoom3);
         }
         if (getNumNeighbors(newRoom3) <= 1)
         {
-            singleNeighborRooms.Insert(0, newRoom3);
+            singleNeighborRooms.Add(newRoom3);
         }
 
         removeNotOpenRooms(newRoom3);
@@ -157,21 +180,27 @@ public class RoomGeneration : MonoBehaviour
     {
         //Add starter room in middle
         //TODO: Different type for starter room (Change 0 to another number)
-        Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), 0);
-        rooms.Insert(0, startRoom);
-        takenPos.Insert(0, startRoom.topLeftInnerLocation); //INSERT ALL LCOATIONS IF BIGGER
-        openRooms.Insert(0, startRoom);
-        singleNeighborRooms.Insert(0, startRoom);
+        Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), new Vector2(1f, 1f), 0);
+        rooms.Add(startRoom);
+        addLocationsToTakenPos(startRoom);
+        openRooms.Add(startRoom);
+        singleNeighborRooms.Add(startRoom);
 
         //Add each room to the grid
         for (int i = 0; i < numOfRooms - 1; i++)
         {
             //Determine type and size of new Room (somehow)
             int tempType = 0;
-            Vector2 tempSize = OnexOne;
+            Vector2 tempSize;
+            Vector2 tempLoc;
 
-            //Get temp position of new room
-            Vector2 tempLoc = getRandomPosition();
+            do
+            {
+                tempSize = getRoomSize();
+                tempLoc = getRandomPosition(tempSize);
+            }
+            while (tempLoc == errorVector);
+
             Room tempRoom = new Room(tempLoc, tempSize, tempType);
 
             //Decreases/Increases branchProb for this iteration
@@ -187,12 +216,14 @@ public class RoomGeneration : MonoBehaviour
             }
 
             int tempNeighbors = getNumNeighbors(tempRoom);
+            int tempUniqueNeighbors = getNumUniqueNeighbors(tempRoom);
 
             //Determines if the random position of the new room will have more than one neighbor and uses branchProb to
             //decide whether or not to force the new room to be a branch position (a position with only one neighbor)
-            if (tempNeighbors > 1 && branchProb > Random.value)
+            //TODO: Check each side of the room depending on its size
+            if (branchProb > Random.value)
             {
-                Vector2 tempBranchLoc = getRandomBranchPosition();
+                Vector2 tempBranchLoc = getRandomBranchPosition(tempSize);
                 Room tempBranchRoom = new Room(tempBranchLoc, tempSize, tempType);
 
                 //If it isn't the error vector, a branch position was found and it will be the position of the new room
@@ -200,32 +231,63 @@ public class RoomGeneration : MonoBehaviour
                 {
                     tempLoc = tempBranchLoc;
                     tempNeighbors = getNumNeighbors(tempBranchRoom);
+                    tempUniqueNeighbors = getNumUniqueNeighbors(tempBranchRoom);
                 }
             }
 
             //Actually insert the room
             Room newRoom = new Room(tempLoc, tempSize, tempType);
-            rooms.Insert(0, newRoom);
+            rooms.Add(newRoom);
 
             addLocationsToTakenPos(newRoom);
-            setRoomDoors(newRoom);
             setNeighboringRooms(newRoom);
+            setRoomDoors(newRoom);
 
             if (tempNeighbors < newRoom.maxNeighbors)
             {
-                openRooms.Insert(0, newRoom);
+                openRooms.Add(newRoom);
             }
-            if (tempNeighbors <= 1)
+            if (tempUniqueNeighbors <= 1)
             {
-                singleNeighborRooms.Insert(0, newRoom);
+                singleNeighborRooms.Add(newRoom);
             }
 
             removeNotOpenRooms(newRoom);
             removeNotSingleNeighborRooms(newRoom);
+        }
+    }
 
-            setRoomDoors(startRoom);
-
-            //**Test with manual additions
+    private Vector2 getRoomSize()
+    {
+        float OneOne = OnexOneRoomProb;
+        float OneTwo = OneOne + OnexTwoRoomProb;
+        float TwoOne = OneTwo + TwoxOneRoomProb;
+        float TwoTwo = TwoOne + TwoxTwoRoomProb;
+        float ThreeThree = TwoTwo + ThreexThreeRoomProb;
+        float random = Random.value;
+        if (random < OneOne)
+        {
+            return OnexOne;
+        }
+        else if (random < OneTwo)
+        {
+            return OnexTwo;
+        }
+        else if (random < TwoOne)
+        {
+            return TwoxOne;
+        }
+        else if (random < TwoTwo)
+        {
+            return TwoxTwo;
+        }
+        else if (random < ThreeThree)
+        {
+            return ThreexThree;
+        }
+        else
+        {
+            return OnexOne;
         }
     }
 
@@ -240,7 +302,7 @@ public class RoomGeneration : MonoBehaviour
         for (int i = 0; i < room.locations.Count; i++)
         {
 
-            takenPos.Insert(0, room.locations[i]);
+            takenPos.Add(room.locations[i]);
         }
     }
 
@@ -963,19 +1025,19 @@ public class RoomGeneration : MonoBehaviour
             Room tempRight = room.getRoomRight();
             Room tempTop = room.getRoomTop();
 
-            if (singleNeighborRooms.Contains(tempBottom) && getNumNeighbors(tempBottom) > 1)
+            if (singleNeighborRooms.Contains(tempBottom) && getNumUniqueNeighbors(tempBottom) > 1)
             {
                 singleNeighborRooms.Remove(tempBottom);
             }
-            if (singleNeighborRooms.Contains(tempLeft) && getNumNeighbors(tempLeft) > 1)
+            if (singleNeighborRooms.Contains(tempLeft) && getNumUniqueNeighbors(tempLeft) > 1)
             {
                 singleNeighborRooms.Remove(tempLeft);
             }
-            if (singleNeighborRooms.Contains(tempRight) && getNumNeighbors(tempRight) > 1)
+            if (singleNeighborRooms.Contains(tempRight) && getNumUniqueNeighbors(tempRight) > 1)
             {
                 singleNeighborRooms.Remove(tempRight);
             }
-            if (singleNeighborRooms.Contains(tempTop) && getNumNeighbors(tempTop) > 1)
+            if (singleNeighborRooms.Contains(tempTop) && getNumUniqueNeighbors(tempTop) > 1)
             {
                 singleNeighborRooms.Remove(tempTop);
             }
@@ -989,27 +1051,27 @@ public class RoomGeneration : MonoBehaviour
             Room tempTopLeft = room.getRoomTopLeft();
             Room tempTopRight = room.getRoomTopRight();
 
-            if (singleNeighborRooms.Contains(tempBottomLeft) && getNumNeighbors(tempBottomLeft) > 1)
+            if (singleNeighborRooms.Contains(tempBottomLeft) && getNumUniqueNeighbors(tempBottomLeft) > 1)
             {
                 singleNeighborRooms.Remove(tempBottomLeft);
             }
-            if (singleNeighborRooms.Contains(tempBottomRight) && getNumNeighbors(tempBottomRight) > 1)
+            if (singleNeighborRooms.Contains(tempBottomRight) && getNumUniqueNeighbors(tempBottomRight) > 1)
             {
                 singleNeighborRooms.Remove(tempBottomRight);
             }
-            if (singleNeighborRooms.Contains(tempLeft) && getNumNeighbors(tempLeft) > 1)
+            if (singleNeighborRooms.Contains(tempLeft) && getNumUniqueNeighbors(tempLeft) > 1)
             {
                 singleNeighborRooms.Remove(tempLeft);
             }
-            if (singleNeighborRooms.Contains(tempRight) && getNumNeighbors(tempRight) > 1)
+            if (singleNeighborRooms.Contains(tempRight) && getNumUniqueNeighbors(tempRight) > 1)
             {
                 singleNeighborRooms.Remove(tempRight);
             }
-            if (singleNeighborRooms.Contains(tempTopLeft) && getNumNeighbors(tempTopLeft) > 1)
+            if (singleNeighborRooms.Contains(tempTopLeft) && getNumUniqueNeighbors(tempTopLeft) > 1)
             {
                 singleNeighborRooms.Remove(tempTopLeft);
             }
-            if (singleNeighborRooms.Contains(tempTopRight) && getNumNeighbors(tempTopRight) > 1)
+            if (singleNeighborRooms.Contains(tempTopRight) && getNumUniqueNeighbors(tempTopRight) > 1)
             {
                 singleNeighborRooms.Remove(tempTopRight);
             }
@@ -1023,27 +1085,27 @@ public class RoomGeneration : MonoBehaviour
             Room tempRightTop = room.getRoomRightTop();
             Room tempTop = room.getRoomTop();
 
-            if (singleNeighborRooms.Contains(tempBottom) && getNumNeighbors(tempBottom) > 1)
+            if (singleNeighborRooms.Contains(tempBottom) && getNumUniqueNeighbors(tempBottom) > 1)
             {
                 singleNeighborRooms.Remove(tempBottom);
             }
-            if (singleNeighborRooms.Contains(tempLeftBottom) && getNumNeighbors(tempLeftBottom) > 1)
+            if (singleNeighborRooms.Contains(tempLeftBottom) && getNumUniqueNeighbors(tempLeftBottom) > 1)
             {
                 singleNeighborRooms.Remove(tempLeftBottom);
             }
-            if (singleNeighborRooms.Contains(tempLeftTop) && getNumNeighbors(tempLeftTop) > 1)
+            if (singleNeighborRooms.Contains(tempLeftTop) && getNumUniqueNeighbors(tempLeftTop) > 1)
             {
                 singleNeighborRooms.Remove(tempLeftTop);
             }
-            if (singleNeighborRooms.Contains(tempRightBottom) && getNumNeighbors(tempRightBottom) > 1)
+            if (singleNeighborRooms.Contains(tempRightBottom) && getNumUniqueNeighbors(tempRightBottom) > 1)
             {
                 singleNeighborRooms.Remove(tempRightBottom);
             }
-            if (singleNeighborRooms.Contains(tempRightTop) && getNumNeighbors(tempRightTop) > 1)
+            if (singleNeighborRooms.Contains(tempRightTop) && getNumUniqueNeighbors(tempRightTop) > 1)
             {
                 singleNeighborRooms.Remove(tempRightTop);
             }
-            if (singleNeighborRooms.Contains(tempTop) && getNumNeighbors(tempTop) > 1)
+            if (singleNeighborRooms.Contains(tempTop) && getNumUniqueNeighbors(tempTop) > 1)
             {
                 singleNeighborRooms.Remove(tempTop);
             }
@@ -1059,35 +1121,35 @@ public class RoomGeneration : MonoBehaviour
             Room tempTopLeft = room.getRoomTopLeft();
             Room tempTopRight = room.getRoomTopRight();
 
-            if (singleNeighborRooms.Contains(tempBottomLeft) && getNumNeighbors(tempBottomLeft) > 1)
+            if (singleNeighborRooms.Contains(tempBottomLeft) && getNumUniqueNeighbors(tempBottomLeft) > 1)
             {
                 singleNeighborRooms.Remove(tempBottomLeft);
             }
-            if (singleNeighborRooms.Contains(tempBottomRight) && getNumNeighbors(tempBottomRight) > 1)
+            if (singleNeighborRooms.Contains(tempBottomRight) && getNumUniqueNeighbors(tempBottomRight) > 1)
             {
                 singleNeighborRooms.Remove(tempBottomRight);
             }
-            if (singleNeighborRooms.Contains(tempLeftBottom) && getNumNeighbors(tempLeftBottom) > 1)
+            if (singleNeighborRooms.Contains(tempLeftBottom) && getNumUniqueNeighbors(tempLeftBottom) > 1)
             {
                 singleNeighborRooms.Remove(tempLeftBottom);
             }
-            if (singleNeighborRooms.Contains(tempLeftTop) && getNumNeighbors(tempLeftTop) > 1)
+            if (singleNeighborRooms.Contains(tempLeftTop) && getNumUniqueNeighbors(tempLeftTop) > 1)
             {
                 singleNeighborRooms.Remove(tempLeftTop);
             }
-            if (singleNeighborRooms.Contains(tempRightBottom) && getNumNeighbors(tempRightBottom) > 1)
+            if (singleNeighborRooms.Contains(tempRightBottom) && getNumUniqueNeighbors(tempRightBottom) > 1)
             {
                 singleNeighborRooms.Remove(tempRightBottom);
             }
-            if (singleNeighborRooms.Contains(tempRightTop) && getNumNeighbors(tempRightTop) > 1)
+            if (singleNeighborRooms.Contains(tempRightTop) && getNumUniqueNeighbors(tempRightTop) > 1)
             {
                 singleNeighborRooms.Remove(tempRightTop);
             }
-            if (singleNeighborRooms.Contains(tempTopLeft) && getNumNeighbors(tempTopLeft) > 1)
+            if (singleNeighborRooms.Contains(tempTopLeft) && getNumUniqueNeighbors(tempTopLeft) > 1)
             {
                 singleNeighborRooms.Remove(tempTopLeft);
             }
-            if (singleNeighborRooms.Contains(tempTopRight) && getNumNeighbors(tempTopRight) > 1)
+            if (singleNeighborRooms.Contains(tempTopRight) && getNumUniqueNeighbors(tempTopRight) > 1)
             {
                 singleNeighborRooms.Remove(tempTopRight);
             }
@@ -1107,51 +1169,51 @@ public class RoomGeneration : MonoBehaviour
             Room tempTop = room.getRoomTop();
             Room tempTopRight = room.getRoomTopRight();
 
-            if (singleNeighborRooms.Contains(tempBottomLeft) && getNumNeighbors(tempBottomLeft) > 1)
+            if (singleNeighborRooms.Contains(tempBottomLeft) && getNumUniqueNeighbors(tempBottomLeft) > 1)
             {
                 singleNeighborRooms.Remove(tempBottomLeft);
             }
-            if (singleNeighborRooms.Contains(tempBottom) && getNumNeighbors(tempBottom) > 1)
+            if (singleNeighborRooms.Contains(tempBottom) && getNumUniqueNeighbors(tempBottom) > 1)
             {
                 singleNeighborRooms.Remove(tempBottom);
             }
-            if (singleNeighborRooms.Contains(tempBottomRight) && getNumNeighbors(tempBottomRight) > 1)
+            if (singleNeighborRooms.Contains(tempBottomRight) && getNumUniqueNeighbors(tempBottomRight) > 1)
             {
                 singleNeighborRooms.Remove(tempBottomRight);
             }
-            if (singleNeighborRooms.Contains(tempLeftBottom) && getNumNeighbors(tempLeftBottom) > 1)
+            if (singleNeighborRooms.Contains(tempLeftBottom) && getNumUniqueNeighbors(tempLeftBottom) > 1)
             {
                 singleNeighborRooms.Remove(tempLeftBottom);
             }
-            if (singleNeighborRooms.Contains(tempLeft) && getNumNeighbors(tempLeft) > 1)
+            if (singleNeighborRooms.Contains(tempLeft) && getNumUniqueNeighbors(tempLeft) > 1)
             {
                 singleNeighborRooms.Remove(tempLeft);
             }
-            if (singleNeighborRooms.Contains(tempLeftTop) && getNumNeighbors(tempLeftTop) > 1)
+            if (singleNeighborRooms.Contains(tempLeftTop) && getNumUniqueNeighbors(tempLeftTop) > 1)
             {
                 singleNeighborRooms.Remove(tempLeftTop);
             }
-            if (singleNeighborRooms.Contains(tempRightBottom) && getNumNeighbors(tempRightBottom) > 1)
+            if (singleNeighborRooms.Contains(tempRightBottom) && getNumUniqueNeighbors(tempRightBottom) > 1)
             {
                 singleNeighborRooms.Remove(tempRightBottom);
             }
-            if (singleNeighborRooms.Contains(tempRight) && getNumNeighbors(tempRight) > 1)
+            if (singleNeighborRooms.Contains(tempRight) && getNumUniqueNeighbors(tempRight) > 1)
             {
                 singleNeighborRooms.Remove(tempRight);
             }
-            if (singleNeighborRooms.Contains(tempRightTop) && getNumNeighbors(tempRightTop) > 1)
+            if (singleNeighborRooms.Contains(tempRightTop) && getNumUniqueNeighbors(tempRightTop) > 1)
             {
                 singleNeighborRooms.Remove(tempRightTop);
             }
-            if (singleNeighborRooms.Contains(tempTopLeft) && getNumNeighbors(tempTopLeft) > 1)
+            if (singleNeighborRooms.Contains(tempTopLeft) && getNumUniqueNeighbors(tempTopLeft) > 1)
             {
                 singleNeighborRooms.Remove(tempTopLeft);
             }
-            if (singleNeighborRooms.Contains(tempTop) && getNumNeighbors(tempTop) > 1)
+            if (singleNeighborRooms.Contains(tempTop) && getNumUniqueNeighbors(tempTop) > 1)
             {
                 singleNeighborRooms.Remove(tempTop);
             }
-            if (singleNeighborRooms.Contains(tempTopRight) && getNumNeighbors(tempTopRight) > 1)
+            if (singleNeighborRooms.Contains(tempTopRight) && getNumUniqueNeighbors(tempTopRight) > 1)
             {
                 singleNeighborRooms.Remove(tempTopRight);
             }
@@ -1159,7 +1221,7 @@ public class RoomGeneration : MonoBehaviour
     }
 
     //Gets a random position that's adjacent to a random room
-    private Vector2 getRandomPosition()
+    private Vector2 getRandomPosition(Vector2 newRoomSize)
     {
         if (openRooms.Count == 0)
         {
@@ -1168,7 +1230,7 @@ public class RoomGeneration : MonoBehaviour
         Vector2 randomPos;
         bool validRandomPos;
         int index;
-        int iterationsDir = 0; //Iterations of the do while loop that selects which direction to deviate from the random room
+        int newRoomIndex;
 
         do
         {
@@ -1177,48 +1239,24 @@ public class RoomGeneration : MonoBehaviour
             index = Mathf.Clamp(index, 0, openRooms.Count);
 
             //TODO: CHANGE
+            Room randomRoom = openRooms[index];
             int x = (int)openRooms[index].topLeftInnerLocation.x;
             int y = (int)openRooms[index].topLeftInnerLocation.y;
+            List<Vector2> openNeighboringPositions = getOpenNeighboringPositions(newRoomSize, randomRoom);
 
-            //Move one (random) direction over from the random room we selected
-            iterationsDir = 0;
-            bool isValidDir;
-            do
+            if (openNeighboringPositions.Count == 0)
             {
-                isValidDir = true;
-
-                float dir = Random.value;
-
-                if (dir < 0.25f && !(takenPos.Contains(new Vector2(x, y - 1)))) //Down
-                {
-                    y -= 1;
-                }
-                else if (dir < 0.50f && !(takenPos.Contains(new Vector2(x - 1, y)))) //Left
-                {
-                    x -= 1;
-                }
-                else if (dir < .75f && !(takenPos.Contains(new Vector2(x + 1, y)))) //Right
-                {
-                    x += 1;
-                }
-                else if (dir >= .75 && !(takenPos.Contains(new Vector2(x, y + 1)))) //Up
-                {
-                    y += 1;
-                }
-                else
-                {
-                    isValidDir = false;
-                    iterationsDir++;
-                }
+                return errorVector;
             }
-            while (!isValidDir && iterationsDir < 16);
 
-            randomPos = new Vector2(x, y);
+            newRoomIndex = Mathf.Clamp(Mathf.RoundToInt(Random.value * (openNeighboringPositions.Count)), 0, openNeighboringPositions.Count - 1);
+            newRoomIndex = Mathf.Clamp(newRoomIndex, 0, openNeighboringPositions.Count);
+
+            randomPos = openNeighboringPositions[newRoomIndex];
             Room newRoom = new Room(randomPos, 0);
 
             //If this new location does not meet location requirements
-            if (iterationsDir >= 16
-                || takenPos.Contains(newRoom.topLeftInnerLocation)
+            if (takenPosContainsAny(newRoom.locations)
                 || x >= areaSizeX
                 || x < 0
                 || y >= areaSizeY
@@ -1236,92 +1274,2373 @@ public class RoomGeneration : MonoBehaviour
         return randomPos;
     }
 
-    //Gets a random position that's adjacent to only one random room (branching)
-    private Vector2 getRandomBranchPosition()
+    private List<Vector2> getOpenNeighboringPositions(Vector2 newRoomSize, Room randomRoom)
     {
-        if (singleNeighborRooms.Count == 0)
+        List<Vector2> openNeighboringPositions = new List<Vector2>();
+        List<Vector2> tempNewRoomLocationsMM = new List<Vector2>();
+        List<Vector2> tempNewRoomLocationsM = new List<Vector2>();
+        List<Vector2> tempNewRoomLocationsZ = new List<Vector2>();
+        List<Vector2> tempNewRoomLocationsP = new List<Vector2>();
+        List<Vector2> tempNewRoomLocationsPP = new List<Vector2>();
+
+        List<Vector2> offsets = new List<Vector2>();
+
+        if (newRoomSize == OnexOne)
         {
-            return errorVector;
-        }
 
-        Vector2 randomPos;
-        bool validRandomPos;
-        int index;
-        int iterationsMain = 0; //Iterations of the main do while loop
-        int iterationsDir = 0; //Iterations of the do while loop that selects which direction to deviate from the random room
-
-        do
-        {
-            //Pick a random room that's already in the grid that has only one neighbor
-            index = Mathf.Clamp(Mathf.RoundToInt(Random.value * (singleNeighborRooms.Count)), 0, singleNeighborRooms.Count - 1);
-            index = Mathf.Clamp(index, 0, singleNeighborRooms.Count);
-
-            //TODO: CHANGE
-            int x = (int)singleNeighborRooms[index].topLeftInnerLocation.x;
-            int y = (int)singleNeighborRooms[index].topLeftInnerLocation.y;
-
-            //Move one (random) direction over from the random room we selected
-            iterationsDir = 0;
-            bool isValidDir;
-            do
+            if (randomRoom.size == OnexOne)
             {
-                isValidDir = true;
+                if (!takenPos.Contains(getBottomNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getBottomNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getLeftNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getLeftNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getRightNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getRightNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getTopNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getTopNeighborPosition(randomRoom));
+                }
 
-                float dir = Random.value;
-
-                if (dir < 0.25f && !(takenPos.Contains(new Vector2(x, y - 1)))) //Down
-                {
-                    y -= 1;
-                }
-                else if (dir < 0.50f && !(takenPos.Contains(new Vector2(x - 1, y)))) //Left
-                {
-                    x -= 1;
-                }
-                else if (dir < .75f && !(takenPos.Contains(new Vector2(x + 1, y)))) //Right
-                {
-                    x += 1;
-                }
-                else if (dir >= .75 && !(takenPos.Contains(new Vector2(x, y + 1)))) //Up
-                {
-                    y += 1;
-                }
-                else
-                {
-                    isValidDir = false;
-                    iterationsDir++;
-                }
+                return openNeighboringPositions;
             }
-            while (!isValidDir && iterationsDir < 16);
-
-            randomPos = new Vector2(x, y);
-            Room newRoom = new Room(randomPos, 0);
-
-            //If this new location does not meet branching requirements
-            if (iterationsDir >= 16
-                || takenPos.Contains(newRoom.topLeftInnerLocation)
-                || getNumNeighbors(newRoom) > 1
-                || x >= areaSizeX
-                || x < 0
-                || y >= areaSizeY
-                || y < 0)
+            else if (randomRoom.size == OnexTwo)
             {
-                validRandomPos = false;
-                iterationsMain++;
+                if (!takenPos.Contains(getBottomLeftNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getBottomLeftNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getBottomRightNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getBottomRightNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getLeftNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getLeftNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getRightNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getRightNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getTopLeftNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getTopLeftNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getTopRightNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getTopRightNeighborPosition(randomRoom));
+                }
+
+                return openNeighboringPositions;
+            }
+            else if (randomRoom.size == TwoxOne)
+            {
+                if (!takenPos.Contains(getBottomNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getBottomNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getLeftBottomNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getLeftBottomNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getLeftTopNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getLeftTopNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getRightBottomNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getRightBottomNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getRightTopNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getRightTopNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getTopNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getTopNeighborPosition(randomRoom));
+                }
+
+                return openNeighboringPositions;
+            }
+            else if (randomRoom.size == TwoxTwo)
+            {
+                if (!takenPos.Contains(getBottomLeftNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getBottomLeftNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getBottomRightNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getBottomRightNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getLeftBottomNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getLeftBottomNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getLeftTopNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getLeftTopNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getRightBottomNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getRightBottomNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getRightTopNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getRightTopNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getTopLeftNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getTopLeftNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getTopRightNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getTopRightNeighborPosition(randomRoom));
+                }
+
+                return openNeighboringPositions;
             }
             else
             {
-                validRandomPos = true;
+                if (!takenPos.Contains(getBottomLeftNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getBottomLeftNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getBottomNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getBottomNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getBottomRightNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getBottomRightNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getLeftBottomNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getLeftBottomNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getLeftNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getLeftNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getLeftTopNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getLeftTopNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getRightBottomNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getRightBottomNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getRightNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getRightNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getRightTopNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getRightTopNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getTopLeftNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getTopLeftNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getTopNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getTopNeighborPosition(randomRoom));
+                }
+                if (!takenPos.Contains(getTopRightNeighborPosition(randomRoom)))
+                {
+                    openNeighboringPositions.Add(getTopRightNeighborPosition(randomRoom));
+                }
+
+                return openNeighboringPositions;
             }
         }
-        while (!validRandomPos && iterationsMain < (2 * numOfRooms));
-
-        //If a branch position was unable to be found
-        if (iterationsMain >= (2 * numOfRooms))
+        else if (newRoomSize == OnexTwo)
         {
-            return errorVector;
+            offsets.Add(new Vector2(-0.5f, 0f));
+            offsets.Add(new Vector2(0.5f, 0f));
+
+            if (randomRoom.size == OnexOne)
+            {
+                Vector2 bottomPosition = getBottomNeighborPosition(randomRoom) + new Vector2(-0.5f, 0f);
+                Vector2 leftPosition = getLeftNeighborPosition(randomRoom) + new Vector2(-0.5f, 0f);
+                Vector2 rightPosition = getRightNeighborPosition(randomRoom) + new Vector2(0.5f, 0f);
+                Vector2 topPosition = getTopNeighborPosition(randomRoom) + new Vector2(-0.5f, 0f);
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                return openNeighboringPositions;
+            }
+            else if (randomRoom.size == OnexTwo)
+            {
+                Vector2 bottomPosition = getBottomLeftNeighborPosition(randomRoom) + new Vector2(-0.5f, 0f);
+                Vector2 leftPosition = getLeftNeighborPosition(randomRoom) + new Vector2(-0.5f, 0f);
+                Vector2 rightPosition = getRightNeighborPosition(randomRoom) + new Vector2(0.5f, 0f);
+                Vector2 topPosition = getTopLeftNeighborPosition(randomRoom) + new Vector2(-0.5f, 0f);
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(bottomPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(topPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(topPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                return openNeighboringPositions;
+            }
+            else if (randomRoom.size == TwoxOne)
+            {
+                Vector2 bottomPosition = getBottomNeighborPosition(randomRoom) + new Vector2(-0.5f, 0f);
+                Vector2 leftPosition = getLeftBottomNeighborPosition(randomRoom) + new Vector2(-0.5f, 0f);
+                Vector2 rightPosition = getRightBottomNeighborPosition(randomRoom) + new Vector2(0.5f, 0f);
+                Vector2 topPosition = getTopNeighborPosition(randomRoom) + new Vector2(-0.5f, 0f);
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                return openNeighboringPositions;
+            }
+            else if (randomRoom.size == TwoxTwo)
+            {
+                Vector2 bottomPosition = getBottomLeftNeighborPosition(randomRoom) + new Vector2(-0.5f, 0f);
+                Vector2 leftPosition = getLeftBottomNeighborPosition(randomRoom) + new Vector2(-0.5f, 0f);
+                Vector2 rightPosition = getRightBottomNeighborPosition(randomRoom) + new Vector2(0.5f, 0f);
+                Vector2 topPosition = getTopLeftNeighborPosition(randomRoom) + new Vector2(-0.5f, 0f);
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(bottomPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(topPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(topPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                return openNeighboringPositions;
+            }
+            else
+            {
+                Vector2 bottomPosition = getBottomNeighborPosition(randomRoom) + new Vector2(-0.5f, 0f);
+                Vector2 leftPosition = getLeftNeighborPosition(randomRoom) + new Vector2(-0.5f, 0f);
+                Vector2 rightPosition = getRightNeighborPosition(randomRoom) + new Vector2(0.5f, 0f);
+                Vector2 topPosition = getTopNeighborPosition(randomRoom) + new Vector2(-0.5f, 0f);
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(bottomPosition + offsets[i] + Vector2.left);
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(bottomPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.left);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(leftPosition + offsets[i] + Vector2.down);
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.down);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(rightPosition + offsets[i] + Vector2.down);
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.down);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(topPosition + offsets[i] + Vector2.left);
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(topPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.left);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(topPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                return openNeighboringPositions;
+            }
         }
+        else if (newRoomSize == TwoxOne)
+        {
+            offsets.Add(new Vector2(0f, -0.5f));
+            offsets.Add(new Vector2(0f, 0.5f));
+
+            if (randomRoom.size == OnexOne)
+            {
+                Vector2 bottomPosition = getBottomNeighborPosition(randomRoom) + new Vector2(0f, -0.5f);
+                Vector2 leftPosition = getLeftNeighborPosition(randomRoom) + new Vector2(0f, -0.5f);
+                Vector2 rightPosition = getRightNeighborPosition(randomRoom) + new Vector2(0f, -0.5f);
+                Vector2 topPosition = getTopNeighborPosition(randomRoom) + new Vector2(0f, 0.5f);
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+
+                return openNeighboringPositions;
+            }
+            else if (randomRoom.size == OnexTwo)
+            {
+                Vector2 bottomPosition = getBottomLeftNeighborPosition(randomRoom) + new Vector2(0f, -0.5f);
+                Vector2 leftPosition = getLeftNeighborPosition(randomRoom) + new Vector2(0f, -0.5f);
+                Vector2 rightPosition = getRightNeighborPosition(randomRoom) + new Vector2(0f, -0.5f);
+                Vector2 topPosition = getTopLeftNeighborPosition(randomRoom) + new Vector2(0f, 0.5f);
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                return openNeighboringPositions;
+            }
+            else if (randomRoom.size == TwoxOne)
+            {
+                Vector2 bottomPosition = getBottomNeighborPosition(randomRoom) + new Vector2(0f, -0.5f);
+                Vector2 leftPosition = getLeftBottomNeighborPosition(randomRoom) + new Vector2(0f, -0.5f);
+                Vector2 rightPosition = getRightBottomNeighborPosition(randomRoom) + new Vector2(0f, -0.5f);
+                Vector2 topPosition = getTopNeighborPosition(randomRoom) + new Vector2(0f, 0.5f);
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(leftPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(leftPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(rightPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(rightPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+
+                return openNeighboringPositions;
+            }
+            else if (randomRoom.size == TwoxTwo)
+            {
+                Vector2 bottomPosition = getBottomLeftNeighborPosition(randomRoom) + new Vector2(0f, -0.5f);
+                Vector2 leftPosition = getLeftBottomNeighborPosition(randomRoom) + new Vector2(0f, -0.5f);
+                Vector2 rightPosition = getRightBottomNeighborPosition(randomRoom) + new Vector2(0f, -0.5f);
+                Vector2 topPosition = getTopLeftNeighborPosition(randomRoom) + new Vector2(0f, 0.5f);
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(leftPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(leftPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(rightPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(rightPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                return openNeighboringPositions;
+            }
+            else
+            {
+                Vector2 bottomPosition = getBottomNeighborPosition(randomRoom) + new Vector2(0f, -0.5f);
+                Vector2 leftPosition = getLeftNeighborPosition(randomRoom) + new Vector2(0f, -0.5f);
+                Vector2 rightPosition = getRightNeighborPosition(randomRoom) + new Vector2(0f, -0.5f);
+                Vector2 topPosition = getTopNeighborPosition(randomRoom) + new Vector2(0f, 0.5f);
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(bottomPosition + offsets[i] + Vector2.left);
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.left);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(leftPosition + offsets[i] + Vector2.down);
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(leftPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.down);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(leftPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(rightPosition + offsets[i] + Vector2.down);
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(rightPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.down);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(rightPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(topPosition + offsets[i] + Vector2.left);
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.left);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                return openNeighboringPositions;
+            }
+        }
+        else if (newRoomSize == TwoxTwo)
+        {
+            offsets.Add(new Vector2(-0.5f, -0.5f));
+            offsets.Add(new Vector2(0.5f, -0.5f));
+            offsets.Add(new Vector2(-0.5f, 0.5f));
+            offsets.Add(new Vector2(0.5f, 0.5f));
+
+            if (randomRoom.size == OnexOne)
+            {
+                Vector2 bottomPosition = getBottomNeighborPosition(randomRoom) + new Vector2(-0.5f, -0.5f);
+                Vector2 leftPosition = getLeftNeighborPosition(randomRoom) + new Vector2(-0.5f, -0.5f);
+                Vector2 rightPosition = getRightNeighborPosition(randomRoom) + new Vector2(0.5f, -0.5f);
+                Vector2 topPosition = getTopNeighborPosition(randomRoom) + new Vector2(-0.5f, 0.5f);
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                return openNeighboringPositions;
+            }
+            else if (randomRoom.size == OnexTwo)
+            {
+                Vector2 bottomPosition = getBottomLeftNeighborPosition(randomRoom) + new Vector2(-0.5f, -0.5f); 
+                Vector2 leftPosition = getLeftNeighborPosition(randomRoom) + new Vector2(-0.5f, -0.5f);
+                Vector2 rightPosition = getRightNeighborPosition(randomRoom) + new Vector2(0.5f, -0.5f);
+                Vector2 topPosition = getTopLeftNeighborPosition(randomRoom) + new Vector2(-0.5f, 0.5f);
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(bottomPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(topPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(topPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                return openNeighboringPositions;
+            }
+            else if (randomRoom.size == TwoxOne)
+            {
+                Vector2 bottomPosition = getBottomNeighborPosition(randomRoom) + new Vector2(-0.5f, -0.5f); 
+                Vector2 leftPosition = getLeftBottomNeighborPosition(randomRoom) + new Vector2(-0.5f, -0.5f);
+                Vector2 rightPosition = getRightBottomNeighborPosition(randomRoom) + new Vector2(0.5f, -0.5f);
+                Vector2 topPosition = getTopNeighborPosition(randomRoom) + new Vector2(-0.5f, 0.5f);
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(leftPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(leftPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(rightPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(rightPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                return openNeighboringPositions;
+            }
+            else if (randomRoom.size == TwoxTwo)
+            {
+                Vector2 bottomPosition = getBottomLeftNeighborPosition(randomRoom) + new Vector2(-0.5f, -0.5f);
+                Vector2 leftPosition = getLeftBottomNeighborPosition(randomRoom) + new Vector2(-0.5f, -0.5f);
+                Vector2 rightPosition = getRightBottomNeighborPosition(randomRoom) + new Vector2(0.5f, -0.5f);
+                Vector2 topPosition = getTopLeftNeighborPosition(randomRoom) + new Vector2(-0.5f, 0.5f);
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(bottomPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(leftPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(leftPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(rightPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(rightPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(topPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(topPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                return openNeighboringPositions;
+            }
+            else
+            {
+                Vector2 bottomPosition = getBottomNeighborPosition(randomRoom) + new Vector2(-0.5f, -0.5f);
+                Vector2 leftPosition = getLeftNeighborPosition(randomRoom) + new Vector2(-0.5f, -0.5f);
+                Vector2 rightPosition = getRightNeighborPosition(randomRoom) + new Vector2(0.5f, -0.5f);
+                Vector2 topPosition = getTopNeighborPosition(randomRoom) + new Vector2(-0.5f, 0.5f);
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(bottomPosition + offsets[i] + Vector2.left);
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(bottomPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.left);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(leftPosition + offsets[i] + Vector2.down);
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(leftPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.down);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(leftPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(rightPosition + offsets[i] + Vector2.down);
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(rightPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.down);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(rightPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(topPosition + offsets[i] + Vector2.left);
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(topPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.left);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(topPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                return openNeighboringPositions;
+            }
+        }
+        else
+        {
+            offsets.Add(new Vector2(-1f, -1f));
+            offsets.Add(new Vector2(0f, -1f));
+            offsets.Add(new Vector2(1f, -1f));
+            offsets.Add(new Vector2(-1f, 0f));
+            offsets.Add(new Vector2(0f, 0f));
+            offsets.Add(new Vector2(1f, 0f));
+            offsets.Add(new Vector2(-1f, 1f));
+            offsets.Add(new Vector2(0f, 1f));
+            offsets.Add(new Vector2(1f, 1f));
+
+            if (randomRoom.size == OnexOne)
+            {
+                Vector2 bottomPosition = getBottomNeighborPosition(randomRoom) + Vector2.down;
+                Vector2 leftPosition = getLeftNeighborPosition(randomRoom) + Vector2.left;
+                Vector2 rightPosition = getRightNeighborPosition(randomRoom) + Vector2.right;
+                Vector2 topPosition = getTopNeighborPosition(randomRoom) + Vector2.up;
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(bottomPosition + offsets[i] + Vector2.left);
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.left);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(leftPosition + offsets[i] + Vector2.down);
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.down);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(rightPosition + offsets[i] + Vector2.down);
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.down);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(topPosition + offsets[i] + Vector2.left);
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.left);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                return openNeighboringPositions;
+            }
+            else if (randomRoom.size == OnexTwo)
+            {
+                Vector2 bottomPosition = getBottomLeftNeighborPosition(randomRoom) + Vector2.down;
+                Vector2 leftPosition = getLeftNeighborPosition(randomRoom) + Vector2.left;
+                Vector2 rightPosition = getRightNeighborPosition(randomRoom) + Vector2.right;
+                Vector2 topPosition = getTopLeftNeighborPosition(randomRoom) + Vector2.up;
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(bottomPosition + offsets[i] + Vector2.left);
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(bottomPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.left);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(leftPosition + offsets[i] + Vector2.down);
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.down);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(rightPosition + offsets[i] + Vector2.down);
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.down);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(topPosition + offsets[i] + Vector2.left);
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(topPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.left);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(topPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                return openNeighboringPositions;
+            }
+            else if (randomRoom.size == TwoxOne)
+            {
+                Vector2 bottomPosition = getBottomNeighborPosition(randomRoom) + Vector2.down;
+                Vector2 leftPosition = getLeftBottomNeighborPosition(randomRoom) + Vector2.left;
+                Vector2 rightPosition = getRightBottomNeighborPosition(randomRoom) + Vector2.right;
+                Vector2 topPosition = getTopNeighborPosition(randomRoom) + Vector2.up;
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(bottomPosition + offsets[i] + Vector2.left);
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.left);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(leftPosition + offsets[i] + Vector2.down);
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(leftPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.down);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(leftPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(rightPosition + offsets[i] + Vector2.down);
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(rightPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.down);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(rightPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(topPosition + offsets[i] + Vector2.left);
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.left);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+
+                return openNeighboringPositions;
+            }
+            else if (randomRoom.size == TwoxTwo)
+            {
+                Vector2 bottomPosition = getBottomLeftNeighborPosition(randomRoom) + Vector2.down;
+                Vector2 leftPosition = getLeftBottomNeighborPosition(randomRoom) + Vector2.left;
+                Vector2 rightPosition = getRightBottomNeighborPosition(randomRoom) + Vector2.right;
+                Vector2 topPosition = getTopLeftNeighborPosition(randomRoom) + Vector2.up;
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(bottomPosition + offsets[i] + Vector2.left);
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(bottomPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.left);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(leftPosition + offsets[i] + Vector2.down);
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(leftPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.down);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(leftPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(rightPosition + offsets[i] + Vector2.down);
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(rightPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.down);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(rightPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsM.Add(topPosition + offsets[i] + Vector2.left);
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(topPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.left);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(topPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                return openNeighboringPositions;
+            }
+            else
+            {
+                Vector2 bottomPosition = getBottomNeighborPosition(randomRoom) + Vector2.down;
+                Vector2 leftPosition = getLeftNeighborPosition(randomRoom) + Vector2.left;
+                Vector2 rightPosition = getRightNeighborPosition(randomRoom) + Vector2.right;
+                Vector2 topPosition = getTopNeighborPosition(randomRoom) + Vector2.up;
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsMM.Add(bottomPosition + offsets[i] + (2 * Vector2.left));
+                    tempNewRoomLocationsM.Add(bottomPosition + offsets[i] + Vector2.left);
+                    tempNewRoomLocationsZ.Add(bottomPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(bottomPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(bottomPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsMM))
+                {
+                    openNeighboringPositions.Add(bottomPosition + (2 * Vector2.left));
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(bottomPosition +  Vector2.left);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(bottomPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(bottomPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsMM.Clear();
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsMM.Add(leftPosition + offsets[i] + (2 * Vector2.down));
+                    tempNewRoomLocationsM.Add(leftPosition + offsets[i] + Vector2.down);
+                    tempNewRoomLocationsZ.Add(leftPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(leftPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(leftPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsMM))
+                {
+                    openNeighboringPositions.Add(leftPosition + (2 * Vector2.down));
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.down);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(leftPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(leftPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(leftPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsMM.Clear();
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsMM.Add(rightPosition + offsets[i] + (2 * Vector2.down));
+                    tempNewRoomLocationsM.Add(rightPosition + offsets[i] + Vector2.down);
+                    tempNewRoomLocationsZ.Add(rightPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(rightPosition + offsets[i] + Vector2.up);
+                    tempNewRoomLocationsPP.Add(rightPosition + offsets[i] + (2 * Vector2.up));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsMM))
+                {
+                    openNeighboringPositions.Add(rightPosition + (2 * Vector2.down));
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.down);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(rightPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(rightPosition + Vector2.up);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(rightPosition + (2 * Vector2.up));
+                }
+
+                tempNewRoomLocationsMM.Clear();
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                for (int i = 0; i < offsets.Count; i++)
+                {
+                    tempNewRoomLocationsMM.Add(topPosition + offsets[i] + (2 * Vector2.left));
+                    tempNewRoomLocationsM.Add(topPosition + offsets[i] + Vector2.left);
+                    tempNewRoomLocationsZ.Add(topPosition + offsets[i]);
+                    tempNewRoomLocationsP.Add(topPosition + offsets[i] + Vector2.right);
+                    tempNewRoomLocationsPP.Add(topPosition + offsets[i] + (2 * Vector2.right));
+                }
+
+                if (!takenPosContainsAny(tempNewRoomLocationsMM))
+                {
+                    openNeighboringPositions.Add(topPosition + (2 * Vector2.left));
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsM))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.left);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsZ))
+                {
+                    openNeighboringPositions.Add(topPosition);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsP))
+                {
+                    openNeighboringPositions.Add(topPosition + Vector2.right);
+                }
+                if (!takenPosContainsAny(tempNewRoomLocationsPP))
+                {
+                    openNeighboringPositions.Add(topPosition + (2 * Vector2.right));
+                }
+
+                tempNewRoomLocationsMM.Clear();
+                tempNewRoomLocationsM.Clear();
+                tempNewRoomLocationsZ.Clear();
+                tempNewRoomLocationsP.Clear();
+                tempNewRoomLocationsPP.Clear();
+
+                return openNeighboringPositions;
+            }
+        }
+    }
+
+    private bool takenPosContainsAny(List<Vector2> vectors)
+    {
+        for (int i = 0; i < vectors.Count; i++)
+        {
+            if (takenPos.Contains(vectors[i]))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //Gets a random position that's adjacent to only one random room (branching)
+    private Vector2 getRandomBranchPosition(Vector2 newRoomSize)
+    {
+        if (openRooms.Count == 0)
+        {
+            throw new System.Exception("There are no open rooms!");
+        }
+        Vector2 randomPos = errorVector;
+        bool validRandomPos = true;
+        int index;
+        int newRoomIndex;
+        int iterations = 0;
+
+        do
+        {
+            //Pick a random room that's already in the grid that doesn't have four neighbors
+            index = Mathf.Clamp(Mathf.RoundToInt(Random.value * (singleNeighborRooms.Count)), 0, singleNeighborRooms.Count - 1);
+            index = Mathf.Clamp(index, 0, singleNeighborRooms.Count);
+
+            Room randomRoom = singleNeighborRooms[index];
+            int x = (int)singleNeighborRooms[index].topLeftInnerLocation.x;
+            int y = (int)singleNeighborRooms[index].topLeftInnerLocation.y;
+            List<Vector2> openNeighboringPositions = getOpenNeighboringPositions(newRoomSize, randomRoom);
+            List<Vector2> singleOpenNeighboringPositions = getSingleOpenNeighboringPositions(openNeighboringPositions, newRoomSize);
+
+            if (singleOpenNeighboringPositions.Count == 0)
+            {
+                if (iterations < 100)
+                {
+                    validRandomPos = false;
+                    iterations++;
+                }
+                else
+                {
+                    return errorVector;
+                }
+            }
+            else
+            {
+                newRoomIndex = Mathf.Clamp(Mathf.RoundToInt(Random.value * (singleOpenNeighboringPositions.Count)), 0, singleOpenNeighboringPositions.Count - 1);
+                newRoomIndex = Mathf.Clamp(newRoomIndex, 0, singleOpenNeighboringPositions.Count);
+
+                randomPos = singleOpenNeighboringPositions[newRoomIndex];
+                Room newRoom = new Room(randomPos, 0);
+
+                //If this new location does not meet location requirements
+                if (takenPosContainsAny(newRoom.locations)
+                    || x >= areaSizeX
+                    || x < 0
+                    || y >= areaSizeY
+                    || y < 0)
+                {
+                    iterations++;
+                    validRandomPos = false;
+                }
+                else
+                {
+                    validRandomPos = true;
+                }
+            }
+        }
+        while (!validRandomPos);
 
         return randomPos;
+    }
+
+    private List<Vector2> getSingleOpenNeighboringPositions(List<Vector2> openNeighboringPositions, Vector2 newRoomSize)
+    {
+        List<Vector2> tempSingleOpenNeighboringPositions = new List<Vector2>();
+        if (newRoomSize == OnexOne)
+        {
+            for (int i = 0; i < openNeighboringPositions.Count; i++)
+            {
+                Room temp = new Room(openNeighboringPositions[i], newRoomSize);
+                int neighbors = getNumUniqueNeighbors(temp);
+                if (neighbors <= 1)
+                {
+                    tempSingleOpenNeighboringPositions.Add(openNeighboringPositions[i]);
+                }
+            }
+
+            return tempSingleOpenNeighboringPositions;
+        }
+        else if (newRoomSize == OnexTwo)
+        {
+            for (int i = 0; i < openNeighboringPositions.Count; i++)
+            {
+                Room temp = new Room(openNeighboringPositions[i], newRoomSize);
+                int neighbors = getNumUniqueNeighbors(temp);
+                if (neighbors <= 1)
+                {
+                    tempSingleOpenNeighboringPositions.Add(openNeighboringPositions[i]);
+                }
+            }
+            return tempSingleOpenNeighboringPositions;
+        }
+        else if (newRoomSize == TwoxOne)
+        {
+            for (int i = 0; i < openNeighboringPositions.Count; i++)
+            {
+                Room temp = new Room(openNeighboringPositions[i], newRoomSize);
+                int neighbors = getNumUniqueNeighbors(temp);
+                if (neighbors <= 1)
+                {
+                    tempSingleOpenNeighboringPositions.Add(openNeighboringPositions[i]);
+                }
+            }
+            return tempSingleOpenNeighboringPositions;
+        }
+        else if (newRoomSize == TwoxTwo)
+        {
+            for (int i = 0; i < openNeighboringPositions.Count; i++)
+            {
+                Room temp = new Room(openNeighboringPositions[i], newRoomSize);
+                int neighbors = getNumUniqueNeighbors(temp);
+                if (neighbors <= 1)
+                {
+                    tempSingleOpenNeighboringPositions.Add(openNeighboringPositions[i]);
+                }
+            }
+            return tempSingleOpenNeighboringPositions;
+        }
+        else
+        {
+            for (int i = 0; i < openNeighboringPositions.Count; i++)
+            {
+                Room temp = new Room(openNeighboringPositions[i], newRoomSize);
+                int neighbors = getNumUniqueNeighbors(temp);
+                if (neighbors <= 1)
+                {
+                    tempSingleOpenNeighboringPositions.Add(openNeighboringPositions[i]);
+                }
+            }
+            return tempSingleOpenNeighboringPositions;
+        }
     }
 
     private void setRoomDoors(Room room)
@@ -2173,11 +4492,6 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorBottomRight(doorBottomRight);
             }
 
-
-
-
-
-
             if (!doorLeftBottom && !doorLeft && !doorLeftTop
                 && room.getRoomLeftBottom() == room.getRoomLeft()
                 && room.getRoomLeft() == room.getRoomLeftTop())
@@ -2306,11 +4620,6 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorLeft(doorLeft);
                 room.setDoorLeftTop(doorLeftTop);
             }
-
-
-
-
-
 
             if (!doorRightBottom && !doorRight && !doorRightTop
                 && room.getRoomRightBottom() == room.getRoomRight()
@@ -2441,12 +4750,6 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorRightTop(doorRightTop);
             }
 
-
-
-
-
-
-
             if (!doorTopLeft && !doorTop && !doorTopRight
                 && room.getRoomTopLeft() == room.getRoomTop()
                 && room.getRoomTop() == room.getRoomTopRight())
@@ -2576,6 +4879,369 @@ public class RoomGeneration : MonoBehaviour
                 room.setDoorTopRight(doorTopRight);
             }
         }
+    }
+
+    private int getNumUniqueNeighbors(Room room)
+    {
+        int numRooms = 0;
+
+        if (room.size == OnexOne)
+        {
+            if (hasBottomNeighbor(room))
+            {
+                numRooms++;
+            }
+            if (hasLeftNeighbor(room))
+            {
+                numRooms++;
+            }
+            if (hasRightNeighbor(room))
+            {
+                numRooms++;
+            }
+            if (hasTopNeighbor(room))
+            {
+                numRooms++;
+            }
+        }
+        else if (room.size == OnexTwo)
+        {
+            bool doorBottomLeft = !hasBottomLeftNeighbor(room);
+            bool doorBottomRight = !hasBottomRightNeighbor(room);
+            bool doorTopLeft = !hasTopLeftNeighbor(room);
+            bool doorTopRight = !hasTopRightNeighbor(room);
+
+            if (!doorBottomLeft && !doorBottomRight && room.getRoomBottomLeft() == room.getRoomBottomRight())
+            {
+                numRooms++;
+            }
+            else
+            {
+                if (hasBottomLeftNeighbor(room))
+                {
+                    numRooms++;
+                }
+                if (hasBottomRightNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+
+            if (!doorTopLeft && !doorTopRight && room.getRoomTopLeft() == room.getRoomTopRight())
+            {
+                numOfRooms++;
+            }
+            else
+            {
+                if (hasTopLeftNeighbor(room))
+                {
+                    numRooms++;
+                }
+                if (hasTopRightNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+
+            if (hasLeftNeighbor(room))
+            {
+                numRooms++;
+            }
+            if (hasRightNeighbor(room))
+            {
+                numRooms++;
+            }
+        }
+        else if (room.size == TwoxOne)
+        {
+            bool doorLeftBottom = !hasLeftBottomNeighbor(room);
+            bool doorLeftTop = !hasLeftTopNeighbor(room);
+            bool doorRightBottom = !hasRightBottomNeighbor(room);
+            bool doorRightTop = !hasRightTopNeighbor(room);
+
+            if (!doorLeftBottom && !doorLeftTop && room.getRoomLeftBottom() == room.getRoomLeftTop())
+            {
+                numRooms++;
+            }
+            else
+            {
+                if (hasLeftBottomNeighbor(room))
+                {
+                    numRooms++;
+                }
+                if (hasLeftTopNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+            if (!doorRightBottom && !doorRightTop && room.getRoomRightBottom() == room.getRoomRightTop())
+            {
+                numRooms++;
+            }
+            else
+            {
+                if (hasRightBottomNeighbor(room))
+                {
+                    numRooms++;
+                }
+                if (hasRightTopNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+
+            if (hasBottomNeighbor(room))
+            {
+                numRooms++;
+            }
+            if (hasTopNeighbor(room))
+            {
+                numRooms++;
+            }
+        }
+        else if (room.size == TwoxTwo)
+        {
+            bool doorBottomLeft = !hasBottomLeftNeighbor(room);
+            bool doorBottomRight = !hasBottomRightNeighbor(room);
+            bool doorLeftBottom = !hasLeftBottomNeighbor(room);
+            bool doorLeftTop = !hasLeftTopNeighbor(room);
+            bool doorRightBottom = !hasRightBottomNeighbor(room);
+            bool doorRightTop = !hasRightTopNeighbor(room);
+            bool doorTopLeft = !hasTopLeftNeighbor(room);
+            bool doorTopRight = !hasTopRightNeighbor(room);
+
+            if (!doorBottomLeft && !doorBottomRight && room.getRoomBottomLeft() == room.getRoomBottomRight())
+            {
+                numRooms++;
+            }
+            else
+            {
+                if (hasBottomLeftNeighbor(room))
+                {
+                    numRooms++;
+                }
+                if (hasBottomRightNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+
+            if (!doorLeftBottom && !doorLeftTop && room.getRoomLeftBottom() == room.getRoomLeftTop())
+            {
+                numRooms++;
+            }
+            else
+            {
+                if (hasLeftBottomNeighbor(room))
+                {
+                    numRooms++;
+                }
+                if (hasLeftTopNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+            if (!doorRightBottom && !doorRightTop && room.getRoomRightBottom() == room.getRoomRightTop())
+            {
+                numRooms++;
+            }
+            else
+            {
+                if (hasRightBottomNeighbor(room))
+                {
+                    numRooms++;
+                }
+                if (hasRightTopNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+
+            if (!doorTopLeft && !doorTopRight && room.getRoomTopLeft() == room.getRoomTopRight())
+            {
+                numOfRooms++;
+            }
+            else
+            {
+                if (hasTopLeftNeighbor(room))
+                {
+                    numRooms++;
+                }
+                if (hasTopRightNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+        }
+        else
+        {
+            bool doorBottomLeft = !hasBottomLeftNeighbor(room);
+            bool doorBottom = !hasBottomNeighbor(room);
+            bool doorBottomRight = !hasBottomRightNeighbor(room);
+            bool doorLeftBottom = !hasLeftBottomNeighbor(room);
+            bool doorLeft = !hasLeftNeighbor(room);
+            bool doorLeftTop = !hasLeftTopNeighbor(room);
+            bool doorRightBottom = !hasRightBottomNeighbor(room);
+            bool doorRight = !hasRightNeighbor(room);
+            bool doorRightTop = !hasRightTopNeighbor(room);
+            bool doorTopLeft = !hasTopLeftNeighbor(room);
+            bool doorTop = !hasTopNeighbor(room);
+            bool doorTopRight = !hasTopRightNeighbor(room);
+
+            if (!doorBottomLeft && !doorBottom && !doorBottomRight
+                    && room.getRoomBottomLeft() == room.getRoomBottom()
+                    && room.getRoomBottom() == room.getRoomBottomRight())
+            {
+                numRooms++;
+            }
+            else if (!doorBottomLeft && !doorBottom && room.getRoomBottomLeft() == room.getRoomBottom())
+            {
+                numRooms++;
+                if (hasBottomRightNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+            else if (!doorBottom && !doorBottomRight && room.getRoomBottom() == room.getRoomBottomRight())
+            {
+                numRooms++;
+                if (hasBottomLeftNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+            else
+            {
+                if (hasBottomLeftNeighbor(room))
+                {
+                    numRooms++;
+                }
+                if (hasBottomNeighbor(room))
+                {
+                    numRooms++;
+                }
+                if (hasBottomRightNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+
+            if (!doorLeftBottom && !doorLeft && !doorLeftTop
+            && room.getRoomLeftBottom() == room.getRoomLeft()
+            && room.getRoomLeft() == room.getRoomLeftTop())
+            {
+                numRooms++;
+            }
+            else if (!doorLeftBottom && !doorLeft && room.getRoomLeftBottom() == room.getRoomLeft())
+            {
+                numRooms++;
+                if (hasLeftTopNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+            else if (!doorLeft && !doorLeftTop && room.getRoomLeft() == room.getRoomLeftTop())
+            {
+                numRooms++;
+                if (hasLeftBottomNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+            else
+            {
+                if (hasLeftBottomNeighbor(room))
+                {
+                    numRooms++;
+                }
+                if (hasLeftNeighbor(room))
+                {
+                    numRooms++;
+                }
+                if (hasLeftTopNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+
+            if (!doorRightBottom && !doorRight && !doorRightTop
+            && room.getRoomRightBottom() == room.getRoomRight()
+            && room.getRoomRight() == room.getRoomRightTop())
+            {
+                numRooms++;
+            }
+            else if (!doorRightBottom && !doorRight && room.getRoomRightBottom() == room.getRoomRight())
+            {
+                numRooms++;
+                if (hasRightTopNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+            else if (!doorRight && !doorRightTop && room.getRoomRight() == room.getRoomRightTop())
+            {
+                numRooms++;
+                if (hasRightBottomNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+            else
+            {
+                if (hasRightBottomNeighbor(room))
+                {
+                    numRooms++;
+                }
+                if (hasRightNeighbor(room))
+                {
+                    numRooms++;
+                }
+                if (hasRightTopNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+
+            if (!doorTopLeft && !doorTop && !doorTopRight
+                    && room.getRoomTopLeft() == room.getRoomTop()
+                    && room.getRoomTop() == room.getRoomTopRight())
+            {
+                numRooms++;
+            }
+            else if (!doorTopLeft && !doorTop && room.getRoomTopLeft() == room.getRoomTop())
+            {
+                numRooms++;
+                if (hasTopRightNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+            else if (!doorTop && !doorTopRight && room.getRoomTop() == room.getRoomTopRight())
+            {
+                numRooms++;
+                if (hasTopLeftNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+            else
+            {
+                if (hasTopLeftNeighbor(room))
+                {
+                    numRooms++;
+                }
+                if (hasTopNeighbor(room))
+                {
+                    numRooms++;
+                }
+                if (hasTopRightNeighbor(room))
+                {
+                    numRooms++;
+                }
+            }
+        }
+
+        return numRooms;
     }
 
     //Gets the number of neighboring rooms surrounding a given room
@@ -2744,6 +5410,176 @@ public class RoomGeneration : MonoBehaviour
         }
 
         return numRooms;
+    }
+
+    private Vector2 getBottomLeftNeighborPosition(Room room)
+    {
+        if (room.size != OnexTwo && room.size != TwoxTwo && room.size != ThreexThree)
+        {
+            throw new System.ArgumentException("Use getBottomNeighborPosition(Room) instead!");
+        }
+
+        if (room.size == OnexTwo)
+        {
+            return room.getLeft() + Vector2.down;
+        }
+
+        return room.getBottomLeft() + Vector2.down;
+    }
+
+    private Vector2 getBottomNeighborPosition(Room room)
+    {
+        if (room.size != OnexOne && room.size != TwoxOne && room.size != ThreexThree)
+        {
+            throw new System.ArgumentException("Use getBottomLeft/RightNeighborPosition(Room) instead!");
+        }
+
+        if (room.size == OnexOne)
+        {
+            return room.getMiddle() + Vector2.down;
+        }
+
+        return room.getBottom() + Vector2.down;
+    }
+
+    private Vector2 getBottomRightNeighborPosition(Room room)
+    {
+        if (room.size != OnexTwo && room.size != TwoxTwo && room.size != ThreexThree)
+        {
+            throw new System.ArgumentException("Use getBottomNeighborPosition(Room) instead!");
+        }
+
+        if (room.size == OnexTwo)
+        {
+            return room.getRight() + Vector2.down;
+        }
+
+        return room.getBottomRight() + Vector2.down;
+    }
+
+    private Vector2 getLeftBottomNeighborPosition(Room room)
+    {
+        if (room.size != TwoxOne && room.size != TwoxTwo && room.size != ThreexThree)
+        {
+            throw new System.ArgumentException("Use getLeftNeighborPosition(Room) instead!");
+        }
+
+        if (room.size == TwoxOne)
+        {
+            return room.getBottom() + Vector2.left;
+        }
+
+        return room.getBottomLeft() + Vector2.left;
+    }
+
+    private Vector2 getLeftNeighborPosition(Room room)
+    {
+        if (room.size != OnexOne && room.size != OnexTwo && room.size != ThreexThree)
+        {
+            throw new System.ArgumentException("Use getLeftBottom/TopNeighborPosition(Room) instead!");
+        }
+
+        if (room.size == OnexOne)
+        {
+            return room.getMiddle() + Vector2.left;
+        }
+
+        return room.getLeft() + Vector2.left;
+    }
+
+    private Vector2 getLeftTopNeighborPosition(Room room)
+    {
+        if (room.size != TwoxOne && room.size != TwoxTwo && room.size != ThreexThree)
+        {
+            throw new System.ArgumentException("Use getLeftNeighborPosition(Room) instead!");
+        }
+
+        return room.topLeftInnerLocation + Vector2.left;
+    }
+
+    private Vector2 getRightBottomNeighborPosition(Room room)
+    {
+        if (room.size != TwoxOne && room.size != TwoxTwo && room.size != ThreexThree)
+        {
+            throw new System.ArgumentException("Use getRightNeighborPosition(Room) instead!");
+        }
+
+        if (room.size == TwoxOne)
+        {
+            return room.getBottom() + Vector2.right;
+        }
+
+        return room.getBottomRight() + Vector2.right;
+    }
+
+    private Vector2 getRightNeighborPosition(Room room)
+    {
+        if (room.size != OnexOne && room.size != OnexTwo && room.size != ThreexThree)
+        {
+            throw new System.ArgumentException("Use getRightBottom/TopNeighborPosition(Room) instead!");
+        }
+
+        if (room.size == OnexOne)
+        {
+            return room.getMiddle() + Vector2.right;
+        }
+
+        return room.getRight() + Vector2.right;
+    }
+
+    private Vector2 getRightTopNeighborPosition(Room room)
+    {
+        if (room.size != TwoxOne && room.size != TwoxTwo && room.size != ThreexThree)
+        {
+            throw new System.ArgumentException("Use getRightNeighborPosition(Room) instead!");
+        }
+
+        if (room.size == TwoxOne)
+        {
+            return room.getTop() + Vector2.right;
+        }
+
+        return room.getTopRight() + Vector2.right;
+    }
+
+    private Vector2 getTopLeftNeighborPosition(Room room)
+    {
+        if (room.size != OnexTwo && room.size != TwoxTwo && room.size != ThreexThree)
+        {
+            throw new System.ArgumentException("Use getTopNeighborPosition(Room) instead!");
+        }
+
+        return room.topLeftInnerLocation + Vector2.up;
+    }
+
+    private Vector2 getTopNeighborPosition(Room room)
+    {
+        if (room.size != OnexOne && room.size != TwoxOne && room.size != ThreexThree)
+        {
+            throw new System.ArgumentException("Use getTopLeft/RightNeighborPosition(Room) instead!");
+        }
+
+        if (room.size == OnexOne)
+        {
+            return room.getMiddle() + Vector2.up;
+        }
+
+        return room.getTop() + Vector2.up;
+    }
+
+    private Vector2 getTopRightNeighborPosition(Room room)
+    {
+        if (room.size != OnexTwo && room.size != TwoxTwo && room.size != ThreexThree)
+        {
+            throw new System.ArgumentException("Use getTopNeighborPosition(Room) instead!");
+        }
+
+        if (room.size == OnexTwo)
+        {
+            return room.getRight() + Vector2.up;
+        }
+
+        return room.getTopRight() + Vector2.up;
     }
 
     private bool hasBottomLeftNeighbor(Room room)
@@ -2923,7 +5759,6 @@ public class RoomGeneration : MonoBehaviour
 
         for (int i = 0; i < rooms.Count; i++)
         {
-            //TODO: CHANGE
             float offsetX = rooms[i].center.x * gridSize;
             float offsetZ = rooms[i].center.y * gridSize;
             int doorCount = getNumNeighbors(rooms[i]);
@@ -3117,6 +5952,9 @@ public class RoomGeneration : MonoBehaviour
                     topRightDoor.transform.parent = rm.transform;
                     topRightDoor.transform.localPosition = new Vector3(12.5f, 1f, 24.5f);
                 }
+
+                rm.transform.parent = map;
+                FillNavBaker(rm);
             }
             else
             {
@@ -3200,6 +6038,9 @@ public class RoomGeneration : MonoBehaviour
                     topRightDoor.transform.parent = rm.transform;
                     topRightDoor.transform.localPosition = new Vector3(25f, 1f, 37f);
                 }
+
+                rm.transform.parent = map;
+                FillNavBaker(rm);
             }
         }
 

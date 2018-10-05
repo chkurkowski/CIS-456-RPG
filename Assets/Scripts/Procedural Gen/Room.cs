@@ -59,6 +59,7 @@ public class Room {
 
         locations = new List<Vector2>();
         setLocations();
+        setDoors();
     }
 
     public Room(Vector2 c, Vector2 s)
@@ -73,6 +74,7 @@ public class Room {
 
         locations = new List<Vector2>();
         setLocations();
+        setDoors();
     }
 
     public Room(Vector2 c, int t)
@@ -85,6 +87,7 @@ public class Room {
 
         locations = new List<Vector2>();
         setLocations();
+        setDoors();
     }
 
     public Room(Vector2 c)
@@ -97,6 +100,63 @@ public class Room {
 
         locations = new List<Vector2>();
         setLocations();
+        setDoors();
+    }
+
+    private void setDoors()
+    {
+        if (size == OnexOne)
+        {
+            doorBottom = true;
+            doorLeft = true;
+            doorRight = true;
+            doorTop = true;
+        }
+        else if (size == OnexTwo)
+        {
+            doorBottomLeft = true;
+            doorBottomRight = true;
+            doorLeft = true;
+            doorRight = true;
+            doorTopLeft = true;
+            doorTopRight = true;
+        }
+        else if (size == TwoxOne)
+        {
+
+            doorBottom = true;
+            doorLeftBottom = true;
+            doorLeftTop = true;
+            doorRightBottom = true;
+            doorRightTop = true;
+            doorTop = true;
+        }
+        else if (size == TwoxTwo)
+        {
+            doorBottomLeft = true;
+            doorBottomRight = true;
+            doorLeftBottom = true;
+            doorLeftTop = true;
+            doorRightBottom = true;
+            doorRightTop = true;
+            doorTopLeft = true;
+            doorTopRight = true;
+        }
+        else
+        {
+            doorBottomLeft = true;
+            doorBottom = true;
+            doorBottomRight = true;
+            doorLeftBottom = true;
+            doorLeft = true;
+            doorLeftTop = true;
+            doorRightBottom = true;
+            doorRight = true;
+            doorRightTop = true;
+            doorTopLeft = true;
+            doorTop = true;
+            doorTopRight = true;
+        }
     }
 
     private void checkValidSize(Vector2 s)
