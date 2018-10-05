@@ -4,8 +4,11 @@ using UnityEngine;
 
 public class Room {
 
-    //Where the room is located (top-left point)
-    public Vector2 location;
+    //Where the room is located (CENTER)
+    public Vector2 center;
+    //Top-leftmost location
+    public Vector2 topLeftInnerLocation;
+    //All 10x10 sections of the room (CENTER OF ROOMS)
     public List<Vector2> locations;
 
     //How big the room is
@@ -44,11 +47,11 @@ public class Room {
     private Vector2 ThreexThree = new Vector2(3f, 3f);
 
     //Constructor
-    public Room(Vector2 l, Vector2 s, int t)
+    public Room(Vector2 c, Vector2 s, int t)
     {
         checkValidSize(s);
 
-        location = l;
+        center = c;
         size = s;
         type = t;
 
@@ -56,13 +59,14 @@ public class Room {
 
         locations = new List<Vector2>();
         setLocations();
+        setDoors();
     }
 
-    public Room(Vector2 l, Vector2 s)
+    public Room(Vector2 c, Vector2 s)
     {
         checkValidSize(s);
 
-        location = l;
+        center = c;
         size = s;
         type = 0;
 
@@ -70,11 +74,12 @@ public class Room {
 
         locations = new List<Vector2>();
         setLocations();
+        setDoors();
     }
 
-    public Room(Vector2 l, int t)
+    public Room(Vector2 c, int t)
     {
-        location = l;
+        center = c;
         size = OnexOne;
         type = t;
 
@@ -82,11 +87,12 @@ public class Room {
 
         locations = new List<Vector2>();
         setLocations();
+        setDoors();
     }
 
-    public Room(Vector2 l)
+    public Room(Vector2 c)
     {
-        location = l;
+        center = c;
         size = OnexOne;
         type = 0;
 
@@ -94,6 +100,63 @@ public class Room {
 
         locations = new List<Vector2>();
         setLocations();
+        setDoors();
+    }
+
+    private void setDoors()
+    {
+        if (size == OnexOne)
+        {
+            doorBottom = true;
+            doorLeft = true;
+            doorRight = true;
+            doorTop = true;
+        }
+        else if (size == OnexTwo)
+        {
+            doorBottomLeft = true;
+            doorBottomRight = true;
+            doorLeft = true;
+            doorRight = true;
+            doorTopLeft = true;
+            doorTopRight = true;
+        }
+        else if (size == TwoxOne)
+        {
+
+            doorBottom = true;
+            doorLeftBottom = true;
+            doorLeftTop = true;
+            doorRightBottom = true;
+            doorRightTop = true;
+            doorTop = true;
+        }
+        else if (size == TwoxTwo)
+        {
+            doorBottomLeft = true;
+            doorBottomRight = true;
+            doorLeftBottom = true;
+            doorLeftTop = true;
+            doorRightBottom = true;
+            doorRightTop = true;
+            doorTopLeft = true;
+            doorTopRight = true;
+        }
+        else
+        {
+            doorBottomLeft = true;
+            doorBottom = true;
+            doorBottomRight = true;
+            doorLeftBottom = true;
+            doorLeft = true;
+            doorLeftTop = true;
+            doorRightBottom = true;
+            doorRight = true;
+            doorRightTop = true;
+            doorTopLeft = true;
+            doorTop = true;
+            doorTopRight = true;
+        }
     }
 
     private void checkValidSize(Vector2 s)
@@ -132,64 +195,93 @@ public class Room {
     {
         if (size == OnexOne)
         {
-            locations.Insert(0, location);
-            middle = location;
+            locations.Insert(0, center);
+            middle = center;
+
+            topLeftInnerLocation = center;
         }
         else if (size == OnexTwo)
         {
-            locations.Insert(0, location);
-            left = location;
-            locations.Insert(0, location + Vector2.right);
-            right = location + Vector2.right;
+            Vector2 newLeft = center + new Vector2(-0.5f, 0f);
+            Vector2 newRight = center + new Vector2(0.5f, 0f);
+            locations.Insert(0, newLeft);
+            left = newLeft;
+            locations.Insert(0, newRight);
+            right = newRight;
+
+            topLeftInnerLocation = left;
         }
         else if (size == TwoxOne)
         {
-            locations.Insert(0, location);
-            top = location;
-            locations.Insert(0, location + Vector2.down);
-            bottom = location + Vector2.down;
+            Vector2 newBottom = center + new Vector2(0f, -0.5f);
+            Vector2 newTop = center + new Vector2(0f, 0.5f);
+            locations.Insert(0, newBottom);
+            bottom = newBottom;
+            locations.Insert(0, newTop);
+            top = newTop;
+
+            topLeftInnerLocation = top;
         }
         else if (size == TwoxTwo)
         {
-            locations.Insert(0, location);
-            topLeft = location;
-            locations.Insert(0, location + Vector2.down);
-            bottomLeft = location + Vector2.down;
-            locations.Insert(0, location + Vector2.down + Vector2.right);
-            bottomRight = location + Vector2.down + Vector2.right;
-            locations.Insert(0, location + Vector2.right);
-            topRight = location + Vector2.right;
+            Vector2 newBottomLeft = center + new Vector2(-0.5f, -0.5f);
+            Vector2 newBottomRight = center + new Vector2(0.5f, -0.5f);
+            Vector2 newTopLeft = center + new Vector2(-0.5f, 0.5f);
+            Vector2 newTopRight = center + new Vector2(0.5f, 0.5f);
+
+            locations.Insert(0, newBottomLeft);
+            bottomLeft = newBottomLeft;
+            locations.Insert(0, newBottomRight);
+            bottomRight = newBottomRight;
+            locations.Insert(0, newTopLeft);
+            topLeft = newTopLeft;
+            locations.Insert(0, newTopRight);
+            topRight = newTopRight;
 
             leftTop = topLeft;
             leftBottom = bottomLeft;
             rightBottom = bottomRight;
             rightTop = topRight;
+
+            topLeftInnerLocation = topLeft;
         }
         else
         {
-            locations.Insert(0, location);
-            topLeft = location;
-            locations.Insert(0, location + Vector2.down);
-            left = location + Vector2.down;
-            locations.Insert(0, location + (2 * Vector2.down));
-            bottomLeft = location + (2 * Vector2.down);
-            locations.Insert(0, location + Vector2.right);
-            top = location + Vector2.right;
-            locations.Insert(0, location + Vector2.down + Vector2.right);
-            middle = location + Vector2.down + Vector2.right;
-            locations.Insert(0, location + (2 * Vector2.down) + Vector2.right);
-            bottom = location + (2 * Vector2.down) + Vector2.right;
-            locations.Insert(0, location + (2 * Vector2.right));
-            topRight = location + (2 * Vector2.right);
-            locations.Insert(0, location + Vector2.down + (2 * Vector2.right));
-            right = location + Vector2.down + (2 * Vector2.right);
-            locations.Insert(0, location + (2 * Vector2.down) + (2 * Vector2.right));
-            bottomRight = location + (2 * Vector2.down) + (2 * Vector2.right);
+            Vector2 newBottomLeft = center + new Vector2(-1f, -1f);
+            Vector2 newBottom = center + new Vector2(0f, -1f);
+            Vector2 newBottomRight = center + new Vector2(1f, -1f);
+            Vector2 newLeft = center + new Vector2(-1f, 0f);
+            Vector2 newMiddle = center;
+            Vector2 newRight = center + new Vector2(1f, 0f);
+            Vector2 newTopLeft = center + new Vector2(-1f, 1f);
+            Vector2 newTop = center + new Vector2(0f, 1f);
+            Vector2 newTopRight = center + new Vector2(1f, 1f);
+
+            locations.Insert(0, newBottomLeft);
+            bottomLeft = newBottomLeft;
+            locations.Insert(0, newBottom);
+            bottom = newBottom;
+            locations.Insert(0, newBottomRight);
+            bottomRight = newBottomRight;
+            locations.Insert(0, newLeft);
+            left = newLeft;
+            locations.Insert(0, newMiddle);
+            middle = newMiddle;
+            locations.Insert(0, newRight);
+            right = newRight;
+            locations.Insert(0, newTopLeft);
+            topLeft = newTopLeft;
+            locations.Insert(0, newTop);
+            top = newTop;
+            locations.Insert(0, newTopRight);
+            topRight = newTopRight;
 
             leftTop = topLeft;
             leftBottom = bottomLeft;
             rightBottom = bottomRight;
             rightTop = topRight;
+
+            topLeftInnerLocation = topLeft;
         }
     }
 
