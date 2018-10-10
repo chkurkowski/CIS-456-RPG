@@ -89,15 +89,16 @@ public class RoomGeneration : MonoBehaviour
             throw new System.ArgumentOutOfRangeException("The sum of you room probabilities is greater than 1!");
         }
 
-        float error = 0.05f;
+        float error = 0.50f;
+
         if (((OnexOneRoomProb + error) * numOfRooms * OnexOne.x * OnexOne.y)
             + ((OnexTwoRoomProb + error) * numOfRooms * OnexTwo.x * OnexTwo.y)
             + ((TwoxOneRoomProb + error) * numOfRooms * TwoxOne.x * TwoxOne.y)
             + ((TwoxTwoRoomProb + error) * numOfRooms * TwoxTwo.x * TwoxTwo.y)
             + ((ThreexThreeRoomProb + error) * numOfRooms * ThreexThree.x * ThreexThree.y)
-            >= areaSizeX * areaSizeY)
+            >= areaSizeX * areaSizeY * Mathf.Abs((startBranchProb + endBranchProb) / 2))
         {
-            throw new System.ArgumentOutOfRangeException("Your room probabilities are likely to exceed the area size!");
+            throw new System.ArgumentOutOfRangeException("Your room probabilities are likely to exceed the area size! Either increase area size or decrease the number of rooms.");
         }
 
         CreateRooms();
@@ -287,7 +288,7 @@ public class RoomGeneration : MonoBehaviour
         }
         else
         {
-            return OnexOne;
+            return getRoomSize();
         }
     }
 
@@ -3513,6 +3514,12 @@ public class RoomGeneration : MonoBehaviour
         {
             throw new System.Exception("There are no open rooms!");
         }
+
+        if (singleNeighborRooms.Count == 0)
+        {
+            return errorVector;
+        }
+
         Vector2 randomPos = errorVector;
         bool validRandomPos = true;
         int index;
@@ -4929,7 +4936,7 @@ public class RoomGeneration : MonoBehaviour
 
             if (!doorTopLeft && !doorTopRight && room.getRoomTopLeft() == room.getRoomTopRight())
             {
-                numOfRooms++;
+                numRooms++;
             }
             else
             {
@@ -5059,7 +5066,7 @@ public class RoomGeneration : MonoBehaviour
 
             if (!doorTopLeft && !doorTopRight && room.getRoomTopLeft() == room.getRoomTopRight())
             {
-                numOfRooms++;
+                numRooms++;
             }
             else
             {
