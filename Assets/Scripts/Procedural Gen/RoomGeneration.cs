@@ -5,8 +5,6 @@ using UnityEngine.AI;
 
 public class RoomGeneration : MonoBehaviour
 {
-    //*MOVE LOGIC FOR CHANGING REMOVING ROOM DOORS TO WHEN WE SPAWN IN THE ROOMS, AND MAKE SURE TO UPDATE ACTUAL VARIAABLES THERE AS WELL (both rooms!!!!!)
-
     public Transform map;
     public GameObject OnexOneRoom;
     public GameObject OnexTwoRoom;
@@ -1239,7 +1237,6 @@ public class RoomGeneration : MonoBehaviour
             index = Mathf.Clamp(Mathf.RoundToInt(Random.value * (openRooms.Count)), 0, openRooms.Count - 1);
             index = Mathf.Clamp(index, 0, openRooms.Count);
 
-            //TODO: CHANGE
             Room randomRoom = openRooms[index];
             int x = (int)openRooms[index].topLeftInnerLocation.x;
             int y = (int)openRooms[index].topLeftInnerLocation.y;
