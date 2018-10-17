@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Laser : MonoBehaviour {
 
+    /* 
+     * Raycast out from the player and then send the laser based on whats hit and the distance.
+     */
+
     [SerializeField] private GameObject atkOrigin;
 
     private GameObject target;

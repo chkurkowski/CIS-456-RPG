@@ -11,9 +11,9 @@ public class FollowPlayer : MonoBehaviour {
     //private float[] xBounds;
     //private float yBound;
     //private float[] zBounds;
-    private float xOffset = .5f;
-    private float yOffset = 3.6f;
-    private float zOffset = 2.8f;
+    private float xOffset = 2.9f;
+    private float yOffset = 4.6f;
+    private float zOffset = 3.25f;
 
     private void Awake()
     {
