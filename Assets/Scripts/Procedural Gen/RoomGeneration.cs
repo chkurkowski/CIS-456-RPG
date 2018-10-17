@@ -16,6 +16,7 @@ public class RoomGeneration : MonoBehaviour
     public GameObject tempEnemy;
     private NavigationBaker baker;
 
+
     public int areaSizeX = 50; //Size of the grid on the x axis
     public int areaSizeY = 50; //Size of the grid on the y axis
     [SerializeField] int numOfRooms = 50; //Number of rooms to add to the grid
@@ -32,6 +33,7 @@ public class RoomGeneration : MonoBehaviour
     [SerializeField] float TwoxTwoRoomProb = 0.1f;
     [SerializeField] float ThreexThreeRoomProb = 0.05f;
 
+
     //List of all rooms
     private List<Room> rooms = new List<Room>();
     //List of all rooms that have at least one open neighboring position
@@ -43,6 +45,7 @@ public class RoomGeneration : MonoBehaviour
 
     //List of all occupied locations in the area
     private List<Vector2> takenPos = new List<Vector2>();
+
 
     //Useful Vectors
     private Vector2 OnexOne = new Vector2(1f, 1f);
@@ -103,6 +106,7 @@ public class RoomGeneration : MonoBehaviour
         BuildPrimitives();
     }
 
+    //Used for testing
     private void CreateManualRooms()
     {
         Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), new Vector2(1f, 1f), 0);
@@ -255,6 +259,7 @@ public class RoomGeneration : MonoBehaviour
         }
     }
 
+    //Gets a random room size
     private Vector2 getRoomSize()
     {
         float OneOne = OnexOneRoomProb;
