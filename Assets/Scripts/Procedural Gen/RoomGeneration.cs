@@ -13,25 +13,24 @@ public class RoomGeneration : MonoBehaviour
     public GameObject ThreexThreeRoom;
     public GameObject RoomDoor;
     public GameObject character;
+    public GameObject tempEnemy;
     private NavigationBaker baker;
 
-    public GameObject tempEnemy;
+    public int areaSizeX = 50; //Size of the grid on the x axis
+    public int areaSizeY = 50; //Size of the grid on the y axis
+    [SerializeField] int numOfRooms = 50; //Number of rooms to add to the grid
 
-    public int areaSizeX = 5; //Size of the grid on the x axis
-    public int areaSizeY = 5; //Size of the grid on the y axis
-    [SerializeField] int numOfRooms = 20; //Number of rooms to add to the grid
-
-    [SerializeField] float startBranchProb = 1.0f; //Branch probability when the first rooms are being created
-    [SerializeField] float endBranchProb = 0.01f; //Branch probability when the last rooms are being created
+    [SerializeField] float startBranchProb = 0.33f; //Branch probability when the first rooms are being created
+    [SerializeField] float endBranchProb = 0.66f; //Branch probability when the last rooms are being created
     private float branchProb; //Actual branch probability that gets decreased/increased over the course of adding all of the rooms
     private float changeInProb; //The difference between startBranchProb and endBranchProb
     private bool decreasing; //Whether the branchProb is decreasing or increasing
 
-    [SerializeField] float OnexOneRoomProb = 0.75f;
-    [SerializeField] float OnexTwoRoomProb = 0.09f;
-    [SerializeField] float TwoxOneRoomProb = 0.09f;
-    [SerializeField] float TwoxTwoRoomProb = 0.06f;
-    [SerializeField] float ThreexThreeRoomProb = 0.01f;
+    [SerializeField] float OnexOneRoomProb = 0.55f;
+    [SerializeField] float OnexTwoRoomProb = 0.15f;
+    [SerializeField] float TwoxOneRoomProb = 0.15f;
+    [SerializeField] float TwoxTwoRoomProb = 0.1f;
+    [SerializeField] float ThreexThreeRoomProb = 0.05f;
 
     //List of all rooms
     private List<Room> rooms = new List<Room>();
