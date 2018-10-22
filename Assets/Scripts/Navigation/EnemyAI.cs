@@ -16,7 +16,7 @@ public class EnemyAI : MonoBehaviour
     }
     public State state;
     public Rect patrolArea;
-    public Transform patrolBase;
+    //public Transform patrolBase;
 
     public NavigationBaker baker;
     public RoomGeneration gen;
@@ -39,10 +39,7 @@ public class EnemyAI : MonoBehaviour
         target = GameObject.Find("Character");
         baker = FindObjectOfType<NavigationBaker>();
         gen = FindObjectOfType<RoomGeneration>();
-        patrolBase.Find("Map");
-
-        waypointInd = Random.Range(0, waypoints.Length);
-        agent.destination = RandomPosition();
+        //patrolBase.Find("Map");
 
         alive = true;
 
@@ -53,8 +50,9 @@ public class EnemyAI : MonoBehaviour
 
     IEnumerator FSM()
     {
-        while(alive && baker.generated)
+        while(alive)
         {
+            print(state);
             switch (state)
             {
                 case State.PATROL:
@@ -71,38 +69,19 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    //private void Patrol()
-    //{
-    //    agent.speed = patrolSpeed;
-    //    agent.destination = RandomPosition();
-    //    if(Vector3.Distance(transform.position, waypoints[waypointInd].transform.position) >= 1)
-    //    {
-    //        agent.destination = waypoints[waypointInd].transform.position;
-    //        agent.isStopped = false;
-    //        print("Patrolling");
-    //    }
-    //    else if(Vector3.Distance(transform.position, waypoints[waypointInd].transform.position) < 1)
-    //    {
-    //        waypointInd = Random.Range(0, waypoints.Length);
-    //    }
-
-    //    if(Vector3.Distance(target.transform.position, transform.position) <= 5)
-    //    {
-    //        state = State.CHASE;
-    //    }
-    //}
-
     private void Patrol()
     {
         agent.speed = patrolSpeed;
         if (Vector3.Distance(transform.position, agent.destination) >= 2)
         {
+            print("Move to Pos");
             float step = patrolSpeed * Time.deltaTime;
 
             transform.position = Vector3.MoveTowards(transform.position, agent.destination, step);
         }
         else if (Vector3.Distance(transform.position, agent.destination) < 2)
         {
+            print("Search new Pos");
             agent.destination = RandomPosition();
         }
 
@@ -136,16 +115,28 @@ public class EnemyAI : MonoBehaviour
         bool validPos = false;
         RaycastHit hit;
 
-        float newX = Random.Range(0f, gen.areaSizeX) + patrolBase.transform.position.x;
-        float newZ = Random.Range(0f, gen.areaSizeY) + patrolBase.transform.position.y;
+        float xOffset = 5f;
+        float zOffset = 5f;
 
-        newPos = new Vector3(newX, transform.position.y, newZ);
+        float xPos = Random.Range(transform.position.x + xOffset, transform.position.x - xOffset);
+        float zPos = Random.Range(transform.position.z + zOffset, transform.position.z - zOffset);
 
-        if (Physics.Raycast(newPos, Vector3.down, out hit))
+        if (Physics.Raycast(transform.position, Vector3.down, out hit))
         {
             print(hit.collider.name);
             if (hit.collider.tag == "Walkable")
+            {
+                //Room roomRef = hit.collider.gameObject.GetComponent<Room>();
+                //Room[] rooms = new Room[roomRef.getNeighboringRooms().Count];
+                //roomRef.getNeighboringRooms().CopyTo(rooms);
+
+                //Room selectedRoom = rooms[Random.Range(0, rooms.Length)];
+                //newPos = new Vector3(selectedRoom)
+
+                newPos = new Vector3(xPos, transform.position.y, zPos);
+
                 validPos = true;
+            }
             else
                 validPos = false;
         }

@@ -10,19 +10,27 @@ public class NavigationBaker : MonoBehaviour
 
     public bool generated;
 
-    void Update()
+    public void Start()
     {
-        if (surfaces.Count >= roomCount && !generated)
+        for (int i = 0; i < surfaces.Count; i++)
         {
-            generated = true;
-            for (int i = 0; i < surfaces.Count; i++)
-            {
-                surfaces[i].BuildNavMesh();
-            }
-        }
-        else if (generated)
-        {
-            this.enabled = false;
+            surfaces[i].BuildNavMesh();
         }
     }
+
+    //void Update()
+    //{
+    //    if (surfaces.Count >= roomCount && !generated)
+    //    {
+    //        generated = true;
+    //        for (int i = 0; i < surfaces.Count; i++)
+    //        {
+    //            surfaces[i].BuildNavMesh();
+    //        }
+    //    }
+    //    else if (generated)
+    //    {
+    //        this.enabled = false;
+    //    }
+    //}
 }
