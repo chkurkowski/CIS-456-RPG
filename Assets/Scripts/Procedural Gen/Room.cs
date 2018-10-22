@@ -7,11 +7,11 @@ public class Room {
     //Reference to the room game object
     public GameObject roomRef;
 
-    //Where the room is located (CENTER)
+    //Where the room is located (CENTER) - relative to grid
     public Vector2 center;
     //Top-leftmost location
     public Vector2 topLeftInnerLocation;
-    //All 10x10 sections of the room (CENTER OF ROOMS)
+    //All 10x10 sections of the room (CENTER OF INDIVIDUAL ROOMS)
     public List<Vector2> locations;
 
     //How big the room is
