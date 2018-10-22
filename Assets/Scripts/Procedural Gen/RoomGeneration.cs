@@ -5774,6 +5774,7 @@ public class RoomGeneration : MonoBehaviour
             if (rooms[i].size == OnexOne)
             {
                 GameObject rm = Instantiate(OnexOneRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                rooms[i].roomRef = rm;
 
                 if (rooms[i].getDoorBottom())
                 {
@@ -5808,6 +5809,7 @@ public class RoomGeneration : MonoBehaviour
             else if (rooms[i].size == OnexTwo)
             {
                 GameObject rm = Instantiate(OnexTwoRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                rooms[i].roomRef = rm;
 
                 bool doorBottomLeft = !hasBottomLeftNeighbor(rooms[i]);
                 bool doorBottomRight = !hasBottomRightNeighbor(rooms[i]);
@@ -5859,6 +5861,7 @@ public class RoomGeneration : MonoBehaviour
             else if (rooms[i].size == TwoxOne)
             {
                 GameObject rm = Instantiate(TwoxOneRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                rooms[i].roomRef = rm;
 
                 if (rooms[i].getDoorBottom())
                 {
@@ -5907,6 +5910,7 @@ public class RoomGeneration : MonoBehaviour
             else if (rooms[i].size == TwoxTwo)
             {
                 GameObject rm = Instantiate(TwoxTwoRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                rooms[i].roomRef = rm;
 
                 if (rooms[i].getDoorBottomLeft())
                 {
@@ -5967,6 +5971,7 @@ public class RoomGeneration : MonoBehaviour
             else
             {
                 GameObject rm = Instantiate(ThreexThreeRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                rooms[i].roomRef = rm;
 
                 if (rooms[i].getDoorBottomLeft())
                 {

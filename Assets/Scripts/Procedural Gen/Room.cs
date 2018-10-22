@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Room {
 
+    //Reference to the room game object
+    public GameObject roomRef;
+
     //Where the room is located (CENTER)
     public Vector2 center;
     //Top-leftmost location
@@ -14,6 +17,7 @@ public class Room {
     //How big the room is
     public Vector2 size;
 
+    //The max number of neighbors a room can have
     public int maxNeighbors;
 
     //What type of room it is:
