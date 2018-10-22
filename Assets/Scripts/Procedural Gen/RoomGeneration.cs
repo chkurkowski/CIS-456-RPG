@@ -17,8 +17,8 @@ public class RoomGeneration : MonoBehaviour
     private NavigationBaker baker;
 
 
-    public int areaSizeX = 50; //Size of the grid on the x axis
-    public int areaSizeY = 50; //Size of the grid on the y axis
+    [SerializeField] int areaSizeX = 50; //Size of the grid on the x axis
+    [SerializeField] int areaSizeY = 50; //Size of the grid on the y axis
     [SerializeField] int numOfRooms = 50; //Number of rooms to add to the grid
 
     [SerializeField] float startBranchProb = 0.33f; //Branch probability when the first rooms are being created
@@ -6067,5 +6067,10 @@ public class RoomGeneration : MonoBehaviour
         character.transform.position = baker.surfaces[Random.Range(0, baker.surfaces.Count)].gameObject.transform.position;
 
         tempEnemy.transform.position = baker.surfaces[Random.Range(0, baker.surfaces.Count)].gameObject.transform.position;
+    }
+
+    public List<Room> getAllRooms()
+    {
+        return rooms;
     }
 }
