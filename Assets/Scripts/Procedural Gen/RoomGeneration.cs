@@ -17,8 +17,8 @@ public class RoomGeneration : MonoBehaviour
     private NavigationBaker baker;
 
 
-    public int areaSizeX = 50; //Size of the grid on the x axis
-    public int areaSizeY = 50; //Size of the grid on the y axis
+    [SerializeField] int areaSizeX = 50; //Size of the grid on the x axis
+    [SerializeField] int areaSizeY = 50; //Size of the grid on the y axis
     [SerializeField] int numOfRooms = 50; //Number of rooms to add to the grid
 
     [SerializeField] float startBranchProb = 0.33f; //Branch probability when the first rooms are being created
@@ -5774,6 +5774,7 @@ public class RoomGeneration : MonoBehaviour
             if (rooms[i].size == OnexOne)
             {
                 GameObject rm = Instantiate(OnexOneRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                rooms[i].roomRef = rm;
 
                 if (rooms[i].getDoorBottom())
                 {
@@ -5808,6 +5809,7 @@ public class RoomGeneration : MonoBehaviour
             else if (rooms[i].size == OnexTwo)
             {
                 GameObject rm = Instantiate(OnexTwoRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                rooms[i].roomRef = rm;
 
                 bool doorBottomLeft = !hasBottomLeftNeighbor(rooms[i]);
                 bool doorBottomRight = !hasBottomRightNeighbor(rooms[i]);
@@ -5859,6 +5861,7 @@ public class RoomGeneration : MonoBehaviour
             else if (rooms[i].size == TwoxOne)
             {
                 GameObject rm = Instantiate(TwoxOneRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                rooms[i].roomRef = rm;
 
                 if (rooms[i].getDoorBottom())
                 {
@@ -5907,6 +5910,7 @@ public class RoomGeneration : MonoBehaviour
             else if (rooms[i].size == TwoxTwo)
             {
                 GameObject rm = Instantiate(TwoxTwoRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                rooms[i].roomRef = rm;
 
                 if (rooms[i].getDoorBottomLeft())
                 {
@@ -5967,6 +5971,7 @@ public class RoomGeneration : MonoBehaviour
             else
             {
                 GameObject rm = Instantiate(ThreexThreeRoom, new Vector3(offsetX, 0, offsetZ), Quaternion.identity);
+                rooms[i].roomRef = rm;
 
                 if (rooms[i].getDoorBottomLeft())
                 {
@@ -6067,5 +6072,10 @@ public class RoomGeneration : MonoBehaviour
         character.transform.position = baker.surfaces[Random.Range(0, baker.surfaces.Count)].gameObject.transform.position;
 
         tempEnemy.transform.position = baker.surfaces[Random.Range(0, baker.surfaces.Count)].gameObject.transform.position;
+    }
+
+    public List<Room> getAllRooms()
+    {
+        return rooms;
     }
 }
