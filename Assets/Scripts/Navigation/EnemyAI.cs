@@ -24,15 +24,19 @@ public class EnemyAI : MonoBehaviour
     //Waypoint values
     public GameObject[] waypoints;
     private int waypointInd;
-    private float patrolSpeed = 1f;
-    private float chaseSpeed = 1.8f;
+    [SerializeField]
+    private float patrolSpeed = 2f;
+    [SerializeField]
+    private float chaseSpeed = 3.2f;
     private float offset = 5f;
-    private float timer = 0;
-    private float maxTime = 2;
 
     //Transform for targeting
     private Transform targetedTransform;
     private bool alive;
+
+    //Move timer
+    private float idleTimer = 0f;
+    private const float IDLETIME = 1.5f;
 
     // Use this for initialization
     void Start()
@@ -78,31 +82,48 @@ public class EnemyAI : MonoBehaviour
         {
             float step = patrolSpeed * Time.deltaTime;
 
-            transform.position = Vector3.MoveTowards(transform.position, agent.destination, step);
+            //transform.position = Vector3.MoveTowards(transform.position, agent.destination, step);
+            agent.isStopped = false;
         }
         else if (Vector3.Distance(transform.position, agent.destination) < 2)
         {
-            timer += Time.deltaTime;
+            agent.isStopped = true;
+            idleTimer += Time.deltaTime;
 
             //print(timer);
-            if (timer >= maxTime)
+            if (idleTimer >= IDLETIME)
             {
                 agent.destination = RandomPosition();
-                timer = 0;
+                idleTimer = 0;
             }
                 
         }
 
-        if (Vector3.Distance(target.transform.position, transform.position) <= 5)
+        if (Vector3.Distance(target.transform.position, transform.position) <= 6)
         {
-            state = State.CHASE;
+            RaycastHit hit;
+            Vector3 direction = target.transform.position - transform.position;
+            direction.Normalize();
+            //print("ATTEMPT TO CHASE");
+
+            Debug.DrawRay(transform.position, direction, Color.red);
+
+            if (Physics.Raycast(transform.position, direction, out hit))
+            {
+                //print("RAYCAST HIT:" + hit.collider.tag);
+                if (hit.collider.tag == "Player")
+                {
+                    //print("IS PLAYER");
+                    state = State.CHASE;
+                }
+            }
         }
     }
 
     private void Chase()
     {
         agent.speed = chaseSpeed;
-        if (Vector3.Distance(target.transform.position, transform.position) <= 5)
+        if (Vector3.Distance(target.transform.position, transform.position) <= 8)
         {
             targetedTransform = target.transform;
             agent.destination = new Vector3(targetedTransform.position.x, transform.position.y, targetedTransform.position.z);
@@ -121,37 +142,35 @@ public class EnemyAI : MonoBehaviour
     {
         Vector3 newPos = transform.position;
         bool validPos = false;
+        float maxOffset = 16.0f;
         RaycastHit hit;
 
-        float xOffset = 8f;
-        float zOffset = 8f;
+        float xOffset = Random.Range(-maxOffset, maxOffset);
+        float zOffset = Random.Range(-maxOffset, maxOffset);
 
-        float xPos = Random.Range(transform.position.x + xOffset, transform.position.x - xOffset);
-        float zPos = Random.Range(transform.position.z + zOffset, transform.position.z - zOffset);
+        newPos.x += xOffset;
+        newPos.z += zOffset;
 
-        if (Physics.Raycast(new Vector3(xPos, transform.position.y, zPos), Vector3.down, out hit))
+        if (Physics.Raycast(transform.position, Vector3.down, out hit))
         {
             print(hit.collider.name);
-            if (hit.collider.tag == "Walkable")
+            if (hit.collider.tag == "Walkable" && hit.point.y < .5f)
             {
-                Room room = new Room(transform.position);
-                Room[] rooms = new Room[room.getNeighboringRooms().Count];
-                room.getNeighboringRooms().CopyTo(rooms);
+                List<Room> rooms = gen.getAllRooms();
+                Room thisRoom;
 
-                Room selectedRoom = rooms[Random.Range(0, rooms.Length)];
-                Transform roomPos = selectedRoom.roomRef.transform;
+                foreach(Room r in rooms)
+                {
+                    if(r.roomRef.transform.position == hit.collider.transform.position)
+                    {
+                        thisRoom = r;
+                    }
+                }
 
 
 
-                newPos = new Vector3(roomPos.position.x, transform.position.y, roomPos.position.z);
-
-                //Vector3 room = hit.collider.transform.position;
-                //float xRoomPos = Random.Range(room.x + xOffset, room.x - xOffset);
-                //float zRoomPos = Random.Range(room.z + zOffset, room.z - zOffset);
-
-                //newPos = new Vector3(xPos, transform.position.y, zPos);
-
-                validPos = true;
+                if(Vector3.Distance(newPos, transform.position) > 4)
+                    validPos = true;
             }
             else
                 validPos = false;
