@@ -32,8 +32,7 @@ public class EnemySpawning : MonoBehaviour
     {
         foreach (Room room in rooms)
         {
-            Vector2 roomSize = room.size;
-            List<float> spawnChances = getSpawnChances(roomSize);
+            List<float> spawnChances = getSpawnChances(room.size);
             int numEnemiesSpawned = 0;
             bool spawnEnemy = true;
 
@@ -41,9 +40,15 @@ public class EnemySpawning : MonoBehaviour
             {
                 float random = Random.value;
 
-                if (random <= spawnChances[numEnemiesSpawned])
+                if (numEnemiesSpawned < spawnChances.Count
+                    && random <= spawnChances[numEnemiesSpawned])
                 {
                     //Instantiate enemy at random location inside of room
+                    numEnemiesSpawned++;
+                }
+                else
+                {
+                    spawnEnemy = false;
                 }
             }
             while (spawnEnemy);
