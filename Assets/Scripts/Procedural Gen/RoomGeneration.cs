@@ -15,6 +15,7 @@ public class RoomGeneration : MonoBehaviour
     public GameObject character;
     public GameObject tempEnemy;
     private NavigationBaker baker;
+    private EnemySpawning spawner;
 
 
     [SerializeField] int areaSizeX = 50; //Size of the grid on the x axis
@@ -72,6 +73,8 @@ public class RoomGeneration : MonoBehaviour
         baker = FindObjectOfType<NavigationBaker>();
         baker.roomCount = numOfRooms;
 
+        spawner = FindObjectOfType<EnemySpawning>();
+
         branchProb = startBranchProb;
         changeInProb = Mathf.Abs(startBranchProb - endBranchProb);
 
@@ -104,6 +107,7 @@ public class RoomGeneration : MonoBehaviour
         CreateRooms();
         //CreateManualRooms();
         BuildPrimitives();
+        SpawnEnemies();
     }
 
     //Used for testing
@@ -6059,6 +6063,7 @@ public class RoomGeneration : MonoBehaviour
 
         map.transform.position = Vector3.zero;
         SetCharToMap();
+        
     }
 
     private void FillNavBaker(GameObject rm)
@@ -6077,5 +6082,10 @@ public class RoomGeneration : MonoBehaviour
     public List<Room> getAllRooms()
     {
         return rooms;
+    }
+
+    private void SpawnEnemies()
+    {
+        spawner.spawnAllEnemies();
     }
 }

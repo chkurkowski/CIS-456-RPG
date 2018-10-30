@@ -1006,4 +1006,46 @@ public class Room {
 
         return roomList;
     }
+
+    public Vector3 getRandomPosition()
+    {
+        Vector3 randomPos = roomRef.transform.position;
+        int wallOffset = 2;
+        int maxOffsetX;
+        int maxOffsetZ;
+
+        if (size == OnexOne)
+        {
+            maxOffsetX = 5;
+            maxOffsetZ = 5;
+        }
+        else if (size == OnexTwo)
+        {
+            maxOffsetX = 10;
+            maxOffsetZ = 5;
+        }
+        else if (size == TwoxOne)
+        {
+            maxOffsetX = 5;
+            maxOffsetZ = 10;
+        }
+        else if (size == TwoxTwo)
+        {
+            maxOffsetX = 10;
+            maxOffsetZ = 10;
+        }
+        else
+        {
+            maxOffsetX = 15;
+            maxOffsetZ = 15;
+        }
+
+        float xOffset = Random.Range((-1f * maxOffsetX) + wallOffset, maxOffsetX - wallOffset);
+        float zOffset = Random.Range((-1f * maxOffsetZ) + wallOffset, maxOffsetZ - wallOffset);
+
+        randomPos.x += xOffset;
+        randomPos.z += zOffset;
+
+        return randomPos;
+    }
 }
