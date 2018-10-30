@@ -153,9 +153,14 @@ public class EnemyAI : MonoBehaviour
 
         if (Physics.Raycast(transform.position, Vector3.down, out hit))
         {
-            print(hit.collider.name);
             if (hit.collider.tag == "Walkable" && hit.point.y < .5f)
             {
+                //TODO: Get Neighbors as a list, then get the neighbors of the neighbors. Put all those in a list and remove any that are the same.
+                //Pick a room and then a point in that room.
+
+                /*
+                List<Room> neighbors = new List<Room>();
+                List<Room> temp = new List<Room>();
                 List<Room> rooms = gen.getAllRooms();
                 Room thisRoom;
 
@@ -164,12 +169,65 @@ public class EnemyAI : MonoBehaviour
                     if(r.roomRef.transform.position == hit.collider.transform.position)
                     {
                         thisRoom = r;
+                        List<Room> firstNeighbors = thisRoom.getNeighboringRooms();
+
+                        foreach (Room n in firstNeighbors)
+                        {
+                            temp = n.getNeighboringRooms();
+
+                            neighbors.Add(n);
+
+                            for (int i = 0; i < n.getNeighboringRooms().Count; i++)
+                            {
+                                if(!neighbors.Contains(temp[i]))
+                                    neighbors.Add(temp[i]);
+                            }
+                        }
+                        break;
                     }
                 }
 
+                print(neighbors[0]);
+                
+                Room chosenRoom = neighbors[Random.Range(0, neighbors.Count)];
+                newPos = chosenRoom.roomRef.transform.position;
+                float offsetAmount;
+                float offsetX;
+                float offsetZ;
 
+                if(chosenRoom.size == chosenRoom.OnexOne)
+                {
+                    offsetAmount = 9;
+                    offsetX = Random.Range(-offsetAmount, offsetAmount);
+                    offsetZ = Random.Range(-offsetAmount, offsetAmount);
+                }
+                else if(chosenRoom.size == chosenRoom.OnexTwo)
+                {
+                    offsetAmount = 9;
+                    offsetX = Random.Range(-offsetAmount, offsetAmount);
+                    offsetZ = Random.Range(-offsetAmount, offsetAmount);
+                }
+                else if (chosenRoom.size == chosenRoom.TwoxOne)
+                {
+                    offsetAmount = 9;
+                    offsetX = Random.Range(-offsetAmount, offsetAmount);
+                    offsetZ = Random.Range(-offsetAmount, offsetAmount);
+                }
+                else if (chosenRoom.size == chosenRoom.TwoxTwo)
+                {
+                    offsetAmount = 9;
+                    offsetX = Random.Range(-offsetAmount, offsetAmount);
+                    offsetZ = Random.Range(-offsetAmount, offsetAmount);
+                }
+                else if (chosenRoom.size == chosenRoom.ThreexThree)
+                {
+                    offsetAmount = 9;
+                    offsetX = Random.Range(-offsetAmount, offsetAmount);
+                    offsetZ = Random.Range(-offsetAmount, offsetAmount);
+                }
+                */
 
-                if(Vector3.Distance(newPos, transform.position) > 4)
+                if (Vector3.Distance(newPos, transform.position) > 4)
                     validPos = true;
             }
             else
