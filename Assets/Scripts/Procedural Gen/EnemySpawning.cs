@@ -7,7 +7,7 @@ public class EnemySpawning : MonoBehaviour
     public GameObject enemy;
     public Transform enemies;
 
-    [SerializeField] List<float> OnexOneSpawnChances = new List<float>(new float[] { 0.50f, 0.50f, 0.25f });
+    [SerializeField] List<float> OnexOneSpawnChances = new List<float>(new float[] { 0.75f, 0.50f, 0.25f });
     [SerializeField] List<float> OnexTwoSpawnChances = new List<float>(new float[] { 1f, 0.75f, 0.5f, 0.25f });
     [SerializeField] List<float> TwoxOneSpawnChances = new List<float>(new float[] { 1f, 0.75f, 0.5f, 0.25f });
     [SerializeField] List<float> TwoxTwoSpawnChances = new List<float>(new float[] { 1f, 1f, 0.75f, 0.5f, 0.25f });
