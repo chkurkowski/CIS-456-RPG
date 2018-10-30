@@ -1040,8 +1040,8 @@ public class Room {
             maxOffsetZ = 15;
         }
 
-        int xOffset = Random.Range((-1 * maxOffsetX) + wallOffset, maxOffsetX - wallOffset);
-        int zOffset = Random.Range((-1 * maxOffsetZ) + wallOffset, maxOffsetZ - wallOffset);
+        float xOffset = Random.Range((-1f * maxOffsetX) + wallOffset, maxOffsetX - wallOffset);
+        float zOffset = Random.Range((-1f * maxOffsetZ) + wallOffset, maxOffsetZ - wallOffset);
 
         randomPos.x += xOffset;
         randomPos.z += zOffset;
