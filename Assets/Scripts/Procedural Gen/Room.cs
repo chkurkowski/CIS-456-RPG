@@ -44,11 +44,11 @@ public class Room {
         middle;
 
     //Useful Vectors
-    private Vector2 OnexOne = new Vector2(1f, 1f);
-    private Vector2 OnexTwo = new Vector2(1f, 2f);
-    private Vector2 TwoxOne = new Vector2(2f, 1f);
-    private Vector2 TwoxTwo = new Vector2(2f, 2f);
-    private Vector2 ThreexThree = new Vector2(3f, 3f);
+    public Vector2 OnexOne = new Vector2(1f, 1f);
+    public Vector2 OnexTwo = new Vector2(1f, 2f);
+    public Vector2 TwoxOne = new Vector2(2f, 1f);
+    public Vector2 TwoxTwo = new Vector2(2f, 2f);
+    public Vector2 ThreexThree = new Vector2(3f, 3f);
 
     //Constructor
     public Room(Vector2 c, Vector2 s, int t)
