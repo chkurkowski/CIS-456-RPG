@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class EnemySpawning : MonoBehaviour
 {
+    public GameObject enemy;
+
     [SerializeField] List<float> OnexOneSpawnChances;
     [SerializeField] List<float> OnexTwoSpawnChances;
     [SerializeField] List<float> TwoxOneSpawnChances;
@@ -43,7 +45,7 @@ public class EnemySpawning : MonoBehaviour
                 if (numEnemiesSpawned < spawnChances.Count
                     && random <= spawnChances[numEnemiesSpawned])
                 {
-                    //Instantiate enemy at random location inside of room
+                    //GameObject rm = Instantiate(enemy, room.getRandomPosition(), Quaternion.identity);
                     numEnemiesSpawned++;
                 }
                 else
