@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class PlayerStats : MonoBehaviour {
 
-    [SerializeField] private float health = 100f;
+    [SerializeField] private float health = 10000f;
 
     private void Update()
     {
         if (health <= 0)
         {
-            //TODO: Game Over
+            //FindObjectOfType<GameManager>().EndGame();
         }
     }
 
