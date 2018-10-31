@@ -9,6 +9,7 @@ public class EnemyAI : MonoBehaviour
     public NavMeshAgent agent;
     [SerializeField]
     private GameObject target;
+    private PlayerStats playerStats;
     public enum State {
         PATROL,
         CHASE,
@@ -28,6 +29,14 @@ public class EnemyAI : MonoBehaviour
     private float patrolSpeed = 2f;
     [SerializeField]
     private float chaseSpeed = 3.2f;
+    [SerializeField]
+    private float attackRange = 1f;
+    [SerializeField]
+    private float detectionRange = 6f;
+    [SerializeField]
+    private float chaseRange = 8f;
+    [SerializeField]
+    private float attackDamage = 25f;
     private float offset = 5f;
 
     //Transform for targeting
@@ -38,6 +47,11 @@ public class EnemyAI : MonoBehaviour
     private float idleTimer = 0f;
     private const float IDLETIME = 1.5f;
 
+    //Attack cooldown
+    [SerializeField]
+    private float attackTimer = 0f;
+    private const float attackCooldown = 0.5f;
+
     // Use this for initialization
     void Start()
     {
@@ -45,6 +59,7 @@ public class EnemyAI : MonoBehaviour
         target = GameObject.Find("Character");
         baker = FindObjectOfType<NavigationBaker>();
         gen = FindObjectOfType<RoomGeneration>();
+        playerStats = FindObjectOfType<PlayerStats>();
         //patrolBase.Find("Map");
 
         alive = true;
@@ -99,7 +114,7 @@ public class EnemyAI : MonoBehaviour
                 
         }
 
-        if (Vector3.Distance(target.transform.position, transform.position) <= 6)
+        if (Vector3.Distance(target.transform.position, transform.position) <= detectionRange)
         {
             RaycastHit hit;
             Vector3 direction = target.transform.position - transform.position;
@@ -123,19 +138,43 @@ public class EnemyAI : MonoBehaviour
     private void Chase()
     {
         agent.speed = chaseSpeed;
-        if (Vector3.Distance(target.transform.position, transform.position) <= 8)
+        attackTimer -= Time.deltaTime;
+
+        if (Vector3.Distance(target.transform.position, transform.position) <= attackRange)
+        {
+            state = State.ATTACK;
+        }
+        else if (Vector3.Distance(target.transform.position, transform.position) <= chaseRange)
         {
             targetedTransform = target.transform;
             agent.destination = new Vector3(targetedTransform.position.x, transform.position.y, targetedTransform.position.z);
-            print("Chasing");
+            //print("Chasing");
         }
         else
+        {
+            attackTimer = 0;
             state = State.PATROL;
+        }
     }
 
     private void Attack()
     {
+        if (Vector3.Distance(target.transform.position, transform.position) > attackRange)
+        {
+            state = State.CHASE;
+        }
 
+        targetedTransform = target.transform;
+        agent.destination = new Vector3(targetedTransform.position.x, transform.position.y, targetedTransform.position.z);
+
+        attackTimer -= Time.deltaTime;
+
+        if (attackTimer <= 0)
+        {
+            attackTimer = attackCooldown;
+            playerStats.TakeDamage(attackDamage);
+            Debug.Log("Took damage!");
+        }
     }
 
     private Vector3 RandomPosition()
