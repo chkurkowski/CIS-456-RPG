@@ -20,7 +20,7 @@ public class EnemyHealth : MonoBehaviour {
             Missle missle = col.gameObject.GetComponent<Missle>();
             if (missle != null)
             {
-                health -= missle.getDamage();
+                TakeDamage(missle.getDamage());
                 Debug.Log("Hit for: " + missle.getDamage());
                 return;
             }

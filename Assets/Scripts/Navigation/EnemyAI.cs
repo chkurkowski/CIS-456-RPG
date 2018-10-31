@@ -156,7 +156,7 @@ public class EnemyAI : MonoBehaviour
             if (hit.collider.tag == "Walkable" && hit.point.y < .5f)
             {
                 //TODO: Get Neighbors as a list, then get the neighbors of the neighbors. Put all those in a list and remove any that are the same.
-                //Pick a room and then a point in that room.
+                //Pick a room and then a point in that room (using room.getRandomPosition())
 
                 /*
                 List<Room> neighbors = new List<Room>();
