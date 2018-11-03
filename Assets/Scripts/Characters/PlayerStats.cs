@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerStats : MonoBehaviour {
 
-    [SerializeField] private float health = 10000f;
+    [SerializeField] private float health = 100f;
 
     private void Update()
     {
@@ -18,13 +18,13 @@ public class PlayerStats : MonoBehaviour {
     {
         if (col.gameObject.tag == "Attack")
         {
-            //TODO: Right method?
+            //TODO: Detect different enemy weapons
         }
     }
 
     public void TakeDamage(float dmg)
     {
         health -= dmg;
-        Debug.Log("Hit for: " + dmg);
+        Debug.Log("Health: " + health);
     }
 }

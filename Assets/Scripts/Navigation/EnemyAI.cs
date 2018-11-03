@@ -19,8 +19,8 @@ public class EnemyAI : MonoBehaviour
     public Rect patrolArea;
     //public Transform patrolBase;
 
-    public NavigationBaker baker;
-    public RoomGeneration gen;
+    private NavigationBaker baker;
+    private RoomGeneration gen;
 
     //Waypoint values
     public GameObject[] waypoints;
@@ -36,7 +36,7 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     private float chaseRange = 8f;
     [SerializeField]
-    private float attackDamage = 25f;
+    private float attackDamage = 1f;
     private float offset = 5f;
 
     //Transform for targeting
@@ -93,14 +93,15 @@ public class EnemyAI : MonoBehaviour
     private void Patrol()
     {
         agent.speed = patrolSpeed;
-        if (Vector3.Distance(transform.position, agent.destination) >= 2)
+        float proximity = 2f;
+        if (Vector3.Distance(transform.position, agent.destination) >= proximity)
         {
             float step = patrolSpeed * Time.deltaTime;
 
             //transform.position = Vector3.MoveTowards(transform.position, agent.destination, step);
             agent.isStopped = false;
         }
-        else if (Vector3.Distance(transform.position, agent.destination) < 2)
+        else if (Vector3.Distance(transform.position, agent.destination) < proximity)
         {
             agent.isStopped = true;
             idleTimer += Time.deltaTime;
@@ -129,6 +130,7 @@ public class EnemyAI : MonoBehaviour
                 if (hit.collider.tag == "Player")
                 {
                     //print("IS PLAYER");
+                    agent.isStopped = false;
                     state = State.CHASE;
                 }
             }
