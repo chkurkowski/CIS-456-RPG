@@ -845,46 +845,46 @@ public class Room {
 
         if (size == OnexOne)
         {
-            if (doorBottom)
+            if (!doorBottom)
             {
                 roomList.Add(roomBottom);
             }
-            if (doorLeft)
+            if (!doorLeft)
             {
                 roomList.Add(roomLeft);
             }
-            if (doorRight)
+            if (!doorRight)
             {
                 roomList.Add(roomRight);
             }
-            if (doorTop)
+            if (!doorTop)
             {
                 roomList.Add(roomTop);
             }
         }
         else if (size == OnexTwo)
         {
-            if (doorBottomLeft)
+            if (!doorBottomLeft)
             {
                 roomList.Add(roomBottomLeft);
             }
-            if (doorBottomRight)
+            if (!doorBottomRight)
             {
                 roomList.Add(roomBottomRight);
             }
-            if (doorLeft)
+            if (!doorLeft)
             {
                 roomList.Add(roomLeft);
             }
-            if (doorRight)
+            if (!doorRight)
             {
                 roomList.Add(roomRight);
             }
-            if (doorTopLeft)
+            if (!doorTopLeft)
             {
                 roomList.Add(roomTopLeft);
             }
-            if (doorTopRight)
+            if (!doorTopRight)
             {
                 roomList.Add(roomTopRight);
             }
@@ -892,113 +892,113 @@ public class Room {
         else if (size == TwoxOne)
         {
 
-            if (doorBottom)
+            if (!doorBottom)
             {
                 roomList.Add(roomBottom);
             }
-            if (doorLeftBottom)
+            if (!doorLeftBottom)
             {
                 roomList.Add(roomLeftBottom);
             }
-            if (doorLeftTop)
+            if (!doorLeftTop)
             {
                 roomList.Add(roomLeftTop);
             }
-            if (doorRightBottom)
+            if (!doorRightBottom)
             {
                 roomList.Add(roomRightBottom);
             }
-            if (doorRightTop)
+            if (!doorRightTop)
             {
                 roomList.Add(roomRightTop);
             }
-            if (doorTop)
+            if (!doorTop)
             {
                 roomList.Add(roomTop);
             }
         }
         else if (size == TwoxTwo)
         {
-            if (doorBottomLeft)
+            if (!doorBottomLeft)
             {
                 roomList.Add(roomBottomLeft);
             }
-            if (doorBottomRight)
+            if (!doorBottomRight)
             {
                 roomList.Add(roomBottomRight);
             }
-            if (doorLeftBottom)
+            if (!doorLeftBottom)
             {
                 roomList.Add(roomLeftBottom);
             }
-            if (doorLeftTop)
+            if (!doorLeftTop)
             {
                 roomList.Add(roomLeftTop);
             }
-            if (doorRightBottom)
+            if (!doorRightBottom)
             {
                 roomList.Add(roomRightBottom);
             }
-            if (doorRightTop)
+            if (!doorRightTop)
             {
                 roomList.Add(roomRightTop);
             }
-            if (doorTopLeft)
+            if (!doorTopLeft)
             {
                 roomList.Add(roomTopLeft);
             }
-            if (doorTopRight)
+            if (!doorTopRight)
             {
                 roomList.Add(roomTopRight);
             }
         }
         else
         {
-            if (doorBottomLeft)
+            if (!doorBottomLeft)
             {
                 roomList.Add(roomBottomLeft);
             }
-            if (doorBottom)
+            if (!doorBottom)
             {
                 roomList.Add(roomBottom);
             }
-            if (doorBottomRight)
+            if (!doorBottomRight)
             {
                 roomList.Add(roomBottomRight);
             }
-            if (doorLeftBottom)
+            if (!doorLeftBottom)
             {
                 roomList.Add(roomLeftBottom);
             }
-            if (doorLeft)
+            if (!doorLeft)
             {
                 roomList.Add(roomLeft);
             }
-            if (doorLeftTop)
+            if (!doorLeftTop)
             {
                 roomList.Add(roomLeftTop);
             }
-            if (doorRightBottom)
+            if (!doorRightBottom)
             {
                 roomList.Add(roomRightBottom);
             }
-            if (doorRight)
+            if (!doorRight)
             {
                 roomList.Add(roomRight);
             }
-            if (doorRightTop)
+            if (!doorRightTop)
             {
                 roomList.Add(roomRightTop);
             }
-            if (doorTopLeft)
+            if (!doorTopLeft)
             {
                 roomList.Add(roomTopLeft);
             }
-            if (doorTop)
+            if (!doorTop)
             {
                 roomList.Add(roomTop);
             }
-            if (doorTopRight)
+            if (!doorTopRight)
             {
                 roomList.Add(roomTopRight);
             }

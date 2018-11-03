@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -10,7 +11,8 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     private GameObject target;
     private PlayerStats playerStats;
-    public enum State {
+    public enum State
+    {
         PATROL,
         CHASE,
         ATTACK
@@ -71,7 +73,7 @@ public class EnemyAI : MonoBehaviour
 
     IEnumerator FSM()
     {
-        while(alive)
+        while (alive)
         {
             //print(state);
             switch (state)
@@ -112,7 +114,7 @@ public class EnemyAI : MonoBehaviour
                 agent.destination = RandomPosition();
                 idleTimer = 0;
             }
-                
+
         }
 
         if (Vector3.Distance(target.transform.position, transform.position) <= detectionRange)
@@ -175,109 +177,82 @@ public class EnemyAI : MonoBehaviour
         {
             attackTimer = attackCooldown;
             playerStats.TakeDamage(attackDamage);
-            Debug.Log("Took damage!");
         }
     }
 
     private Vector3 RandomPosition()
     {
-        Vector3 newPos = transform.position;
+        Vector3 randomPos = transform.position;
         bool validPos = false;
-        float maxOffset = 16.0f;
+        float minimumDistance = 4f;
+
         RaycastHit hit;
-
-        float xOffset = Random.Range(-maxOffset, maxOffset);
-        float zOffset = Random.Range(-maxOffset, maxOffset);
-
-        newPos.x += xOffset;
-        newPos.z += zOffset;
-
         if (Physics.Raycast(transform.position, Vector3.down, out hit))
         {
             if (hit.collider.tag == "Walkable" && hit.point.y < .5f)
             {
-                //TODO: Get Neighbors as a list, then get the neighbors of the neighbors. Put all those in a list and remove any that are the same.
-                //Pick a room and then a point in that room (using room.getRandomPosition())
-
-                /*
-                List<Room> neighbors = new List<Room>();
-                List<Room> temp = new List<Room>();
+                Room current = null;
                 List<Room> rooms = gen.getAllRooms();
-                Room thisRoom;
+                List<Room> levelOneRoomChoices = new List<Room>();
+                List<Room> levelTwoRoomChoices = new List<Room>();
+                List<Room> allRoomChoices = new List<Room>();
 
-                foreach(Room r in rooms)
+                foreach (Room r in rooms)
                 {
-                    if(r.roomRef.transform.position == hit.collider.transform.position)
+                    if (r.roomRef.transform.position == hit.collider.transform.position)
                     {
-                        thisRoom = r;
-                        List<Room> firstNeighbors = thisRoom.getNeighboringRooms();
-
-                        foreach (Room n in firstNeighbors)
-                        {
-                            temp = n.getNeighboringRooms();
-
-                            neighbors.Add(n);
-
-                            for (int i = 0; i < n.getNeighboringRooms().Count; i++)
-                            {
-                                if(!neighbors.Contains(temp[i]))
-                                    neighbors.Add(temp[i]);
-                            }
-                        }
+                        current = r;
                         break;
                     }
                 }
 
-                print(neighbors[0]);
-                
-                Room chosenRoom = neighbors[Random.Range(0, neighbors.Count)];
-                newPos = chosenRoom.roomRef.transform.position;
-                float offsetAmount;
-                float offsetX;
-                float offsetZ;
+                if (current == null)
+                {
+                    //Not on the map
+                    return transform.position;
+                }
 
-                if(chosenRoom.size == chosenRoom.OnexOne)
-                {
-                    offsetAmount = 9;
-                    offsetX = Random.Range(-offsetAmount, offsetAmount);
-                    offsetZ = Random.Range(-offsetAmount, offsetAmount);
-                }
-                else if(chosenRoom.size == chosenRoom.OnexTwo)
-                {
-                    offsetAmount = 9;
-                    offsetX = Random.Range(-offsetAmount, offsetAmount);
-                    offsetZ = Random.Range(-offsetAmount, offsetAmount);
-                }
-                else if (chosenRoom.size == chosenRoom.TwoxOne)
-                {
-                    offsetAmount = 9;
-                    offsetX = Random.Range(-offsetAmount, offsetAmount);
-                    offsetZ = Random.Range(-offsetAmount, offsetAmount);
-                }
-                else if (chosenRoom.size == chosenRoom.TwoxTwo)
-                {
-                    offsetAmount = 9;
-                    offsetX = Random.Range(-offsetAmount, offsetAmount);
-                    offsetZ = Random.Range(-offsetAmount, offsetAmount);
-                }
-                else if (chosenRoom.size == chosenRoom.ThreexThree)
-                {
-                    offsetAmount = 9;
-                    offsetX = Random.Range(-offsetAmount, offsetAmount);
-                    offsetZ = Random.Range(-offsetAmount, offsetAmount);
-                }
-                */
+                //Get neighbors of current
+                levelOneRoomChoices = current.getNeighboringRooms();
+                levelOneRoomChoices.Add(current);
 
-                if (Vector3.Distance(newPos, transform.position) > 4)
+                //Get neighbors of neighbors of current
+                foreach (Room roomL1 in levelOneRoomChoices)
+                {
+                    levelTwoRoomChoices.Add(roomL1);
+                    foreach (Room roomL2 in roomL1.getNeighboringRooms())
+                    {
+                        levelTwoRoomChoices.Add(roomL2);
+                    }
+                }
+
+                //Remove duplicates
+                allRoomChoices = levelTwoRoomChoices.Distinct().ToList();
+
+                //Select a random room
+                Room randomRoom = allRoomChoices[Random.Range(0, allRoomChoices.Count)];
+
+                //Select a random position inside the random room
+                randomPos = randomRoom.getRandomPosition();
+
+                if (Vector3.Distance(randomPos, transform.position) >= minimumDistance)
+                {
                     validPos = true;
+                }
+                else
+                {
+                    validPos = false;
+                }
             }
-            else
-                validPos = false;
         }
 
         if (validPos)
-            return newPos;
+        {
+            return randomPos;
+        }
         else
+        {
             return transform.position;
+        }
     }
 }
