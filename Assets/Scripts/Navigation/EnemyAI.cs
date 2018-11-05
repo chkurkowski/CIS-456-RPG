@@ -146,6 +146,8 @@ public class EnemyAI : MonoBehaviour
 
         if (Vector3.Distance(target.transform.position, transform.position) <= attackRange)
         {
+            //1
+            agent.isStopped = true;
             state = State.ATTACK;
         }
         else if (Vector3.Distance(target.transform.position, transform.position) <= chaseRange)
@@ -165,6 +167,7 @@ public class EnemyAI : MonoBehaviour
     {
         if (Vector3.Distance(target.transform.position, transform.position) > attackRange)
         {
+            agent.isStopped = false;
             state = State.CHASE;
         }
 
