@@ -10,7 +10,7 @@ public class PlayerStats : MonoBehaviour {
     {
         if (health <= 0)
         {
-            //FindObjectOfType<GameManager>().EndGame();
+            FindObjectOfType<GameManager>().EndGame();
         }
     }
 

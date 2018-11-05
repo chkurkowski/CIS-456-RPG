@@ -50,9 +50,9 @@ public class EnemyAI : MonoBehaviour
     private const float IDLETIME = 1.5f;
 
     //Attack cooldown
-    [SerializeField]
     private float attackTimer = 0f;
-    private const float attackCooldown = 0.5f;
+    [SerializeField]
+    private float attackCooldown = 0.5f;
 
     // Use this for initialization
     void Start()

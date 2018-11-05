@@ -2,7 +2,7 @@
 
 public class EnemyHealth : MonoBehaviour {
 
-    [SerializeField] private float health = 100f;
+    [SerializeField] private float health = 5f;
 
     private void Update()
     {
@@ -21,7 +21,7 @@ public class EnemyHealth : MonoBehaviour {
             if (missle != null)
             {
                 TakeDamage(missle.getDamage());
-                Debug.Log("Hit for: " + missle.getDamage());
+                //Debug.Log("Hit for: " + missle.getDamage());
                 return;
             }
         }
