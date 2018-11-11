@@ -111,7 +111,7 @@ public class EnemyAI : MonoBehaviour
             //print(timer);
             if (idleTimer >= IDLETIME)
             {
-                agent.destination = RandomPosition();
+                agent.destination = getRandomTargetPosition();
                 idleTimer = 0;
             }
 
@@ -183,7 +183,7 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    private Vector3 RandomPosition()
+    private Vector3 getRandomTargetPosition()
     {
         Vector3 randomPos = transform.position;
         bool validPos = false;
@@ -216,14 +216,14 @@ public class EnemyAI : MonoBehaviour
                 }
 
                 //Get neighbors of current
-                levelOneRoomChoices = current.getNeighboringRooms();
+                levelOneRoomChoices = current.getUniqueNeighboringRooms();
                 levelOneRoomChoices.Add(current);
 
                 //Get neighbors of neighbors of current
                 foreach (Room roomL1 in levelOneRoomChoices)
                 {
                     levelTwoRoomChoices.Add(roomL1);
-                    foreach (Room roomL2 in roomL1.getNeighboringRooms())
+                    foreach (Room roomL2 in roomL1.getUniqueNeighboringRooms())
                     {
                         levelTwoRoomChoices.Add(roomL2);
                     }

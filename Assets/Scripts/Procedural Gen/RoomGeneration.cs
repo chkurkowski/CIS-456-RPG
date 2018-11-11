@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using System.Linq;
 
 public class RoomGeneration : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class RoomGeneration : MonoBehaviour
     public GameObject ThreexThreeRoom;
     public GameObject RoomDoor;
     public GameObject character;
-    public GameObject tempEnemy;
+    public GameObject teleporter;
     private NavigationBaker baker;
     private EnemySpawning spawner;
 
@@ -105,80 +106,10 @@ public class RoomGeneration : MonoBehaviour
         }
 
         CreateRooms();
-        //CreateManualRooms();
         BuildPrimitives();
+        AddObjects();
+        baker.generateNavMesh();
         SpawnEnemies();
-    }
-
-    //Used for testing
-    private void CreateManualRooms()
-    {
-        Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), new Vector2(1f, 1f), 0);
-        rooms.Add(startRoom);
-        addLocationsToTakenPos(startRoom);
-        openRooms.Add(startRoom);
-        singleNeighborRooms.Add(startRoom);
-
-
-        float offsetX = (startRoom.topLeftInnerLocation.x - 2f);
-        float offsetY = (startRoom.topLeftInnerLocation.y - 1f);
-
-        Room newRoom = new Room(new Vector2(12, 11), OnexOne);
-        rooms.Add(newRoom);
-
-        addLocationsToTakenPos(newRoom);
-        setNeighboringRooms(newRoom);
-        setRoomDoors(newRoom);
-
-        if (getNumNeighbors(newRoom) < newRoom.maxNeighbors)
-        {
-            openRooms.Add(newRoom);
-        }
-        if (getNumNeighbors(newRoom) <= 1)
-        {
-            singleNeighborRooms.Add(newRoom);
-        }
-
-        removeNotOpenRooms(newRoom);
-        removeNotSingleNeighborRooms(newRoom);
-
-        Room newRoom2 = new Room(new Vector2(13.5f, 11.5f), TwoxTwo);
-        rooms.Add(newRoom2);
-
-        addLocationsToTakenPos(newRoom2);
-        setNeighboringRooms(newRoom2);
-        setRoomDoors(newRoom2);
-
-        if (getNumNeighbors(newRoom2) < newRoom2.maxNeighbors)
-        {
-            openRooms.Add(newRoom2);
-        }
-        if (getNumNeighbors(newRoom2) <= 1)
-        {
-            singleNeighborRooms.Add(newRoom2);
-        }
-
-        removeNotOpenRooms(newRoom2);
-        removeNotSingleNeighborRooms(newRoom2);
-
-        Room newRoom3 = new Room(new Vector2(startRoom.topLeftInnerLocation.x + 3.5f, startRoom.topLeftInnerLocation.y - 2.5f), TwoxTwo);
-        rooms.Add(newRoom3);
-
-        addLocationsToTakenPos(newRoom3);
-        setNeighboringRooms(newRoom3);
-        setRoomDoors(newRoom3);
-
-        if (getNumNeighbors(newRoom3) < newRoom3.maxNeighbors)
-        {
-            openRooms.Add(newRoom3);
-        }
-        if (getNumNeighbors(newRoom3) <= 1)
-        {
-            singleNeighborRooms.Add(newRoom3);
-        }
-
-        removeNotOpenRooms(newRoom3);
-        removeNotSingleNeighborRooms(newRoom3);
     }
 
     //Populates the "rooms" array with rooms
@@ -186,7 +117,7 @@ public class RoomGeneration : MonoBehaviour
     {
         //Add starter room in middle
         //TODO: Different type for starter room (Change 0 to another number)
-        Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), new Vector2(1f, 1f), 0);
+        Room startRoom = new Room(new Vector2(areaSizeX / 2, areaSizeY / 2), new Vector2(1f, 1f));
         rooms.Add(startRoom);
         addLocationsToTakenPos(startRoom);
         openRooms.Add(startRoom);
@@ -196,14 +127,14 @@ public class RoomGeneration : MonoBehaviour
         for (int i = 0; i < numOfRooms - 1; i++)
         {
             //Determine type and size of new Room (somehow)
-            int tempType = 0;
+            string tempType = "";
             Vector2 tempSize;
             Vector2 tempLoc;
 
             do
             {
                 tempSize = getRoomSize();
-                tempLoc = getRandomPosition(tempSize);
+                tempLoc = getRandomRoomPosition(tempSize);
             }
             while (tempLoc == errorVector);
 
@@ -229,7 +160,7 @@ public class RoomGeneration : MonoBehaviour
             //TODO: Check each side of the room depending on its size
             if (branchProb > Random.value)
             {
-                Vector2 tempBranchLoc = getRandomBranchPosition(tempSize);
+                Vector2 tempBranchLoc = getRandomBranchRoomPosition(tempSize);
                 Room tempBranchRoom = new Room(tempBranchLoc, tempSize, tempType);
 
                 //If it isn't the error vector, a branch position was found and it will be the position of the new room
@@ -261,6 +192,11 @@ public class RoomGeneration : MonoBehaviour
             removeNotOpenRooms(newRoom);
             removeNotSingleNeighborRooms(newRoom);
         }
+    }
+
+    private void AddObjects()
+    {
+        GameObject tp = Instantiate(teleporter, rooms[rooms.Count - 1].getRandomPosition() + new Vector3(0f, 0.4f, 0f), Quaternion.identity);
     }
 
     //Gets a random room size
@@ -1020,6 +956,8 @@ public class RoomGeneration : MonoBehaviour
                 openRooms.Remove(tempTopRight);
             }
         }
+
+        openRooms = openRooms.Distinct().ToList();
     }
 
     //Removes rooms that do not have at most one neighboring position from the singleNeighborRooms list
@@ -1225,15 +1163,18 @@ public class RoomGeneration : MonoBehaviour
                 singleNeighborRooms.Remove(tempTopRight);
             }
         }
+
+        singleNeighborRooms = singleNeighborRooms.Distinct().ToList();
     }
 
     //Gets a random position that's adjacent to a random room
-    private Vector2 getRandomPosition(Vector2 newRoomSize)
+    private Vector2 getRandomRoomPosition(Vector2 newRoomSize)
     {
         if (openRooms.Count == 0)
         {
             throw new System.Exception("There are no open rooms!");
         }
+
         Vector2 randomPos;
         bool validRandomPos;
         int index;
@@ -1259,7 +1200,7 @@ public class RoomGeneration : MonoBehaviour
             newRoomIndex = Mathf.Clamp(newRoomIndex, 0, openNeighboringPositions.Count);
 
             randomPos = openNeighboringPositions[newRoomIndex];
-            Room newRoom = new Room(randomPos, 0);
+            Room newRoom = new Room(randomPos);
 
             //If this new location does not meet location requirements
             if (takenPosContainsAny(newRoom.locations)
@@ -3513,7 +3454,7 @@ public class RoomGeneration : MonoBehaviour
     }
 
     //Gets a random position that's adjacent to only one random room (branching)
-    private Vector2 getRandomBranchPosition(Vector2 newRoomSize)
+    private Vector2 getRandomBranchRoomPosition(Vector2 newRoomSize)
     {
         if (openRooms.Count == 0)
         {
@@ -3561,7 +3502,7 @@ public class RoomGeneration : MonoBehaviour
                 newRoomIndex = Mathf.Clamp(newRoomIndex, 0, singleOpenNeighboringPositions.Count);
 
                 randomPos = singleOpenNeighboringPositions[newRoomIndex];
-                Room newRoom = new Room(randomPos, 0);
+                Room newRoom = new Room(randomPos);
 
                 //If this new location does not meet location requirements
                 if (takenPosContainsAny(newRoom.locations)
@@ -6063,20 +6004,19 @@ public class RoomGeneration : MonoBehaviour
 
         map.transform.position = Vector3.zero;
         SetCharToMap();
-        
     }
 
     private void FillNavBaker(GameObject rm)
     {
         baker.surfaces.Add(rm.GetComponent<NavMeshSurface>());
-        print(baker.surfaces[baker.surfaces.Count - 1]);
     }
 
     private void SetCharToMap()
     {
-        character.transform.position = baker.surfaces[Random.Range(0, baker.surfaces.Count)].gameObject.transform.position;
-
-        tempEnemy.transform.position = baker.surfaces[Random.Range(0, baker.surfaces.Count)].gameObject.transform.position;
+        int rand = Random.Range(0, rooms.Count - 1);
+        Room spawnRoom = rooms[rand];
+        spawnRoom.type = "spawn";
+        character.transform.position = spawnRoom.getRandomPosition();
     }
 
     public List<Room> getAllRooms()

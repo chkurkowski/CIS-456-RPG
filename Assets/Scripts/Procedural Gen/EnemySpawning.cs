@@ -5,7 +5,8 @@ using UnityEngine;
 public class EnemySpawning : MonoBehaviour
 {
     public GameObject enemy;
-    public Transform enemies;
+    public Transform enemiesList;
+    private List<GameObject> enemies;
 
     [SerializeField] List<float> OnexOneSpawnChances = new List<float>(new float[] { 0.75f, 0.50f, 0.25f });
     [SerializeField] List<float> OnexTwoSpawnChances = new List<float>(new float[] { 1f, 0.75f, 0.5f, 0.25f });
@@ -25,6 +26,8 @@ public class EnemySpawning : MonoBehaviour
 
     public void spawnAllEnemies()
     {
+        enemies = new List<GameObject>();
+
         roomGen = FindObjectOfType<RoomGeneration>();
         rooms = roomGen.getAllRooms();
 
@@ -35,6 +38,11 @@ public class EnemySpawning : MonoBehaviour
     {
         foreach (Room room in rooms)
         {
+            if (room.type.ToLower().Equals("spawn"))
+            {
+                continue;
+            }
+
             List<float> spawnChances = getSpawnChances(room.size);
             int numEnemiesSpawned = 0;
             bool spawnEnemy = true;
@@ -47,9 +55,9 @@ public class EnemySpawning : MonoBehaviour
                     && random <= spawnChances[numEnemiesSpawned])
                 {
                     GameObject newEnemy = Instantiate(enemy, room.getRandomPosition(), Quaternion.identity);
+                    enemies.Add(newEnemy);
                     numEnemiesSpawned++;
-                    Debug.Log("Spawned enemy in Room " + room.roomRef.transform.position + " at pos: " + room.getRandomPosition());
-                    newEnemy.transform.parent = enemies;
+                    newEnemy.transform.parent = enemiesList;
                 }
                 else
                 {

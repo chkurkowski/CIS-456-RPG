@@ -5,7 +5,12 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour {
 
-    public static int level = 1;
+    private static int level = 1;
+
+    public void levelPP()
+    {
+        level++;
+    }
 
     public void LoadScene(string s)
     {
