@@ -291,10 +291,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 42301132}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0dbe53173259aba4a98600ce6b2e4f1c, type: 3}
+  m_Script: {fileID: 11500000, guid: 3905c4a2820318844bfc621dfb68a66b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 100
 --- !u!1 &50232052
 GameObject:
   m_ObjectHideFlags: 0
@@ -382,11 +381,6 @@ Transform:
   m_Father: {fileID: 2050266143}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &54290502 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1527023597123910, guid: 147a5962e7b864a43a1bfd7108b75055,
-    type: 2}
-  m_PrefabInternal: {fileID: 728476632}
 --- !u!1 &129274552
 GameObject:
   m_ObjectHideFlags: 0
@@ -912,12 +906,12 @@ MonoBehaviour:
     type: 2}
   RoomDoor: {fileID: 1101315897637654, guid: b023f08085389244986bb48fa49d437a, type: 2}
   character: {fileID: 42301132}
-  tempEnemy: {fileID: 54290502}
+  teleporter: {fileID: 1506745577070694, guid: 2ace1b967125ec945b04f605ca177afc, type: 2}
   areaSizeX: 50
   areaSizeY: 50
   numOfRooms: 50
-  startBranchProb: 0.3
-  endBranchProb: 0.75
+  startBranchProb: 1
+  endBranchProb: 0.25
   OnexOneRoomProb: 0.75
   OnexTwoRoomProb: 0.09
   TwoxOneRoomProb: 0.09
@@ -950,7 +944,6 @@ MonoBehaviour:
   surfaces:
   - {fileID: 129274553}
   roomCount: 0
-  generated: 0
 --- !u!1001 &728476632
 Prefab:
   m_ObjectHideFlags: 0
@@ -1966,7 +1959,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemy: {fileID: 1527023597123910, guid: 147a5962e7b864a43a1bfd7108b75055, type: 2}
-  enemies: {fileID: 1855203520}
+  enemiesList: {fileID: 0}
   OnexOneSpawnChances:
   - 0.75
   - 0.5

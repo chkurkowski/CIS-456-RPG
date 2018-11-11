@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour {
     {
         //TODO: Game over screen
         level = 1;
+        PlayerStats.Instance.Reset();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

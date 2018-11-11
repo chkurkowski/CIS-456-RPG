@@ -2,29 +2,51 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerStats : MonoBehaviour {
+public class PlayerStats {
 
-    [SerializeField] private float health = 100f;
+    [SerializeField] private static float health = 100f;
+    [SerializeField] private static int gold = 0;
+    private static PlayerStats inst;
 
-    private void Update()
+    private PlayerStats()
     {
-        if (health <= 0)
+    }
+
+    public static PlayerStats Instance
+    {
+        get
         {
-            FindObjectOfType<GameManager>().EndGame();
+            if (inst == null)
+            {
+                inst = new PlayerStats();
+            }
+            return inst;
         }
     }
 
-    private void OnCollisionEnter(Collision col)
+    public void Reset()
     {
-        if (col.gameObject.tag == "Attack")
-        {
-            //TODO: Detect different enemy weapons
-        }
+        health = 100f;
+        gold = 0;
     }
 
-    public void TakeDamage(float dmg)
+    public float getHealth()
     {
-        health -= dmg;
-        Debug.Log("Health: " + health);
+        return health;
+    }
+
+    public int getGold()
+    {
+        return gold;
+    }
+
+    public void setHealth(float h)
+    {
+        health = h;
+    }
+
+    public void setGold(int g)
+    {
+        gold = g;
     }
 }

@@ -10,7 +10,7 @@ public class EnemyAI : MonoBehaviour
     public NavMeshAgent agent;
     [SerializeField]
     private GameObject target;
-    private PlayerStats playerStats;
+    private Player playerScript;
     public enum State
     {
         PATROL,
@@ -61,7 +61,7 @@ public class EnemyAI : MonoBehaviour
         target = GameObject.Find("Character");
         baker = FindObjectOfType<NavigationBaker>();
         gen = FindObjectOfType<RoomGeneration>();
-        playerStats = FindObjectOfType<PlayerStats>();
+        playerScript = FindObjectOfType<Player>();
         //patrolBase.Find("Map");
 
         alive = true;
@@ -179,7 +179,7 @@ public class EnemyAI : MonoBehaviour
         if (attackTimer <= 0)
         {
             attackTimer = attackCooldown;
-            playerStats.TakeDamage(attackDamage);
+            playerScript.TakeDamage(attackDamage);
         }
     }
 
