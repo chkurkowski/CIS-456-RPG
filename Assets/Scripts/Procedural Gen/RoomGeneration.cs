@@ -22,13 +22,16 @@ public class RoomGeneration : MonoBehaviour
     [SerializeField] int areaSizeX = 50; //Size of the grid on the x axis
     [SerializeField] int areaSizeY = 50; //Size of the grid on the y axis
     [SerializeField] int numOfRoomsInitial = 50; //Number of rooms to add to the grid
-    public int numOfRoomsFinal;
+    public int numOfRoomsFinal; //Number of rooms actually added (including cycles and branching off of cycles)
+
 
     [SerializeField] float startBranchProb = 0.33f; //Branch probability when the first rooms are being created
     [SerializeField] float endBranchProb = 0.66f; //Branch probability when the last rooms are being created
     private float branchProb; //Actual branch probability that gets decreased/increased over the course of adding all of the rooms
     private float changeInProb; //The difference between startBranchProb and endBranchProb
     private bool decreasing; //Whether the branchProb is decreasing or increasing
+    [SerializeField] float cycleBranchProb = 0.75f; //Probability to branch off of the rooms added when adding a cycle
+
 
     [SerializeField] float OnexOneRoomProb = 0.55f;
     [SerializeField] float OnexTwoRoomProb = 0.15f;
@@ -37,17 +40,10 @@ public class RoomGeneration : MonoBehaviour
     [SerializeField] float ThreexThreeRoomProb = 0.05f;
 
 
-    //List of all rooms
-    private List<Room> rooms = new List<Room>();
-    //List of all rooms that have at least one open neighboring position
-    //TODO: Sort by num of neighbors
-    private List<Room> openRooms = new List<Room>();
-    //List of all rooms that have at most one neighboring position
-    //TODO: Make seperate lists for each size to speed up efficiency
-    private List<Room> singleNeighborRooms = new List<Room>();
-
-    //List of all occupied locations in the area
-    private List<Vector2> takenPos = new List<Vector2>();
+    private List<Room> rooms = new List<Room>(); //List of all rooms
+    private List<Room> openRooms = new List<Room>(); //List of all rooms that have at least one open neighboring position
+    private List<Room> singleNeighborRooms = new List<Room>(); //List of all rooms that have at most one neighboring position
+    private List<Vector2> takenPos = new List<Vector2>(); //List of all occupied locations in the grid
 
 
     //Useful Vectors
@@ -57,7 +53,7 @@ public class RoomGeneration : MonoBehaviour
     private Vector2 TwoxTwo = new Vector2(2f, 2f);
     private Vector2 ThreexThree = new Vector2(3f, 3f);
 
-    //Placeholder vector in case a randomBranchPosition can't be found in a timely manner
+    //Placeholder vector/Room to detect if something went wrong
     private Vector2 errorVector = new Vector2(3.14f, 3.14f);
     private Room errorRoom;
 
@@ -2665,8 +2661,7 @@ public class RoomGeneration : MonoBehaviour
                 // Actually add the rooms to form a cycle
                 foreach (Room addedRoom in roomsToAdd)
                 {
-                    //Debug.Log("Adding (to form cycle): " + addedRoom.center);
-                    //TODO: Add random rooms off of it and make sure none of the new locations are in takenPos. Use addedRoom.Count to determine how many to add
+                    Debug.Log("*CYCLE* Actually adding: " + addedRoom.center);
                     rooms.Add(addedRoom);
 
                     addLocationsToTakenPos(addedRoom);
@@ -2684,6 +2679,49 @@ public class RoomGeneration : MonoBehaviour
 
                     removeNotOpenRooms(addedRoom);
                     removeNotSingleNeighborRooms(addedRoom);
+                }
+
+                foreach (Room addedRoom in roomsToAdd)
+                {
+                    if (Random.value <= cycleBranchProb)
+                    {
+                        int iterations = 0;
+                        Vector2 tempSize;
+                        Vector2 tempLoc;
+
+                        do
+                        {
+                            tempSize = getRoomSize();
+                            tempLoc = getRandomCycleBranchRoomPosition(roomsToAdd, tempSize);
+                            iterations++;
+                        }
+                        while (tempLoc == errorVector && iterations < roomsToAdd.Count * 2);
+
+                        if (tempLoc == errorVector)
+                        {
+                            continue;
+                        }
+
+                        Room cycleBranchRoom = new Room(tempLoc, tempSize);
+                        Debug.Log("*BRANCH* Actually adding: " + cycleBranchRoom.center);
+                        rooms.Add(cycleBranchRoom);
+
+                        addLocationsToTakenPos(cycleBranchRoom);
+                        setNeighboringRooms(cycleBranchRoom);
+                        setRoomDoors(cycleBranchRoom);
+
+                        if (getNumNeighbors(cycleBranchRoom) < cycleBranchRoom.maxNeighbors)
+                        {
+                            openRooms.Add(cycleBranchRoom);
+                        }
+                        if (getNumUniqueNeighbors(cycleBranchRoom) <= 1)
+                        {
+                            singleNeighborRooms.Add(cycleBranchRoom);
+                        }
+
+                        removeNotOpenRooms(cycleBranchRoom);
+                        removeNotSingleNeighborRooms(cycleBranchRoom);
+                    }
                 }
             }
         }
@@ -4983,6 +5021,78 @@ public class RoomGeneration : MonoBehaviour
                 newRoomIndex = Mathf.Clamp(newRoomIndex, 0, singleOpenNeighboringPositions.Count);
 
                 randomPos = singleOpenNeighboringPositions[newRoomIndex];
+                Room newRoom = new Room(randomPos);
+
+                //If this new location does not meet location requirements
+                if (takenPosContainsAny(newRoom.locations)
+                    || x >= areaSizeX
+                    || x < 0
+                    || y >= areaSizeY
+                    || y < 0)
+                {
+                    iterations++;
+                    validRandomPos = false;
+                }
+                else
+                {
+                    validRandomPos = true;
+                }
+            }
+        }
+        while (!validRandomPos);
+
+        return randomPos;
+    }
+
+    //Gets a random position that's adjacent to only one random room (branching)
+    private Vector2 getRandomCycleBranchRoomPosition(List<Room> cycleRooms, Vector2 newRoomSize)
+    {
+        if (openRooms.Count == 0)
+        {
+            throw new System.Exception("There are no open rooms!");
+        }
+
+        if (cycleRooms.Count == 0)
+        {
+            return errorVector;
+        }
+
+        Vector2 randomPos = errorVector;
+        bool validRandomPos = true;
+        int index;
+        int newRoomIndex;
+        int iterations = 0;
+
+        do
+        {
+            //Pick a random room that's already in the grid that doesn't have four neighbors
+            index = Mathf.Clamp(Mathf.RoundToInt(Random.value * (cycleRooms.Count)), 0, cycleRooms.Count - 1);
+            index = Mathf.Clamp(index, 0, cycleRooms.Count);
+
+            Room randomRoom = cycleRooms[index];
+            int x = (int) cycleRooms[index].topLeftInnerLocation.x;
+            int y = (int) cycleRooms[index].topLeftInnerLocation.y;
+            //Here
+            List<Vector2> openNeighboringPositions = getOpenNeighboringPositions(newRoomSize, randomRoom);
+
+            if (openNeighboringPositions.Count == 0)
+            {
+                if (iterations < cycleRooms.Count * 2)
+                {
+                    validRandomPos = false;
+                    iterations++;
+                }
+                else
+                {
+                    return errorVector;
+                }
+            }
+            else
+            {
+                newRoomIndex = Mathf.Clamp(Mathf.RoundToInt(Random.value * (openNeighboringPositions.Count)), 0, openNeighboringPositions.Count - 1);
+                newRoomIndex = Mathf.Clamp(newRoomIndex, 0, openNeighboringPositions.Count);
+
+                randomPos = openNeighboringPositions[newRoomIndex];
                 Room newRoom = new Room(randomPos);
 
                 //If this new location does not meet location requirements
