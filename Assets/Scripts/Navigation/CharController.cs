@@ -52,7 +52,6 @@ public class CharController : MonoBehaviour
             {
                 if(hit.point.y <= .5)
                 {
-                print(hit.point);
                     navMeshAgent.destination = hit.point;
                     navMeshAgent.isStopped = false;
                 }

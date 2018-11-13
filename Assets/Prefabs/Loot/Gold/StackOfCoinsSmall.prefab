@@ -21,7 +21,6 @@ GameObject:
   - component: {fileID: 4158472091321162}
   - component: {fileID: 33198454120258570}
   - component: {fileID: 23689503948595626}
-  - component: {fileID: 136494863116864634}
   m_Layer: 0
   m_Name: Coin (3)
   m_TagString: Untagged
@@ -39,7 +38,6 @@ GameObject:
   - component: {fileID: 4546473241137336}
   - component: {fileID: 33037136353814872}
   - component: {fileID: 23525480959160900}
-  - component: {fileID: 136135651871908362}
   m_Layer: 0
   m_Name: Coin (2)
   m_TagString: Untagged
@@ -57,7 +55,6 @@ GameObject:
   - component: {fileID: 4797809173508074}
   - component: {fileID: 33359485581996778}
   - component: {fileID: 23815514103362020}
-  - component: {fileID: 136306221047845042}
   m_Layer: 0
   m_Name: Coin (4)
   m_TagString: Untagged
@@ -90,7 +87,6 @@ GameObject:
   - component: {fileID: 4170529403108858}
   - component: {fileID: 33280132303620626}
   - component: {fileID: 23293945900604388}
-  - component: {fileID: 136357923717437440}
   m_Layer: 0
   m_Name: Coin
   m_TagString: Untagged
@@ -108,7 +104,6 @@ GameObject:
   - component: {fileID: 4979049174600002}
   - component: {fileID: 33620499385028356}
   - component: {fileID: 23737717382981132}
-  - component: {fileID: 136775242548928500}
   m_Layer: 0
   m_Name: Coin (6)
   m_TagString: Untagged
@@ -126,7 +121,6 @@ GameObject:
   - component: {fileID: 4869238843739894}
   - component: {fileID: 33737799635698314}
   - component: {fileID: 23046610514526616}
-  - component: {fileID: 136238482840118936}
   m_Layer: 0
   m_Name: Coin (5)
   m_TagString: Untagged
@@ -144,9 +138,10 @@ GameObject:
   - component: {fileID: 4877004660837698}
   - component: {fileID: 54083818015538634}
   - component: {fileID: 65155826014718842}
+  - component: {fileID: 114319656574094858}
   m_Layer: 0
   m_Name: StackOfCoinsSmall
-  m_TagString: Untagged
+  m_TagString: Gold
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -161,7 +156,6 @@ GameObject:
   - component: {fileID: 4518226878149430}
   - component: {fileID: 33218075102377098}
   - component: {fileID: 23692999827142874}
-  - component: {fileID: 136940922770482464}
   m_Layer: 0
   m_Name: Coin (7)
   m_TagString: Untagged
@@ -179,7 +173,6 @@ GameObject:
   - component: {fileID: 4591456812122858}
   - component: {fileID: 33213332824224426}
   - component: {fileID: 23010830672913864}
-  - component: {fileID: 136960036696152090}
   m_Layer: 0
   m_Name: Coin (1)
   m_TagString: Untagged
@@ -307,7 +300,7 @@ Transform:
   m_GameObject: {fileID: 1618723237822234}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -4.633778, y: 0.938, z: -2.5782428}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_Children:
   - {fileID: 4744513147588732}
   m_Father: {fileID: 0}
@@ -675,7 +668,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!65 &65155826014718842
 BoxCollider:
@@ -687,109 +680,16 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.09682131, y: 0.28989214, z: 0.114883184}
-  m_Center: {x: -0.026422739, y: 0.13384995, z: 0.07092607}
---- !u!136 &136135651871908362
-CapsuleCollider:
+  m_Size: {x: 0.09682131, y: 0.19261855, z: 0.114883184}
+  m_Center: {x: -0.026422739, y: 0.085213155, z: 0.07092607}
+--- !u!114 &114319656574094858
+MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1089000709793458}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_GameObject: {fileID: 1618723237822234}
   m_Enabled: 1
-  m_Radius: 0.5000001
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
---- !u!136 &136238482840118936
-CapsuleCollider:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1580920987054858}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.5000001
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
---- !u!136 &136306221047845042
-CapsuleCollider:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1127480106073066}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.5000001
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
---- !u!136 &136357923717437440
-CapsuleCollider:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1286828260060478}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.5000001
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
---- !u!136 &136494863116864634
-CapsuleCollider:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1012060816384024}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.5000001
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
---- !u!136 &136775242548928500
-CapsuleCollider:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1302227710483808}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.5000001
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
---- !u!136 &136940922770482464
-CapsuleCollider:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1674791882553472}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.5000001
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
---- !u!136 &136960036696152090
-CapsuleCollider:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1900620025368738}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.5000001
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 096f249c7de2143c7bcf64b6367a32b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
