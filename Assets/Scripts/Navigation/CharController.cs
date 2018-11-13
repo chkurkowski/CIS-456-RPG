@@ -44,14 +44,18 @@ public class CharController : MonoBehaviour
 
     private void ClickToMove()
     {
-        if (Input.GetButtonDown("Fire1") && !(Input.GetKey(KeyCode.LeftShift)))
+        if (Input.GetKey(KeyCode.Mouse0) && !(Input.GetKey(KeyCode.LeftShift)))
         {
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, 100))
             {
-                navMeshAgent.destination = hit.point;
-                navMeshAgent.isStopped = false;
+                if(hit.point.y <= .5)
+                {
+                print(hit.point);
+                    navMeshAgent.destination = hit.point;
+                    navMeshAgent.isStopped = false;
+                }
             }
         }
     }

@@ -2,10 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour {
 
+    public Text goldText;
+
+    private PlayerStats stats;
     private static int level = 1;
+
+    private void Start()
+    {
+        stats = PlayerStats.Instance;
+    }
+
+    private void Update()
+    {
+        goldText.text = ":  " + stats.getGold().ToString();
+    }
 
     public void levelPP()
     {
