@@ -1087,17 +1087,17 @@ MonoBehaviour:
   RoomDoor: {fileID: 1101315897637654, guid: b023f08085389244986bb48fa49d437a, type: 2}
   character: {fileID: 42301132}
   teleporter: {fileID: 1506745577070694, guid: 2ace1b967125ec945b04f605ca177afc, type: 2}
-  areaSizeX: 50
-  areaSizeY: 50
+  areaSizeX: 100
+  areaSizeY: 100
   numOfRoomsInitial: 50
   numOfRoomsFinal: 0
-  startBranchProb: 1
-  endBranchProb: 0.25
-  OnexOneRoomProb: 0.75
-  OnexTwoRoomProb: 0.09
-  TwoxOneRoomProb: 0.09
-  TwoxTwoRoomProb: 0.06
-  ThreexThreeRoomProb: 0.01
+  startBranchProb: 0.75
+  endBranchProb: 0.5
+  OnexOneRoomProb: 0.35
+  OnexTwoRoomProb: 0.25
+  TwoxOneRoomProb: 0.25
+  TwoxTwoRoomProb: 0.1
+  ThreexThreeRoomProb: 0.05
 --- !u!4 &603840743
 Transform:
   m_ObjectHideFlags: 0
