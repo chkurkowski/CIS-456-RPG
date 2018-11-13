@@ -2669,7 +2669,7 @@ public class RoomGeneration : MonoBehaviour
                 // Actually add the rooms to form a cycle
                 foreach (Room addedRoom in roomsToAdd)
                 {
-                    Debug.Log("Actually adding: " + addedRoom.center);
+                    //Debug.Log("Adding (to form cycle): " + addedRoom.center);
                     rooms.Add(addedRoom);
 
                     addLocationsToTakenPos(addedRoom);
