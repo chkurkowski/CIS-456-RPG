@@ -216,14 +216,14 @@ public class EnemyAI : MonoBehaviour
                 }
 
                 //Get neighbors of current
-                levelOneRoomChoices = current.getUniqueNeighboringRooms();
+                levelOneRoomChoices = current.getNeighboringRooms();
                 levelOneRoomChoices.Add(current);
 
                 //Get neighbors of neighbors of current
                 foreach (Room roomL1 in levelOneRoomChoices)
                 {
                     levelTwoRoomChoices.Add(roomL1);
-                    foreach (Room roomL2 in roomL1.getUniqueNeighboringRooms())
+                    foreach (Room roomL2 in roomL1.getNeighboringRooms())
                     {
                         levelTwoRoomChoices.Add(roomL2);
                     }

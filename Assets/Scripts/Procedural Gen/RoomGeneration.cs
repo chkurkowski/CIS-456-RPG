@@ -21,7 +21,8 @@ public class RoomGeneration : MonoBehaviour
 
     [SerializeField] int areaSizeX = 50; //Size of the grid on the x axis
     [SerializeField] int areaSizeY = 50; //Size of the grid on the y axis
-    [SerializeField] int numOfRooms = 50; //Number of rooms to add to the grid
+    [SerializeField] int numOfRoomsInitial = 50; //Number of rooms to add to the grid
+    public int numOfRoomsFinal;
 
     [SerializeField] float startBranchProb = 0.33f; //Branch probability when the first rooms are being created
     [SerializeField] float endBranchProb = 0.66f; //Branch probability when the last rooms are being created
@@ -66,13 +67,12 @@ public class RoomGeneration : MonoBehaviour
         errorRoom = new Room(errorVector);
 
         //If there are more rooms than can fit in the grid
-        if (numOfRooms >= (areaSizeX * areaSizeY))
+        if (numOfRoomsInitial>= (areaSizeX * areaSizeY))
         {
-            numOfRooms = Mathf.RoundToInt(areaSizeX * areaSizeY);
+            numOfRoomsInitial= Mathf.RoundToInt(areaSizeX * areaSizeY);
         }
 
         baker = FindObjectOfType<NavigationBaker>();
-        baker.roomCount = numOfRooms;
 
         spawner = FindObjectOfType<EnemySpawning>();
 
@@ -95,22 +95,27 @@ public class RoomGeneration : MonoBehaviour
 
         float error = 0.50f;
 
-        if (((OnexOneRoomProb + error) * numOfRooms * OnexOne.x * OnexOne.y)
-            + ((OnexTwoRoomProb + error) * numOfRooms * OnexTwo.x * OnexTwo.y)
-            + ((TwoxOneRoomProb + error) * numOfRooms * TwoxOne.x * TwoxOne.y)
-            + ((TwoxTwoRoomProb + error) * numOfRooms * TwoxTwo.x * TwoxTwo.y)
-            + ((ThreexThreeRoomProb + error) * numOfRooms * ThreexThree.x * ThreexThree.y)
+        if (((OnexOneRoomProb + error) * numOfRoomsInitial* OnexOne.x * OnexOne.y)
+            + ((OnexTwoRoomProb + error) * numOfRoomsInitial* OnexTwo.x * OnexTwo.y)
+            + ((TwoxOneRoomProb + error) * numOfRoomsInitial* TwoxOne.x * TwoxOne.y)
+            + ((TwoxTwoRoomProb + error) * numOfRoomsInitial* TwoxTwo.x * TwoxTwo.y)
+            + ((ThreexThreeRoomProb + error) * numOfRoomsInitial* ThreexThree.x * ThreexThree.y)
             >= areaSizeX * areaSizeY * Mathf.Abs((startBranchProb + endBranchProb) / 2))
         {
             throw new System.ArgumentOutOfRangeException("Your room probabilities are likely to exceed the area size! Either increase area size or decrease the number of rooms.");
         }
 
         CreateRooms();
+        numOfRoomsFinal = rooms.Count;
+        baker.roomCount = numOfRoomsFinal;
         BuildPrimitives();
         AddObjects();
         baker.generateNavMesh();
         SpawnEnemies();
     }
+
+    //1. Make sure TP in right spot
+    //2. Recolor/MakeDifferent added rooms to make see visually where they were added. 
 
     //Populates the "rooms" array with rooms
     private void CreateRooms()
@@ -124,7 +129,7 @@ public class RoomGeneration : MonoBehaviour
         singleNeighborRooms.Add(startRoom);
 
         //Add each room to the grid
-        for (int i = 0; i < numOfRooms - 1; i++)
+        for (int i = 0; i < numOfRoomsInitial- 1; i++)
         {
             //Determine type and size of new Room (somehow)
             string tempType = "";
@@ -143,12 +148,12 @@ public class RoomGeneration : MonoBehaviour
             //Decreases/Increases branchProb for this iteration
             if (decreasing)
             {
-                float num = getBranchY(((float)i) / (numOfRooms - 1));
+                float num = getBranchY(((float)i) / (numOfRoomsInitial- 1));
                 branchProb = Mathf.Clamp((startBranchProb - (changeInProb - (changeInProb * num))), endBranchProb, startBranchProb);
             }
             else
             {
-                float num = getBranchY(((float)i) / (numOfRooms - 1));
+                float num = getBranchY(((float)i) / (numOfRoomsInitial- 1));
                 branchProb = Mathf.Clamp((startBranchProb + (changeInProb - (changeInProb * num))), startBranchProb, endBranchProb);
             }
 
@@ -192,11 +197,13 @@ public class RoomGeneration : MonoBehaviour
             removeNotOpenRooms(newRoom);
             removeNotSingleNeighborRooms(newRoom);
         }
+
+        addCycles();
     }
 
     private void AddObjects()
     {
-        GameObject tp = Instantiate(teleporter, rooms[rooms.Count - 1].getRandomPosition() + new Vector3(0f, 0.4f, 0f), Quaternion.identity);
+        GameObject tp = Instantiate(teleporter, rooms[numOfRoomsInitial - 1].getRandomPosition() + new Vector3(0f, 0.4f, 0f), Quaternion.identity);
     }
 
     //Gets a random room size
@@ -1219,6 +1226,1695 @@ public class RoomGeneration : MonoBehaviour
         while (!validRandomPos);
 
         return randomPos;
+    }
+
+    private void addCycles()
+    {
+        int rayLength = 5;
+        int minLength = 2;
+
+        //Debug.Log("SingleNeighborRooms: " + singleNeighborRooms.Count);
+        List<Room> initialSingleNeighborRooms = singleNeighborRooms.ToList();
+        foreach (Room singleNeighborRoom in initialSingleNeighborRooms)
+        {
+            if (getNumUniqueNeighbors(singleNeighborRoom) > 1)
+            {
+                Debug.Log(singleNeighborRoom.center + " is no longer a single room!");
+                continue;
+            }
+
+            Debug.Log("\n\nSingleRoom: " + singleNeighborRoom.center);
+            List<Room> twoNeighborRoomList = new List<Room>();
+            twoNeighborRoomList.Add(singleNeighborRoom);
+
+            Room previousRoom;
+            Room currentRoom = singleNeighborRoom;
+            List<Room> current = singleNeighborRoom.getNeighboringRooms();
+            bool end = false;
+
+            while (!end)
+            {
+                previousRoom = currentRoom;
+                currentRoom = current[0];
+                Debug.Log("previousRoom: " + previousRoom.center);
+                current.Clear();
+
+                current = currentRoom.getNeighboringRooms();
+                Debug.Log("Neighbors to " + currentRoom.center + ": " + getNumUniqueNeighbors(currentRoom));
+                current.Remove(previousRoom);
+
+                Debug.Log("Current: " + current.Count);
+
+                if (current.Count == 1 && !twoNeighborRoomList.Contains(currentRoom))
+                {
+                    Debug.Log("Added: " + currentRoom.center);
+                    twoNeighborRoomList.Add(currentRoom);
+                }
+                else
+                {
+                    end = true;
+                }
+            }
+
+            if (twoNeighborRoomList.Count < minLength)
+            {
+                Debug.Log("Skipped");
+                continue;
+            }
+
+            bool added = false;
+
+            for (int i = 0; i < twoNeighborRoomList.Count; i++)
+            {
+                Room twoNeighborRoom = twoNeighborRoomList[i];
+                Debug.Log("   twoNeighborRoom: " + twoNeighborRoom.center);
+                List<Room> roomsToAdd = new List<Room>();
+
+                if (twoNeighborRoom.size == OnexOne)
+                {
+                    bool goBottomDown = !hasBottomNeighbor(twoNeighborRoom);
+                    bool goLeftLeft = !hasLeftNeighbor(twoNeighborRoom);
+                    bool goRightRight = !hasRightNeighbor(twoNeighborRoom);
+                    bool goTopUp = !hasTopNeighbor(twoNeighborRoom);
+
+                    if (goBottomDown && !added)
+                    {
+                        Debug.Log("Going BottomDown");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getBottomNeighborPosition(twoNeighborRoom) + (r * Vector2.down);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.down)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                        roomsToAdd.Add(new Room(getBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (goLeftLeft && !added)
+                    {
+                        Debug.Log("Going LeftLeft");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getLeftNeighborPosition(twoNeighborRoom) + (r * Vector2.left);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.left)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                        roomsToAdd.Add(new Room(getLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goRightRight && !added)
+                    {
+                        Debug.Log("Going RightRight");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getRightNeighborPosition(twoNeighborRoom) + (r * Vector2.right);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.right)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getRightNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                        roomsToAdd.Add(new Room(getRightNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goTopUp && !added)
+                    {
+                        Debug.Log("Going TopUp");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getTopNeighborPosition(twoNeighborRoom) + (r * Vector2.up);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.up)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getTopNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                        roomsToAdd.Add(new Room(getTopNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (twoNeighborRoom.size == OnexTwo)
+                {
+                    bool goBottomLeftDown = !hasBottomLeftNeighbor(twoNeighborRoom);
+                    bool goBottomRightDown = !hasBottomRightNeighbor(twoNeighborRoom);
+                    bool goLeftLeft = !hasLeftNeighbor(twoNeighborRoom);
+                    bool goRightRight = !hasRightNeighbor(twoNeighborRoom);
+                    bool goTopLeftUp = !hasTopLeftNeighbor(twoNeighborRoom);
+                    bool goTopRightUp = !hasTopRightNeighbor(twoNeighborRoom);
+
+                    if (goBottomLeftDown && !added)
+                    {
+                        Debug.Log("Going BottomLeftDown");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getBottomLeftNeighborPosition(twoNeighborRoom) + (r * Vector2.down);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.down)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getBottomLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                        roomsToAdd.Add(new Room(getBottomLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goBottomRightDown && !added)
+                    {
+                        Debug.Log("Going BottomRightDown");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getBottomRightNeighborPosition(twoNeighborRoom) + (r * Vector2.down);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.down)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getBottomRightNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                        roomsToAdd.Add(new Room(getBottomRightNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goLeftLeft && !added)
+                    {
+                        Debug.Log("Going LeftLeft");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getLeftNeighborPosition(twoNeighborRoom) + (r * Vector2.left);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.left)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                        roomsToAdd.Add(new Room(getLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goRightRight && !added)
+                    {
+                        Debug.Log("Going RightRight");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getRightNeighborPosition(twoNeighborRoom) + (r * Vector2.right);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.right)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getRightNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                        roomsToAdd.Add(new Room(getRightNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goTopLeftUp && !added)
+                    {
+                        Debug.Log("Going TopLeftUp");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getTopLeftNeighborPosition(twoNeighborRoom) + (r * Vector2.up);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.up)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getTopLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                        roomsToAdd.Add(new Room(getTopLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goTopRightUp && !added)
+                    {
+                        Debug.Log("Going TopRightUp");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getTopRightNeighborPosition(twoNeighborRoom) + (r * Vector2.up);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.up)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getTopRightNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                        roomsToAdd.Add(new Room(getTopRightNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (twoNeighborRoom.size == TwoxOne)
+                {
+                    bool goBottomDown = !hasBottomNeighbor(twoNeighborRoom);
+                    bool goLeftBottomLeft = !hasLeftBottomNeighbor(twoNeighborRoom);
+                    bool goLeftTopLeft = !hasLeftTopNeighbor(twoNeighborRoom);
+                    bool goRightBottomRight = !hasRightBottomNeighbor(twoNeighborRoom);
+                    bool goRightTopRight = !hasRightTopNeighbor(twoNeighborRoom);
+                    bool goTopUp = !hasTopNeighbor(twoNeighborRoom);
+
+                    if (goBottomDown && !added)
+                    {
+                        Debug.Log("Going BottomDown");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getBottomNeighborPosition(twoNeighborRoom) + (r * Vector2.down);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.down)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                        roomsToAdd.Add(new Room(getBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goLeftBottomLeft && !added)
+                    {
+                        Debug.Log("Going LeftBottomLeft");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getLeftBottomNeighborPosition(twoNeighborRoom) + (r * Vector2.left);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.left)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getLeftBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                        roomsToAdd.Add(new Room(getLeftBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goLeftTopLeft && !added)
+                    {
+                        Debug.Log("Going LeftTopLeft");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getLeftTopNeighborPosition(twoNeighborRoom) + (r * Vector2.left);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.left)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getLeftTopNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                        roomsToAdd.Add(new Room(getLeftTopNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goRightBottomRight && !added)
+                    {
+                        Debug.Log("Going RightBottomRight");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getRightBottomNeighborPosition(twoNeighborRoom) + (r * Vector2.right);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.right)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getRightBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                        roomsToAdd.Add(new Room(getRightBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goRightTopRight && !added)
+                    {
+                        Debug.Log("Going RightTopRight");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getRightTopNeighborPosition(twoNeighborRoom) + (r * Vector2.right);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.right)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getRightTopNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                        roomsToAdd.Add(new Room(getRightTopNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goTopUp && !added)
+                    {
+                        Debug.Log("Going TopUp");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getTopNeighborPosition(twoNeighborRoom) + (r * Vector2.up);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.up)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getTopNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                        roomsToAdd.Add(new Room(getTopNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (twoNeighborRoom.size == TwoxTwo)
+                {
+                    bool goBottomLeftDown = !hasBottomLeftNeighbor(twoNeighborRoom);
+                    bool goBottomRightDown = !hasBottomRightNeighbor(twoNeighborRoom);
+                    bool goLeftBottomLeft = !hasLeftBottomNeighbor(twoNeighborRoom);
+                    bool goLeftTopLeft = !hasLeftTopNeighbor(twoNeighborRoom);
+                    bool goRightBottomRight = !hasRightBottomNeighbor(twoNeighborRoom);
+                    bool goRightTopRight = !hasRightTopNeighbor(twoNeighborRoom);
+                    bool goTopLeftUp = !hasTopLeftNeighbor(twoNeighborRoom);
+                    bool goTopRightUp = !hasTopRightNeighbor(twoNeighborRoom);
+
+                    if (goBottomLeftDown && !added)
+                    {
+                        Debug.Log("Going BottomLeftDown");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getBottomLeftNeighborPosition(twoNeighborRoom) + (r * Vector2.down);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.down)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getBottomLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                        roomsToAdd.Add(new Room(getBottomLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goBottomRightDown && !added)
+                    {
+                        Debug.Log("Going BottomRightDown");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getBottomRightNeighborPosition(twoNeighborRoom) + (r * Vector2.down);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.down)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getBottomRightNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                        roomsToAdd.Add(new Room(getBottomRightNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goLeftBottomLeft && !added)
+                    {
+                        Debug.Log("Going LeftBottomLeft");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getLeftBottomNeighborPosition(twoNeighborRoom) + (r * Vector2.left);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.left)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getLeftBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                        roomsToAdd.Add(new Room(getLeftBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goLeftTopLeft && !added)
+                    {
+                        Debug.Log("Going LeftTopLeft");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getLeftTopNeighborPosition(twoNeighborRoom) + (r * Vector2.left);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.left)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getLeftTopNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                        roomsToAdd.Add(new Room(getLeftTopNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goRightBottomRight && !added)
+                    {
+                        Debug.Log("Going RightBottomRight");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getRightBottomNeighborPosition(twoNeighborRoom) + (r * Vector2.right);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.right)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getRightBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                        roomsToAdd.Add(new Room(getRightBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goRightTopRight && !added)
+                    {
+                        Debug.Log("Going RightTopRight");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getRightTopNeighborPosition(twoNeighborRoom) + (r * Vector2.right);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.right)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getRightTopNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                        roomsToAdd.Add(new Room(getRightTopNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goTopLeftUp && !added)
+                    {
+                        Debug.Log("Going TopLeftUp");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getTopLeftNeighborPosition(twoNeighborRoom) + (r * Vector2.up);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.up)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getTopLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                        roomsToAdd.Add(new Room(getTopLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goTopRightUp && !added)
+                    {
+                        Debug.Log("Going TopRightUp");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getTopRightNeighborPosition(twoNeighborRoom) + (r * Vector2.up);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.up)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getTopRightNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                        roomsToAdd.Add(new Room(getTopRightNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    bool goBottomLeftDown = !hasBottomLeftNeighbor(twoNeighborRoom);
+                    bool goBottomDown = !hasBottomNeighbor(twoNeighborRoom);
+                    bool goBottomRightDown = !hasBottomRightNeighbor(twoNeighborRoom);
+                    bool goLeftBottomLeft = !hasLeftBottomNeighbor(twoNeighborRoom);
+                    bool goLeftLeft = !hasLeftNeighbor(twoNeighborRoom);
+                    bool goLeftTopLeft = !hasLeftTopNeighbor(twoNeighborRoom);
+                    bool goRightBottomRight = !hasRightBottomNeighbor(twoNeighborRoom);
+                    bool goRightRight = !hasRightNeighbor(twoNeighborRoom);
+                    bool goRightTopRight = !hasRightTopNeighbor(twoNeighborRoom);
+                    bool goTopLeftUp = !hasTopLeftNeighbor(twoNeighborRoom);
+                    bool goTopUp = !hasTopNeighbor(twoNeighborRoom);
+                    bool goTopRightUp = !hasTopRightNeighbor(twoNeighborRoom);
+
+                    if (goBottomLeftDown && !added)
+                    {
+                        Debug.Log("Going BottomLeftDown");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getBottomLeftNeighborPosition(twoNeighborRoom) + (r * Vector2.down);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.down)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getBottomLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                        roomsToAdd.Add(new Room(getBottomLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goBottomDown && !added)
+                    {
+                        Debug.Log("Going BottomDown");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getBottomNeighborPosition(twoNeighborRoom) + (r * Vector2.down);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.down)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                        roomsToAdd.Add(new Room(getBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goBottomRightDown && !added)
+                    {
+                        Debug.Log("Going BottomRightDown");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getBottomRightNeighborPosition(twoNeighborRoom) + (r * Vector2.down);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.down)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getBottomRightNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                        roomsToAdd.Add(new Room(getBottomRightNeighborPosition(twoNeighborRoom) + (j * Vector2.down)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goLeftBottomLeft && !added)
+                    {
+                        Debug.Log("Going LeftBottomLeft");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getLeftBottomNeighborPosition(twoNeighborRoom) + (r * Vector2.left);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.left)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getLeftBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                        roomsToAdd.Add(new Room(getLeftBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goLeftLeft && !added)
+                    {
+                        Debug.Log("Going LeftLeft");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getLeftNeighborPosition(twoNeighborRoom) + (r * Vector2.left);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.left)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                        roomsToAdd.Add(new Room(getLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goLeftTopLeft && !added)
+                    {
+                        Debug.Log("Going LeftTopLeft");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getLeftTopNeighborPosition(twoNeighborRoom) + (r * Vector2.left);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.left)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getLeftTopNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                        roomsToAdd.Add(new Room(getLeftTopNeighborPosition(twoNeighborRoom) + (j * Vector2.left)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goRightBottomRight && !added)
+                    {
+                        Debug.Log("Going RightBottomRight");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getRightBottomNeighborPosition(twoNeighborRoom) + (r * Vector2.right);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.right)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getRightBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                        roomsToAdd.Add(new Room(getRightBottomNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goRightRight && !added)
+                    {
+                        Debug.Log("Going RightRight");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getRightNeighborPosition(twoNeighborRoom) + (r * Vector2.right);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.right)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getRightNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                        roomsToAdd.Add(new Room(getRightNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goRightTopRight && !added)
+                    {
+                        Debug.Log("Going RightTopRight");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getRightTopNeighborPosition(twoNeighborRoom) + (r * Vector2.right);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.right)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getRightTopNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                        roomsToAdd.Add(new Room(getRightTopNeighborPosition(twoNeighborRoom) + (j * Vector2.right)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goTopLeftUp && !added)
+                    {
+                        Debug.Log("Going TopLeftUp");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getTopLeftNeighborPosition(twoNeighborRoom) + (r * Vector2.up);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.up)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getTopLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                        roomsToAdd.Add(new Room(getTopLeftNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goTopUp && !added)
+                    {
+                        Debug.Log("Going TopUp");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getTopNeighborPosition(twoNeighborRoom) + (r * Vector2.up);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.up)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getTopNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                        roomsToAdd.Add(new Room(getTopNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (goTopRightUp && !added)
+                    {
+                        Debug.Log("Going TopRightUp");
+                        for (int r = 0; r <= rayLength; r++)
+                        {
+                            Vector2 tempLocation = getTopRightNeighborPosition(twoNeighborRoom) + (r * Vector2.up);
+
+                            if (takenPos.Contains(tempLocation))
+                            {
+                                Debug.Log("tempLocation: " + tempLocation);
+                                Debug.Log("numUniqueNeighbors(previous): " + getNumUniqueNeighbors(new Room(tempLocation - Vector2.up)));
+                                continue;
+                            }
+
+                            Room tempRoom = new Room(tempLocation);
+
+                            if (getNumUniqueNeighbors(tempRoom) >= 1)
+                            {
+                                List<Room> neighbors = getNeighbors(tempRoom);
+                                Debug.Log("NeighborsBefore: " + neighbors.Count);
+                                foreach (Room neighbor in twoNeighborRoomList)
+                                {
+                                    if (neighbors.Contains(neighbor))
+                                    {
+                                        neighbors.Remove(neighbor);
+                                    }
+                                }
+                                Debug.Log("NeighborsAfter: " + neighbors.Count);
+
+                                if (neighbors.Count >= 1)
+                                {
+                                    for (int j = 0; j <= r; j++)
+                                    {
+                                        Debug.Log("-----Added: " + (getTopRightNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                        roomsToAdd.Add(new Room(getTopRightNeighborPosition(twoNeighborRoom) + (j * Vector2.up)));
+                                    }
+                                    added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Actually add the rooms to form a cycle
+                Debug.Log("roomsToAdd.Count: " + roomsToAdd.Count);
+                foreach (Room addedRoom in roomsToAdd)
+                {
+                    Debug.Log("Actually adding: " + addedRoom.center);
+                    rooms.Add(addedRoom);
+
+                    addLocationsToTakenPos(addedRoom);
+                    setNeighboringRooms(addedRoom);
+                    setRoomDoors(addedRoom);
+
+                    if (getNumNeighbors(addedRoom) < addedRoom.maxNeighbors)
+                    {
+                        openRooms.Add(addedRoom);
+                    }
+                    if (getNumUniqueNeighbors(addedRoom) <= 1)
+                    {
+                        singleNeighborRooms.Add(addedRoom);
+                    }
+
+                    removeNotOpenRooms(addedRoom);
+                    removeNotSingleNeighborRooms(addedRoom);
+                }
+            }
+        }
     }
 
     private List<Vector2> getOpenNeighboringPositions(Vector2 newRoomSize, Room randomRoom)
@@ -3453,6 +5149,19 @@ public class RoomGeneration : MonoBehaviour
         return false;
     }
 
+    private Room findRoomAtLocation(Vector2 location)
+    {
+        foreach (Room room in rooms)
+        {
+            if (room.locations.Contains(location))
+            {
+                return room;
+            }
+        }
+
+        return errorRoom;
+    }
+
     //Gets a random position that's adjacent to only one random room (branching)
     private Vector2 getRandomBranchRoomPosition(Vector2 newRoomSize)
     {
@@ -4859,38 +6568,38 @@ public class RoomGeneration : MonoBehaviour
         }
         else if (room.size == OnexTwo)
         {
-            bool doorBottomLeft = !hasBottomLeftNeighbor(room);
-            bool doorBottomRight = !hasBottomRightNeighbor(room);
-            bool doorTopLeft = !hasTopLeftNeighbor(room);
-            bool doorTopRight = !hasTopRightNeighbor(room);
+            bool bottomLeft = hasBottomLeftNeighbor(room);
+            bool bottomRight = hasBottomRightNeighbor(room);
+            bool topLeft = hasTopLeftNeighbor(room);
+            bool topRight = hasTopRightNeighbor(room);
 
-            if (!doorBottomLeft && !doorBottomRight && room.getRoomBottomLeft() == room.getRoomBottomRight())
+            if (bottomLeft && bottomRight && room.getRoomBottomLeft() == room.getRoomBottomRight())
             {
                 numRooms++;
             }
             else
             {
-                if (hasBottomLeftNeighbor(room))
+                if (bottomLeft)
                 {
                     numRooms++;
                 }
-                if (hasBottomRightNeighbor(room))
+                if (bottomRight)
                 {
                     numRooms++;
                 }
             }
 
-            if (!doorTopLeft && !doorTopRight && room.getRoomTopLeft() == room.getRoomTopRight())
+            if (topLeft && topRight && room.getRoomTopLeft() == room.getRoomTopRight())
             {
                 numRooms++;
             }
             else
             {
-                if (hasTopLeftNeighbor(room))
+                if (topLeft)
                 {
                     numRooms++;
                 }
-                if (hasTopRightNeighbor(room))
+                if (topRight)
                 {
                     numRooms++;
                 }
@@ -4907,37 +6616,37 @@ public class RoomGeneration : MonoBehaviour
         }
         else if (room.size == TwoxOne)
         {
-            bool doorLeftBottom = !hasLeftBottomNeighbor(room);
-            bool doorLeftTop = !hasLeftTopNeighbor(room);
-            bool doorRightBottom = !hasRightBottomNeighbor(room);
-            bool doorRightTop = !hasRightTopNeighbor(room);
+            bool leftBottom = hasLeftBottomNeighbor(room);
+            bool leftTop = hasLeftTopNeighbor(room);
+            bool rightBottom = hasRightBottomNeighbor(room);
+            bool rightTop = hasRightTopNeighbor(room);
 
-            if (!doorLeftBottom && !doorLeftTop && room.getRoomLeftBottom() == room.getRoomLeftTop())
+            if (leftBottom && leftTop && room.getRoomLeftBottom() == room.getRoomLeftTop())
             {
                 numRooms++;
             }
             else
             {
-                if (hasLeftBottomNeighbor(room))
+                if (leftBottom)
                 {
                     numRooms++;
                 }
-                if (hasLeftTopNeighbor(room))
+                if (leftTop)
                 {
                     numRooms++;
                 }
             }
-            if (!doorRightBottom && !doorRightTop && room.getRoomRightBottom() == room.getRoomRightTop())
+            if (rightBottom && rightTop && room.getRoomRightBottom() == room.getRoomRightTop())
             {
                 numRooms++;
             }
             else
             {
-                if (hasRightBottomNeighbor(room))
+                if (rightBottom)
                 {
                     numRooms++;
                 }
-                if (hasRightTopNeighbor(room))
+                if (rightTop)
                 {
                     numRooms++;
                 }
@@ -4954,73 +6663,73 @@ public class RoomGeneration : MonoBehaviour
         }
         else if (room.size == TwoxTwo)
         {
-            bool doorBottomLeft = !hasBottomLeftNeighbor(room);
-            bool doorBottomRight = !hasBottomRightNeighbor(room);
-            bool doorLeftBottom = !hasLeftBottomNeighbor(room);
-            bool doorLeftTop = !hasLeftTopNeighbor(room);
-            bool doorRightBottom = !hasRightBottomNeighbor(room);
-            bool doorRightTop = !hasRightTopNeighbor(room);
-            bool doorTopLeft = !hasTopLeftNeighbor(room);
-            bool doorTopRight = !hasTopRightNeighbor(room);
+            bool bottomLeft = hasBottomLeftNeighbor(room);
+            bool bottomRight = hasBottomRightNeighbor(room);
+            bool leftBottom = hasLeftBottomNeighbor(room);
+            bool leftTop = hasLeftTopNeighbor(room);
+            bool rightBottom = hasRightBottomNeighbor(room);
+            bool rightTop = hasRightTopNeighbor(room);
+            bool topLeft = hasTopLeftNeighbor(room);
+            bool topRight = hasTopRightNeighbor(room);
 
-            if (!doorBottomLeft && !doorBottomRight && room.getRoomBottomLeft() == room.getRoomBottomRight())
+            if (bottomLeft && bottomRight && room.getRoomBottomLeft() == room.getRoomBottomRight())
             {
                 numRooms++;
             }
             else
             {
-                if (hasBottomLeftNeighbor(room))
+                if (bottomLeft)
                 {
                     numRooms++;
                 }
-                if (hasBottomRightNeighbor(room))
-                {
-                    numRooms++;
-                }
-            }
-
-            if (!doorLeftBottom && !doorLeftTop && room.getRoomLeftBottom() == room.getRoomLeftTop())
-            {
-                numRooms++;
-            }
-            else
-            {
-                if (hasLeftBottomNeighbor(room))
-                {
-                    numRooms++;
-                }
-                if (hasLeftTopNeighbor(room))
-                {
-                    numRooms++;
-                }
-            }
-            if (!doorRightBottom && !doorRightTop && room.getRoomRightBottom() == room.getRoomRightTop())
-            {
-                numRooms++;
-            }
-            else
-            {
-                if (hasRightBottomNeighbor(room))
-                {
-                    numRooms++;
-                }
-                if (hasRightTopNeighbor(room))
+                if (bottomRight)
                 {
                     numRooms++;
                 }
             }
 
-            if (!doorTopLeft && !doorTopRight && room.getRoomTopLeft() == room.getRoomTopRight())
+            if (leftBottom && leftTop && room.getRoomLeftBottom() == room.getRoomLeftTop())
             {
                 numRooms++;
             }
             else
             {
-                if (hasTopLeftNeighbor(room))
+                if (leftBottom)
                 {
                     numRooms++;
                 }
-                if (hasTopRightNeighbor(room))
+                if (leftTop)
+                {
+                    numRooms++;
+                }
+            }
+            if (rightBottom && rightTop && room.getRoomRightBottom() == room.getRoomRightTop())
+            {
+                numRooms++;
+            }
+            else
+            {
+                if (rightBottom)
+                {
+                    numRooms++;
+                }
+                if (rightTop)
+                {
+                    numRooms++;
+                }
+            }
+
+            if (topLeft && topRight && room.getRoomTopLeft() == room.getRoomTopRight())
+            {
+                numRooms++;
+            }
+            else
+            {
+                if (topLeft)
+                {
+                    numRooms++;
+                }
+                if (topRight)
                 {
                     numRooms++;
                 }
@@ -5028,166 +6737,166 @@ public class RoomGeneration : MonoBehaviour
         }
         else
         {
-            bool doorBottomLeft = !hasBottomLeftNeighbor(room);
-            bool doorBottom = !hasBottomNeighbor(room);
-            bool doorBottomRight = !hasBottomRightNeighbor(room);
-            bool doorLeftBottom = !hasLeftBottomNeighbor(room);
-            bool doorLeft = !hasLeftNeighbor(room);
-            bool doorLeftTop = !hasLeftTopNeighbor(room);
-            bool doorRightBottom = !hasRightBottomNeighbor(room);
-            bool doorRight = !hasRightNeighbor(room);
-            bool doorRightTop = !hasRightTopNeighbor(room);
-            bool doorTopLeft = !hasTopLeftNeighbor(room);
-            bool doorTop = !hasTopNeighbor(room);
-            bool doorTopRight = !hasTopRightNeighbor(room);
+            bool bottomLeft = hasBottomLeftNeighbor(room);
+            bool bottom = hasBottomNeighbor(room);
+            bool bottomRight = hasBottomRightNeighbor(room);
+            bool leftBottom = hasLeftBottomNeighbor(room);
+            bool left = hasLeftNeighbor(room);
+            bool leftTop = hasLeftTopNeighbor(room);
+            bool rightBottom = hasRightBottomNeighbor(room);
+            bool right = hasRightNeighbor(room);
+            bool rightTop = hasRightTopNeighbor(room);
+            bool topLeft = hasTopLeftNeighbor(room);
+            bool top = hasTopNeighbor(room);
+            bool topRight = hasTopRightNeighbor(room);
 
-            if (!doorBottomLeft && !doorBottom && !doorBottomRight
+            if (bottomLeft && bottom && bottomRight
                     && room.getRoomBottomLeft() == room.getRoomBottom()
                     && room.getRoomBottom() == room.getRoomBottomRight())
             {
                 numRooms++;
             }
-            else if (!doorBottomLeft && !doorBottom && room.getRoomBottomLeft() == room.getRoomBottom())
+            else if (bottomLeft && bottom && room.getRoomBottomLeft() == room.getRoomBottom())
             {
                 numRooms++;
-                if (hasBottomRightNeighbor(room))
+                if (bottomRight)
                 {
                     numRooms++;
                 }
             }
-            else if (!doorBottom && !doorBottomRight && room.getRoomBottom() == room.getRoomBottomRight())
+            else if (bottom && bottomRight && room.getRoomBottom() == room.getRoomBottomRight())
             {
                 numRooms++;
-                if (hasBottomLeftNeighbor(room))
+                if (bottomLeft)
                 {
                     numRooms++;
                 }
             }
             else
             {
-                if (hasBottomLeftNeighbor(room))
+                if (bottomLeft)
                 {
                     numRooms++;
                 }
-                if (hasBottomNeighbor(room))
+                if (bottom)
                 {
                     numRooms++;
                 }
-                if (hasBottomRightNeighbor(room))
+                if (bottomRight)
                 {
                     numRooms++;
                 }
             }
 
-            if (!doorLeftBottom && !doorLeft && !doorLeftTop
+            if (leftBottom && left && leftTop
             && room.getRoomLeftBottom() == room.getRoomLeft()
             && room.getRoomLeft() == room.getRoomLeftTop())
             {
                 numRooms++;
             }
-            else if (!doorLeftBottom && !doorLeft && room.getRoomLeftBottom() == room.getRoomLeft())
+            else if (leftBottom && left && room.getRoomLeftBottom() == room.getRoomLeft())
             {
                 numRooms++;
-                if (hasLeftTopNeighbor(room))
+                if (leftTop)
                 {
                     numRooms++;
                 }
             }
-            else if (!doorLeft && !doorLeftTop && room.getRoomLeft() == room.getRoomLeftTop())
+            else if (left && leftTop && room.getRoomLeft() == room.getRoomLeftTop())
             {
                 numRooms++;
-                if (hasLeftBottomNeighbor(room))
+                if (leftBottom)
                 {
                     numRooms++;
                 }
             }
             else
             {
-                if (hasLeftBottomNeighbor(room))
+                if (leftBottom)
                 {
                     numRooms++;
                 }
-                if (hasLeftNeighbor(room))
+                if (left)
                 {
                     numRooms++;
                 }
-                if (hasLeftTopNeighbor(room))
+                if (leftTop)
                 {
                     numRooms++;
                 }
             }
 
-            if (!doorRightBottom && !doorRight && !doorRightTop
+            if (rightBottom && right && rightTop
             && room.getRoomRightBottom() == room.getRoomRight()
             && room.getRoomRight() == room.getRoomRightTop())
             {
                 numRooms++;
             }
-            else if (!doorRightBottom && !doorRight && room.getRoomRightBottom() == room.getRoomRight())
+            else if (rightBottom && right && room.getRoomRightBottom() == room.getRoomRight())
             {
                 numRooms++;
-                if (hasRightTopNeighbor(room))
+                if (rightTop)
                 {
                     numRooms++;
                 }
             }
-            else if (!doorRight && !doorRightTop && room.getRoomRight() == room.getRoomRightTop())
+            else if (right && rightTop && room.getRoomRight() == room.getRoomRightTop())
             {
                 numRooms++;
-                if (hasRightBottomNeighbor(room))
+                if (rightBottom)
                 {
                     numRooms++;
                 }
             }
             else
             {
-                if (hasRightBottomNeighbor(room))
+                if (rightBottom)
                 {
                     numRooms++;
                 }
-                if (hasRightNeighbor(room))
+                if (right)
                 {
                     numRooms++;
                 }
-                if (hasRightTopNeighbor(room))
+                if (rightTop)
                 {
                     numRooms++;
                 }
             }
 
-            if (!doorTopLeft && !doorTop && !doorTopRight
+            if (topLeft && top && topRight
                     && room.getRoomTopLeft() == room.getRoomTop()
                     && room.getRoomTop() == room.getRoomTopRight())
             {
                 numRooms++;
             }
-            else if (!doorTopLeft && !doorTop && room.getRoomTopLeft() == room.getRoomTop())
+            else if (topLeft && top && room.getRoomTopLeft() == room.getRoomTop())
             {
                 numRooms++;
-                if (hasTopRightNeighbor(room))
+                if (topRight)
                 {
                     numRooms++;
                 }
             }
-            else if (!doorTop && !doorTopRight && room.getRoomTop() == room.getRoomTopRight())
+            else if (top && topRight && room.getRoomTop() == room.getRoomTopRight())
             {
                 numRooms++;
-                if (hasTopLeftNeighbor(room))
+                if (topLeft)
                 {
                     numRooms++;
                 }
             }
             else
             {
-                if (hasTopLeftNeighbor(room))
+                if (topLeft)
                 {
                     numRooms++;
                 }
-                if (hasTopNeighbor(room))
+                if (top)
                 {
                     numRooms++;
                 }
-                if (hasTopRightNeighbor(room))
+                if (topRight)
                 {
                     numRooms++;
                 }
@@ -5361,8 +7070,175 @@ public class RoomGeneration : MonoBehaviour
                 numRooms++;
             }
         }
-
         return numRooms;
+    }
+
+    // Only use this for temporary rooms. Otherwise, use room.getNeighboringRooms();
+    private List<Room> getNeighbors(Room room)
+    {
+        List<Room> neighbors = new List<Room>();
+
+        if (room.size == OnexOne)
+        {
+            if (hasBottomNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getBottomNeighborPosition(room)));
+            }
+            if (hasLeftNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getLeftNeighborPosition(room)));
+            }
+            if (hasRightNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getRightNeighborPosition(room)));
+            }
+            if (hasTopNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getTopNeighborPosition(room)));
+            }
+        }
+        else if (room.size == OnexTwo)
+        {
+            if (hasBottomLeftNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getBottomLeftNeighborPosition(room)));
+            }
+            if (hasBottomRightNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getBottomRightNeighborPosition(room)));
+            }
+            if (hasLeftNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getLeftNeighborPosition(room)));
+            }
+            if (hasRightNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getRightNeighborPosition(room)));
+            }
+            if (hasTopLeftNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getTopLeftNeighborPosition(room)));
+            }
+            if (hasTopRightNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getTopRightNeighborPosition(room)));
+            }
+        }
+        else if (room.size == TwoxOne)
+        {
+            if (hasBottomNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getBottomNeighborPosition(room)));
+            }
+            if (hasLeftBottomNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getLeftBottomNeighborPosition(room)));
+            }
+            if (hasLeftTopNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getLeftTopNeighborPosition(room)));
+            }
+            if (hasRightBottomNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getRightBottomNeighborPosition(room)));
+            }
+            if (hasRightTopNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getRightTopNeighborPosition(room)));
+            }
+            if (hasTopNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getTopNeighborPosition(room)));
+            }
+        }
+        else if (room.size == TwoxTwo)
+        {
+            if (hasBottomLeftNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getBottomLeftNeighborPosition(room)));
+            }
+            if (hasBottomRightNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getBottomRightNeighborPosition(room)));
+            }
+            if (hasLeftBottomNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getLeftBottomNeighborPosition(room)));
+            }
+            if (hasLeftTopNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getLeftTopNeighborPosition(room)));
+            }
+            if (hasRightBottomNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getRightBottomNeighborPosition(room)));
+            }
+            if (hasRightTopNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getRightTopNeighborPosition(room)));
+            }
+            if (hasTopLeftNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getTopLeftNeighborPosition(room)));
+            }
+            if (hasTopRightNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getTopRightNeighborPosition(room)));
+            }
+        }
+        else
+        {
+            if (hasBottomLeftNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getBottomLeftNeighborPosition(room)));
+            }
+            if (hasBottomNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getBottomNeighborPosition(room)));
+            }
+            if (hasBottomRightNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getBottomRightNeighborPosition(room)));
+            }
+            if (hasLeftBottomNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getLeftBottomNeighborPosition(room)));
+            }
+            if (hasLeftNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getLeftNeighborPosition(room)));
+            }
+            if (hasLeftTopNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getLeftTopNeighborPosition(room)));
+            }
+            if (hasRightBottomNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getRightBottomNeighborPosition(room)));
+            }
+            if (hasRightNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getRightNeighborPosition(room)));
+            }
+            if (hasRightTopNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getRightTopNeighborPosition(room)));
+            }
+            if (hasTopLeftNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getTopLeftNeighborPosition(room)));
+            }
+            if (hasTopNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getTopNeighborPosition(room)));
+            }
+            if (hasTopRightNeighbor(room))
+            {
+                neighbors.Add(findRoomAtLocation(getTopRightNeighborPosition(room)));
+            }
+        }
+
+        return neighbors;
     }
 
     private Vector2 getBottomLeftNeighborPosition(Room room)
@@ -6013,7 +7889,7 @@ public class RoomGeneration : MonoBehaviour
 
     private void SetCharToMap()
     {
-        int rand = Random.Range(0, rooms.Count - 1);
+        int rand = Random.Range(0, numOfRoomsInitial - 1);
         Room spawnRoom = rooms[rand];
         spawnRoom.type = "spawn";
         character.transform.position = spawnRoom.getRandomPosition();
