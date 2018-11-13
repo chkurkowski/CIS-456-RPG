@@ -114,9 +114,6 @@ public class RoomGeneration : MonoBehaviour
         SpawnEnemies();
     }
 
-    //1. Make sure TP in right spot
-    //2. Recolor/MakeDifferent added rooms to make see visually where they were added. 
-
     //Populates the "rooms" array with rooms
     private void CreateRooms()
     {
@@ -1296,7 +1293,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1333,7 +1330,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1370,7 +1367,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1407,7 +1404,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1453,7 +1450,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1490,7 +1487,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1527,7 +1524,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1564,7 +1561,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1601,7 +1598,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1638,7 +1635,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1684,7 +1681,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1721,7 +1718,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1758,7 +1755,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1795,7 +1792,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1832,7 +1829,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1869,7 +1866,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1917,7 +1914,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1954,7 +1951,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -1991,7 +1988,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2028,7 +2025,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2065,7 +2062,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2102,7 +2099,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2139,7 +2136,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2176,7 +2173,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2228,7 +2225,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2265,7 +2262,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2302,7 +2299,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2339,7 +2336,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2376,7 +2373,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2413,7 +2410,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2450,7 +2447,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2487,7 +2484,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2524,7 +2521,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2561,7 +2558,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2592,14 +2589,13 @@ public class RoomGeneration : MonoBehaviour
 
                     if (goTopUp && !added)
                     {
-                        Debug.Log("Going TopUp");
                         for (int r = 0; r <= rayLength; r++)
                         {
                             Vector2 tempLocation = getTopNeighborPosition(twoNeighborRoom) + (r * Vector2.up);
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2636,7 +2632,7 @@ public class RoomGeneration : MonoBehaviour
 
                             if (takenPos.Contains(tempLocation))
                             {
-                                continue;
+                                break;
                             }
 
                             Room tempRoom = new Room(tempLocation);
@@ -2670,6 +2666,7 @@ public class RoomGeneration : MonoBehaviour
                 foreach (Room addedRoom in roomsToAdd)
                 {
                     //Debug.Log("Adding (to form cycle): " + addedRoom.center);
+                    //TODO: Add random rooms off of it and make sure none of the new locations are in takenPos. Use addedRoom.Count to determine how many to add
                     rooms.Add(addedRoom);
 
                     addLocationsToTakenPos(addedRoom);
