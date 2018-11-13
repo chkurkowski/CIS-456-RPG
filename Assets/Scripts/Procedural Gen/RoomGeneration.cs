@@ -1226,7 +1226,6 @@ public class RoomGeneration : MonoBehaviour
         int rayLength = numOfRoomsInitial / 8;
         int minLength = 2;
 
-        //Debug.Log("SingleNeighborRooms: " + singleNeighborRooms.Count);
         List<Room> initialSingleNeighborRooms = singleNeighborRooms.ToList();
         foreach (Room singleNeighborRoom in initialSingleNeighborRooms)
         {
@@ -2661,7 +2660,7 @@ public class RoomGeneration : MonoBehaviour
                 // Actually add the rooms to form a cycle
                 foreach (Room addedRoom in roomsToAdd)
                 {
-                    Debug.Log("*CYCLE* Actually adding: " + addedRoom.center);
+                    //Debug.Log("*CYCLE* Actually adding: " + addedRoom.center);
                     rooms.Add(addedRoom);
 
                     addLocationsToTakenPos(addedRoom);
@@ -2703,7 +2702,7 @@ public class RoomGeneration : MonoBehaviour
                         }
 
                         Room cycleBranchRoom = new Room(tempLoc, tempSize);
-                        Debug.Log("*BRANCH* Actually adding: " + cycleBranchRoom.center);
+                        //Debug.Log("*BRANCH* Actually adding: " + cycleBranchRoom.center);
                         rooms.Add(cycleBranchRoom);
 
                         addLocationsToTakenPos(cycleBranchRoom);
