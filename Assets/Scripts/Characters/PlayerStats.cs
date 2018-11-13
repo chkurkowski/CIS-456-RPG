@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerStats {
 
-    [SerializeField] private static float health = 100f;
+    [SerializeField] private static float health = 100000f;
     [SerializeField] private static int gold = 0;
     private static PlayerStats inst;
 
@@ -48,5 +48,10 @@ public class PlayerStats {
     public void setGold(int g)
     {
         gold = g;
+    }
+
+    public void addGold(int g)
+    {
+        gold += g;
     }
 }

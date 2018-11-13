@@ -98,6 +98,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba1417077d4804df08038ce1cdf578db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  goldLoot:
+  - {fileID: 1618723237822234, guid: 8c623cbd7c8ee4d24825880136726711, type: 2}
+  - {fileID: 1144261655328184, guid: 3ff0b28f26a1e403a959e1397be1d721, type: 2}
+  - {fileID: 1600730219073594, guid: d9175e949fed64547be8f7139c52def6, type: 2}
+  itemLoot: []
   health: 25
 --- !u!114 &114722584651854470
 MonoBehaviour:

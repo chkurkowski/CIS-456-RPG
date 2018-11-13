@@ -11,6 +11,7 @@ public class Laser : MonoBehaviour {
     [SerializeField] private GameObject atkOrigin;
 
     private GameObject target;
+    private List<GameObject> targets;
     private EnemyHealth enemyHealthInst;
 
     [SerializeField] private float damagePerSecond = 100f;
@@ -21,39 +22,40 @@ public class Laser : MonoBehaviour {
     {
         //Gets the length of the red line
         range = this.transform.localScale.z * this.GetComponent<BoxCollider>().size.z * this.transform.parent.localScale.z;
+        targets = new List<GameObject>();
     }
 
     public void Update()
     {
-        if (target == null)
+        if (targets.Count == 0)
         {
             isEnemy = false;
             enemyHealthInst = null;
             return;
         }
 
-        if (isEnemy) //If the target being lasered is an enemy
-        {
-            enemyHealthInst.TakeDamage(damagePerSecond * Time.deltaTime);
-        }
+        //foreach(GameObject enemy in targets)
+        //{
+        //    if(isEnemy)
+        //    {
+        //        enemyHealthInst = enemy.GetComponent<EnemyHealth>();
+        //        enemyHealthInst.TakeDamage(damagePerSecond * Time.deltaTime);
+        //    }
+        //}
     }
 
     public void setTarget(GameObject t)
     {
-        target = t;
+        targets.Add(t);
 
-        if (target == null)
+        if (targets.Count == 0)
         {
             isEnemy = false;
             enemyHealthInst = null;
             return;
         }
 
-        if (target.tag == "Enemy")
-        {
-            isEnemy = true;
-            enemyHealthInst = target.GetComponent<EnemyHealth>();
-        }
+        isEnemy = true;
     }
 
     public float getDamagePerSecond()
@@ -66,5 +68,22 @@ public class Laser : MonoBehaviour {
         //Recalculates the range in case it has updated since last function call
         range = this.transform.localScale.z * this.GetComponent<BoxCollider>().size.z * this.transform.parent.localScale.z;
         return range;
+    }
+
+    private void OnTriggerEnter(Collider col)
+    {
+        print("Target added");
+        if (col.gameObject.tag == "Enemy")
+        {
+            setTarget(col.gameObject);
+        }
+    }
+
+    private void OnTriggerExit(Collider col)
+    {
+        if(col.gameObject.tag == "Enemy")
+        {
+            targets.Remove(col.gameObject);
+        }
     }
 }

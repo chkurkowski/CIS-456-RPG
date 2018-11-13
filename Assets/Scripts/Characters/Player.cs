@@ -19,6 +19,11 @@ public class Player : MonoBehaviour {
         }
     }
 
+    public void CollectGold(int g)
+    {
+        stats.addGold(g);
+    }
+
     private void OnCollisionEnter(Collision col)
     {
         if (col.gameObject.tag == "Attack")
@@ -30,6 +35,6 @@ public class Player : MonoBehaviour {
     public void TakeDamage(float dmg)
     {
         stats.setHealth(stats.getHealth() - dmg);
-        Debug.Log("Health: " + stats.getHealth());
+        //Debug.Log("Health: " + stats.getHealth());
     }
 }
