@@ -35,6 +35,6 @@ public class Player : MonoBehaviour {
     public void TakeDamage(float dmg)
     {
         stats.setHealth(stats.getHealth() - dmg);
-        //Debug.Log("Health: " + stats.getHealth());
+        Debug.Log("Health: " + stats.getHealth());
     }
 }
