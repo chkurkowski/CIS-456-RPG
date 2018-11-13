@@ -19,6 +19,11 @@ public class Player : MonoBehaviour {
         }
     }
 
+    private void CollectGold(int g)
+    {
+        stats.addGold(g);
+    }
+
     private void OnCollisionEnter(Collision col)
     {
         if (col.gameObject.tag == "Attack")

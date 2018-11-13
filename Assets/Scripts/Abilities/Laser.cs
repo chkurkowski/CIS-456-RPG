@@ -11,6 +11,7 @@ public class Laser : MonoBehaviour {
     [SerializeField] private GameObject atkOrigin;
 
     private GameObject target;
+    private List<GameObject> targets;
     private EnemyHealth enemyHealthInst;
 
     [SerializeField] private float damagePerSecond = 100f;
@@ -21,6 +22,7 @@ public class Laser : MonoBehaviour {
     {
         //Gets the length of the red line
         range = this.transform.localScale.z * this.GetComponent<BoxCollider>().size.z * this.transform.parent.localScale.z;
+        targets = new List<GameObject>();
     }
 
     public void Update()
