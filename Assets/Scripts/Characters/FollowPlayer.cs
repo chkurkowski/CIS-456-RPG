@@ -8,26 +8,21 @@ public class FollowPlayer : MonoBehaviour {
 
     private Transform charTransform;
     private Transform cameraTransform;
-    //private float[] xBounds;
-    //private float yBound;
-    //private float[] zBounds;
-    private float xOffset = 2.9f;
-    private float yOffset = 4.6f;
-    private float zOffset = 3.25f;
+    private Vector3 offset = new Vector3(2.9f, 4.6f, 3.25f);
 
     private void Awake()
     {
         charTransform = character.transform;
-        Vector3 charPos = charTransform.position;
-        //xBounds = new float[2] { charPos.x + .5f, charPos.x - .5f };
-        //zBounds = new float[2] { charPos.x + .5f, charPos.y - .5f };
-        //yBound = charPos.y;
-        
+        Vector3 charPos = charTransform.position; 
     }
 
-    // Update is called once per frame
-    void Update ()
+    void LateUpdate ()
     {
-        this.transform.position = new Vector3(character.transform.position.x + xOffset, character.transform.position.y + yOffset, character.transform.position.z + zOffset);
+        moveCameraToPlayer();
+    }
+
+    public void moveCameraToPlayer()
+    {
+        this.transform.position = charTransform.position + offset;
     }
 }

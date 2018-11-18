@@ -15,6 +15,7 @@ public class RoomGeneration : MonoBehaviour
     public GameObject RoomDoor;
     public GameObject character;
     public GameObject teleporter;
+    private FollowPlayer cameraController;
     private NavigationBaker baker;
     private EnemySpawning spawner;
 
@@ -68,8 +69,8 @@ public class RoomGeneration : MonoBehaviour
             numOfRoomsInitial= Mathf.RoundToInt(areaSizeX * areaSizeY);
         }
 
+        cameraController = FindObjectOfType<FollowPlayer>();
         baker = FindObjectOfType<NavigationBaker>();
-
         spawner = FindObjectOfType<EnemySpawning>();
 
         branchProb = startBranchProb;
@@ -7773,7 +7774,8 @@ public class RoomGeneration : MonoBehaviour
         int rand = Random.Range(0, numOfRoomsInitial - 1);
         Room spawnRoom = rooms[rand];
         spawnRoom.type = "spawn";
-        character.transform.position = spawnRoom.getRandomPosition();
+        character.transform.position = spawnRoom.getRandomPosition() + new Vector3(0f, 1.13f, 0f);
+        cameraController.moveCameraToPlayer();
     }
 
     public List<Room> getAllRooms()
