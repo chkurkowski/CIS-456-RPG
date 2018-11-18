@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PlayerStats {
 
+    [SerializeField] private const float maxHealth = 100f;
     [SerializeField] private static float health = 100f;
     [SerializeField] private static int gold = 0;
     private static PlayerStats inst;
@@ -26,7 +27,7 @@ public class PlayerStats {
 
     public void Reset()
     {
-        health = 100f;
+        health = maxHealth;
         gold = 0;
     }
 
@@ -53,5 +54,10 @@ public class PlayerStats {
     public void addGold(int g)
     {
         gold += g;
+    }
+
+    public float getHealthPercentage()
+    {
+        return health / maxHealth;
     }
 }

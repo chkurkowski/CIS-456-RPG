@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour {
 
 	public void EndGame()
     {
-        //TODO: Game over screen
+        //TODO: Game over screen ON THIS LINE
         level = 1;
         PlayerStats.Instance.Reset();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
