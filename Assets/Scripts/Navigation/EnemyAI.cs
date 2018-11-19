@@ -147,6 +147,7 @@ public class EnemyAI : MonoBehaviour
         if (Vector3.Distance(target.transform.position, transform.position) <= attackRange)
         {
             //1
+            attackTimer = attackCooldown;
             agent.isStopped = true;
             state = State.ATTACK;
         }
