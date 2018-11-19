@@ -130,7 +130,7 @@ public class EnemyHealth : MonoBehaviour {
         }
         else if(roll < itemChance[3])
         {
-            GameObject gm = Instantiate(itemLoot[2], transform.position + Vector3.up, Quaternion.identity);
+            GameObject gm = Instantiate(itemLoot[3], transform.position + Vector3.up, Quaternion.identity);
             //Set Quality here?
         }
     }
