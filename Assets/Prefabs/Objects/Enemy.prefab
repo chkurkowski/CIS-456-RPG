@@ -102,7 +102,11 @@ MonoBehaviour:
   - {fileID: 1618723237822234, guid: 8c623cbd7c8ee4d24825880136726711, type: 2}
   - {fileID: 1144261655328184, guid: 3ff0b28f26a1e403a959e1397be1d721, type: 2}
   - {fileID: 1600730219073594, guid: d9175e949fed64547be8f7139c52def6, type: 2}
-  itemLoot: []
+  itemLoot:
+  - {fileID: 1436567206873954, guid: c0eaee27bba5d4af9a65f143a5d2646d, type: 2}
+  - {fileID: 1777722872658952, guid: 677dff78446de4f3c9d6f5622a4f66a1, type: 2}
+  - {fileID: 1805743057951068, guid: 035caefcbe20c406ea1cfb78af151526, type: 2}
+  - {fileID: 1850583187578550, guid: c1dc0be08a4294f6fa85b43c4bc4126c, type: 2}
   health: 25
 --- !u!114 &114722584651854470
 MonoBehaviour:

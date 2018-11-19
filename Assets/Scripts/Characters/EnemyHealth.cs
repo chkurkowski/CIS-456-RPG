@@ -9,7 +9,9 @@ public class EnemyHealth : MonoBehaviour {
     private float[] goldChance = {
         65, 85, 90
     };
-    private float[] itemChance;
+    private float[] itemChance = {
+        15, 30, 45, 60
+    };
 
     [SerializeField] private float health = 5f;
 
@@ -17,23 +19,11 @@ public class EnemyHealth : MonoBehaviour {
     {
         if (health <= 0)
         {
-            float roll = Random.Range(0, 100f);
-
-            if (roll < goldChance[0])
-            {
-                GameObject gm = Instantiate(goldLoot[0], transform.position + Vector3.up, Quaternion.identity);
-                gm.GetComponent<Gold>().SetWorth(0);
-            }
-            else if (roll < goldChance[1])
-            {
-                GameObject gm = Instantiate(goldLoot[1], transform.position + Vector3.up, Quaternion.identity);
-                gm.GetComponent<Gold>().SetWorth(1);
-            }
-            else if (roll < goldChance[2])
-            {
-                GameObject gm = Instantiate(goldLoot[2], transform.position + Vector3.up, Quaternion.identity);
-                gm.GetComponent<Gold>().SetWorth(2);
-            }
+            SpawnGold();
+            SpawnItem();
+            EnemyAI AI = GetComponent<EnemyAI>();
+            AI.alive = false;
+            AI.agent.enabled = false;
 
             Destroy(this.gameObject);
         }
@@ -95,6 +85,53 @@ public class EnemyHealth : MonoBehaviour {
                 else
                     right = true;
             }
+        }
+    }
+
+    private void SpawnGold()
+    {
+        float roll = Random.Range(0, 100f);
+
+        if (roll < goldChance[0])
+        {
+            GameObject gm = Instantiate(goldLoot[0], transform.position + Vector3.up, Quaternion.identity);
+            gm.GetComponent<Gold>().SetWorth(0);
+        }
+        else if (roll < goldChance[1])
+        {
+            GameObject gm = Instantiate(goldLoot[1], transform.position + Vector3.up, Quaternion.identity);
+            gm.GetComponent<Gold>().SetWorth(1);
+        }
+        else if (roll < goldChance[2])
+        {
+            GameObject gm = Instantiate(goldLoot[2], transform.position + Vector3.up, Quaternion.identity);
+            gm.GetComponent<Gold>().SetWorth(2);
+        }
+    }
+
+    private void SpawnItem()
+    {
+        float roll = Random.Range(0, 100f);
+
+        if (roll < itemChance[0])
+        {
+            GameObject gm = Instantiate(itemLoot[0], transform.position + Vector3.up, Quaternion.identity);
+            //Set Quality here?
+        }
+        else if (roll < itemChance[1])
+        {
+            GameObject gm = Instantiate(itemLoot[1], transform.position + Vector3.up, Quaternion.identity);
+            //Set Quality here?
+        }
+        else if (roll < itemChance[2])
+        {
+            GameObject gm = Instantiate(itemLoot[2], transform.position + Vector3.up, Quaternion.identity);
+            //Set quiality here?
+        }
+        else if(roll < itemChance[3])
+        {
+            GameObject gm = Instantiate(itemLoot[2], transform.position + Vector3.up, Quaternion.identity);
+            //Set Quality here?
         }
     }
 }

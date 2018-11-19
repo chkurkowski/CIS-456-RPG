@@ -43,7 +43,7 @@ public class EnemyAI : MonoBehaviour
 
     //Transform for targeting
     private Transform targetedTransform;
-    private bool alive;
+    public bool alive;
 
     //Move timer
     private float idleTimer = 0f;
