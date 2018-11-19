@@ -18,7 +18,7 @@ public class GameManager : MonoBehaviour {
 
     private void Update()
     {
-        goldText.text = ":  " + stats.getGold().ToString();
+        goldText.text = stats.getGold().ToString();
     }
 
     public void levelPP()
@@ -36,6 +36,7 @@ public class GameManager : MonoBehaviour {
         //TODO: Game over screen ON THIS LINE
         level = 1;
         PlayerStats.Instance.Reset();
+        EquipmentManager.instance.UnequipAll();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

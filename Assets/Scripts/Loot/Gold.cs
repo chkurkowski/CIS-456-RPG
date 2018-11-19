@@ -7,20 +7,28 @@ public class Gold : MonoBehaviour {
     private GameObject player;
 
     private int value = 100;
+    private bool canPickup = false;
+    private float pickupRange = 2f;
 
     private void Start()
     {
         player = GameObject.FindWithTag("Player");
+        Invoke("Pickup", .8f);
     }
 
     // Update is called once per frame
     void Update () {
-        if(Vector3.Distance(transform.position, player.transform.position) < 1)
+        if(Vector3.Distance(transform.position, player.transform.position) < pickupRange && canPickup)
         {
             player.GetComponent<Player>().CollectGold(value);
             Destroy(gameObject);
         }
 	}
+
+    private void Pickup()
+    {
+        canPickup = true;
+    }
 
     public void SetWorth(int i)
     {

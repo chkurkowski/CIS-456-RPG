@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.EventSystems;
 
 public class CharController : MonoBehaviour
 {
@@ -38,22 +39,48 @@ public class CharController : MonoBehaviour
     void Update()
     {
         ClickToMove();
+        ClickToPickUp();
         MagicMissileAttack();
         LaserAttack();
     }
 
     private void ClickToMove()
     {
+        if (EventSystem.current.IsPointerOverGameObject())
+            return;
+
         if (Input.GetKey(KeyCode.Mouse0) && !(Input.GetKey(KeyCode.LeftShift)))
         {
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, 100))
             {
+                ItemPickup pickup = hit.collider.gameObject.GetComponent<ItemPickup>();
+                if(pickup != null)
+                {
+                    pickup.focused = true;
+                }
                 if(hit.point.y <= .5)
                 {
                     navMeshAgent.destination = hit.point;
                     navMeshAgent.isStopped = false;
+                }
+            }
+        }
+    }
+
+    private void ClickToPickUp()
+    {
+        if (Input.GetKey(KeyCode.Mouse0))
+        {
+            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, 100))
+            {
+                ItemPickup pickup = hit.collider.gameObject.GetComponent<ItemPickup>();
+                if (pickup != null)
+                {
+                    pickup.focused = true;
                 }
             }
         }
@@ -64,7 +91,7 @@ public class CharController : MonoBehaviour
         missleNextFire -= Time.deltaTime;
         missleNextFire = Mathf.Clamp(missleNextFire, 0, missleNextFire);
 
-        if (Input.GetButton("Fire1") && Input.GetKey(KeyCode.LeftShift) && missleNextFire <= 0f)
+        if (Input.GetKey(KeyCode.Mouse0) && Input.GetKey(KeyCode.LeftShift) && missleNextFire <= 0f)
         {
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
@@ -86,7 +113,7 @@ public class CharController : MonoBehaviour
 
     private void LaserAttack()
     {
-        if(Input.GetButton("Fire2"))
+        if(Input.GetKey(KeyCode.Mouse1))
         {
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit; 

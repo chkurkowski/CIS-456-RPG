@@ -8,6 +8,10 @@ TagManager:
   - Attack
   - Enemy
   - Gold
+  - Boots
+  - Pants
+  - Chest
+  - Helm
   layers:
   - Default
   - TransparentFX
