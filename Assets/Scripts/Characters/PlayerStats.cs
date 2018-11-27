@@ -4,10 +4,12 @@ using UnityEngine;
 
 public class PlayerStats {
 
-    [SerializeField] private const float maxHealth = 100f;
-    [SerializeField] private static float health = 100f;
-    [SerializeField] private static int gold = 0;
+    private const float maxHealth = 100f;
+    private static float health = 100f;
+    private static int gold = 0;
     private static PlayerStats inst;
+    private float armorModifier = 0f;
+    private float damageModifier = 0f;
 
     private PlayerStats()
     {
@@ -60,4 +62,27 @@ public class PlayerStats {
     {
         return health / maxHealth;
     }
+
+    public float GetArmorModifier()
+    {
+        return armorModifier;
+    }
+
+    public void SetArmorModifier(float a)
+    {
+        armorModifier = a;
+        //Debug.Log("Armor: " + armorModifier);
+    }
+
+    public float GetDamageModifier()
+    {
+        return damageModifier;
+    }
+
+    public void SetDamageModifier(float d)
+    {
+        damageModifier = d;
+        //Debug.Log("Damage: " + damageModifier);
+    }
+
 }

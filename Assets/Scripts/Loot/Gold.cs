@@ -8,7 +8,7 @@ public class Gold : MonoBehaviour {
 
     private int value = 100;
     private bool canPickup = false;
-    private float pickupRange = 1.4f;
+    private float pickupRange = 1.25f;
 
     private void Start()
     {
