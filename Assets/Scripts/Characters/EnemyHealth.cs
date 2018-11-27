@@ -10,7 +10,7 @@ public class EnemyHealth : MonoBehaviour {
         65, 85, 90
     };
     private float[] itemChance = {
-        15, 30, 45, 60
+        5, 10, 15, 20
     };
 
     [SerializeField] private float health = 5f;

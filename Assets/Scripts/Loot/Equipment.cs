@@ -7,8 +7,8 @@ public class Equipment : Items
 {
     public EquipmentType equipType;
 
-    public int armorModifier;
-    public int damageModifier;
+    public float armorModifier;
+    public float damageModifier;
 
     public override void Use()
     {
