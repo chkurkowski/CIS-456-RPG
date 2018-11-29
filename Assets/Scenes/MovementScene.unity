@@ -2764,7 +2764,7 @@ MonoBehaviour:
   teleporter: {fileID: 1506745577070694, guid: 2ace1b967125ec945b04f605ca177afc, type: 2}
   areaSizeX: 100
   areaSizeY: 100
-  numOfRoomsInitial: 50
+  numOfRoomsInitial: 10
   numOfRoomsFinal: 0
   startBranchProb: 0.75
   endBranchProb: 0.5
@@ -6350,6 +6350,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   goldLoot: []
   itemLoot: []
+  potions: []
   health: 100
 --- !u!65 &1669031320
 BoxCollider:

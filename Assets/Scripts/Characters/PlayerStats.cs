@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerStats {
 
+    private Equipment[] savedEquipment;
+    public List<Items> savedItems = new List<Items>();
     private const float maxHealth = 100f;
     private static float health = 100f;
     private static int gold = 0;
@@ -83,6 +85,62 @@ public class PlayerStats {
     {
         damageModifier = d;
         //Debug.Log("Damage: " + damageModifier);
+    }
+
+    public void GetSavedEquipment()
+    {
+        EquipmentManager manager = EquipmentManager.instance;
+
+        if(savedEquipment.Length != 0)
+        {
+            foreach (Equipment e in savedEquipment)
+            {
+                manager.Equip(e);
+            }
+        }
+    }
+
+    public void SetSavedEquipment()
+    {
+        EquipmentManager manager = EquipmentManager.instance;
+
+        if (manager.currentEquipment.Length != 0)
+        {
+            for (int i = 0; i < manager.currentEquipment.Length; i++)
+            {
+                if (manager.currentEquipment[i] != null)
+                {
+                    savedEquipment[i] = manager.currentEquipment[i];
+                }
+            }
+        }
+    }
+
+    public void GetSavedInventory()
+    {
+        InventoryManager manager = InventoryManager.instance;
+
+        if (savedItems.Count != 0)
+        {
+            foreach (Items i in savedItems)
+            {
+                manager.Add(i);
+            }
+        }
+    }
+
+    public void SetSavedInventory()
+    {
+        savedItems.Clear();
+        InventoryManager manager = InventoryManager.instance;
+
+        if (manager.items.Count != 0)
+        {
+            foreach (Items i in manager.items)
+            {
+                savedItems.Add(i);
+            }
+        }
     }
 
 }
