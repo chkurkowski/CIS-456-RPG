@@ -35,6 +35,7 @@ public class EquipmentManager : MonoBehaviour
         currentEquipment = new Equipment[numSlots];
         inventory = InventoryManager.instance;
         stats = PlayerStats.Instance;
+        stats.GetSavedEquipment();
     }
 
     public void Equip(Equipment newItem)

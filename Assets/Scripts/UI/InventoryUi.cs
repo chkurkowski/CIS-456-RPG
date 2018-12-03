@@ -21,9 +21,14 @@ public class InventoryUi : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
+        OpenInventory();
+    }
 
+    private void OpenInventory()
+    {
         if (Input.GetKeyDown(KeyCode.I))
         {
+            GameManager.instance.UpdateGoldText();
             inventoryUI.SetActive(!inventoryUI.activeSelf);
         }
     }

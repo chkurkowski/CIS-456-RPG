@@ -107,6 +107,8 @@ MonoBehaviour:
   - {fileID: 1777722872658952, guid: 677dff78446de4f3c9d6f5622a4f66a1, type: 2}
   - {fileID: 1805743057951068, guid: 035caefcbe20c406ea1cfb78af151526, type: 2}
   - {fileID: 1850583187578550, guid: c1dc0be08a4294f6fa85b43c4bc4126c, type: 2}
+  potions:
+  - {fileID: 1464280097616438, guid: fa7ab15fa214c403c8b650135d5ff1b2, type: 2}
   health: 25
 --- !u!114 &114722584651854470
 MonoBehaviour:

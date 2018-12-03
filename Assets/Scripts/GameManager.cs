@@ -6,9 +6,21 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour {
 
+    #region Singleton
+
+    public static GameManager instance;
+
+    private void Awake()
+    {
+        instance = this;
+    }
+
+    #endregion
+
     public Text goldText;
 
     private PlayerStats stats;
+    [SerializeField]
     private static int level = 1;
 
     private void Start()
@@ -16,7 +28,7 @@ public class GameManager : MonoBehaviour {
         stats = PlayerStats.Instance;
     }
 
-    private void Update()
+    public void UpdateGoldText()
     {
         goldText.text = stats.getGold().ToString();
     }

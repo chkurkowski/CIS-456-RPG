@@ -25,8 +25,9 @@ public class Teleporter : MonoBehaviour {
 
     public void Teleport()
     {
-        FindObjectOfType<GameManager>().levelPP();
-        //roomGen.ResetRooms();
+        GameManager.instance.levelPP();
+        //PlayerStats.Instance.SetSavedEquipment();
+        PlayerStats.Instance.SetSavedInventory();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

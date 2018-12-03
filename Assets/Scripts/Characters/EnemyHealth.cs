@@ -4,6 +4,7 @@ public class EnemyHealth : MonoBehaviour {
 
     public GameObject[] goldLoot;
     public GameObject[] itemLoot;
+    public GameObject[] potions;
 
     // Chances in order to get 1 stack, 2 stacks, 3 stacks
     private float[] goldChance = {
@@ -11,6 +12,9 @@ public class EnemyHealth : MonoBehaviour {
     };
     private float[] itemChance = {
         5, 10, 15, 20
+    };
+    private float[] potionChance ={
+        15
     };
 
     [SerializeField] private float health = 5f;
@@ -21,6 +25,7 @@ public class EnemyHealth : MonoBehaviour {
         {
             SpawnGold();
             SpawnItem();
+            SpawnPotion();
             EnemyAI AI = GetComponent<EnemyAI>();
             AI.alive = false;
             AI.agent.enabled = false;
@@ -131,6 +136,17 @@ public class EnemyHealth : MonoBehaviour {
         else if(roll < itemChance[3])
         {
             GameObject gm = Instantiate(itemLoot[3], transform.position + Vector3.up, Quaternion.identity);
+            //Set Quality here?
+        }
+    }
+
+    private void SpawnPotion()
+    {
+        float roll = Random.Range(0, 100f);
+
+        if (roll < potionChance[0])
+        {
+            GameObject gm = Instantiate(potions[0], transform.position + Vector3.up, Quaternion.identity);
             //Set Quality here?
         }
     }
