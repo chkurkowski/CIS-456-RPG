@@ -18,24 +18,22 @@ public class EquipmentManager : MonoBehaviour
 
     #endregion
 
-    //public EquipmentSlot[] currentSlots;
-
-    public Equipment[] currentEquipment;
+    private EquippedItems equipment = EquippedItems.Instance;
 
     private PlayerStats stats;
 
     private InventoryManager inventory;
 
-    public delegate void OnEquipmentChanged(Equipment newItem, Equipment oldItem);
+    public delegate void OnEquipmentChanged();
     public OnEquipmentChanged onEquipmentChanged;
 
     private void Start()
     {
         int numSlots = System.Enum.GetNames(typeof(EquipmentType)).Length;
-        currentEquipment = new Equipment[numSlots];
+        equipment.GenerateArray(numSlots);
         inventory = InventoryManager.instance;
         stats = PlayerStats.Instance;
-        stats.GetSavedEquipment();
+        //stats.GetSavedEquipment();
     }
 
     public void Equip(Equipment newItem)
@@ -44,37 +42,39 @@ public class EquipmentManager : MonoBehaviour
 
         Equipment oldItem = null;
 
-        if(currentEquipment[slotIndex] != null)
+        if(equipment.currentEquipment[slotIndex] != null)
         {
-            oldItem = currentEquipment[slotIndex];
+            oldItem = equipment.currentEquipment[slotIndex];
             inventory.Add(oldItem);
         }
 
-        if (onEquipmentChanged != null)
-            onEquipmentChanged.Invoke(newItem, oldItem);
+        equipment.currentEquipment[slotIndex] = newItem;
 
-        currentEquipment[slotIndex] = newItem;
+        if (onEquipmentChanged != null)
+            onEquipmentChanged.Invoke();
+
         PassEquipStats();
     }
 
     public void Unequip(int slotIndex)
     {
-        if(currentEquipment[slotIndex] != null)
+        if(equipment.currentEquipment[slotIndex] != null)
         {
-            Equipment oldItem = currentEquipment[slotIndex];
+            Equipment oldItem = equipment.currentEquipment[slotIndex];
             inventory.Add(oldItem);
 
-            if (onEquipmentChanged != null)
-                onEquipmentChanged.Invoke(null, oldItem);
+            equipment.currentEquipment[slotIndex] = null;
 
-            currentEquipment[slotIndex] = null;
+            if (onEquipmentChanged != null)
+                onEquipmentChanged.Invoke();
+
             PassEquipStats();
         }
     }
 
     public void UnequipAll()
     {
-        for (int i = 0; i < currentEquipment.Length; i++)
+        for (int i = 0; i < equipment.currentEquipment.Length; i++)
         {
             Unequip(i);
         }
@@ -86,12 +86,12 @@ public class EquipmentManager : MonoBehaviour
         float totalArmor = 0;
         float totalDamage = 0;
 
-        for (int i = 0; i < currentEquipment.Length; i++)
+        for (int i = 0; i < equipment.currentEquipment.Length; i++)
         {
-            if(currentEquipment[i] != null)
+            if(equipment.currentEquipment[i] != null)
             {
-                totalArmor += currentEquipment[i].armorModifier;
-                totalDamage += currentEquipment[i].damageModifier;
+                totalArmor += equipment.currentEquipment[i].armorModifier;
+                totalDamage += equipment.currentEquipment[i].damageModifier;
             }
         }
 

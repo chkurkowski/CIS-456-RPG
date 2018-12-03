@@ -18,18 +18,18 @@ public class InventoryManager : MonoBehaviour {
 
     public float inventorySize;
     public Canvas inventory;
-    public List<Items> items = new List<Items>();
+    public InventoryItems currItems = InventoryItems.Instance;
 
     public delegate void OnItemChanged();
     public OnItemChanged onItemChangedCallback;
 
     public bool Add(Items item)
     {
-        if(items.Count >= inventorySize)
+        if(currItems.items.Count >= inventorySize)
         {
             return false;
         }
-        items.Add(item);
+        currItems.items.Add(item);
 
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
@@ -39,9 +39,14 @@ public class InventoryManager : MonoBehaviour {
 
     public void Remove(Items item)
     {
-        items.Remove(item);
+        currItems.items.Remove(item);
 
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
+    }
+
+    public void RemoveAll()
+    {
+        currItems.items.Clear();
     }
 }

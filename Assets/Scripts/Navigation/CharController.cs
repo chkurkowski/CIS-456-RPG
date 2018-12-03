@@ -91,7 +91,8 @@ public class CharController : MonoBehaviour
         missleNextFire -= Time.deltaTime;
         missleNextFire = Mathf.Clamp(missleNextFire, 0, missleNextFire);
 
-        if (Input.GetKey(KeyCode.Mouse0) && Input.GetKey(KeyCode.LeftShift) && missleNextFire <= 0f)
+        //&& Input.GetKey(KeyCode.LeftShift)
+        if (Input.GetKey(KeyCode.Mouse0) && missleNextFire <= 0f)
         {
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;

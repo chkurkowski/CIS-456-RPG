@@ -7,8 +7,11 @@ public class InventoryUi : MonoBehaviour {
     public GameObject inventoryUI;
 
     private InventoryManager inventory;
+    private InventoryItems currItems = InventoryItems.Instance;
 
     private InventorySlot[] slots;
+
+    private bool inventoryOpen = false;
 
 	// Use this for initialization
 	void Start () {
@@ -28,6 +31,8 @@ public class InventoryUi : MonoBehaviour {
     {
         if (Input.GetKeyDown(KeyCode.I))
         {
+            inventory.onItemChangedCallback.Invoke();
+            EquipmentManager.instance.onEquipmentChanged.Invoke();
             GameManager.instance.UpdateGoldText();
             inventoryUI.SetActive(!inventoryUI.activeSelf);
         }
@@ -39,9 +44,9 @@ public class InventoryUi : MonoBehaviour {
 
         for (int i = 0; i < slots.Length; i++)
         {
-            if (i < inventory.items.Count)
+            if (i < currItems.items.Count)
             {
-                slots[i].AddItem(inventory.items[i]);
+                slots[i].AddItem(currItems.items[i]);
             }
             else
             {
