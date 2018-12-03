@@ -3,11 +3,9 @@ using UnityEngine.AI;
 using System.Collections.Generic;
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using UnityEditor;
 using UnityEditorInternal;
-using UnityEngine;
 
 public class NavigationBaker : MonoBehaviour
 {

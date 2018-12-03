@@ -5,14 +5,21 @@ using UnityEngine;
 public class EnemySpawning : MonoBehaviour
 {
     public GameObject enemy;
+    public GameObject tankEnemy;
     public Transform enemiesList;
     private List<GameObject> enemies;
 
-    [SerializeField] List<float> OnexOneSpawnChances = new List<float>(new float[] { 0.75f, 0.50f, 0.25f });
-    [SerializeField] List<float> OnexTwoSpawnChances = new List<float>(new float[] { 1f, 0.75f, 0.5f, 0.25f });
-    [SerializeField] List<float> TwoxOneSpawnChances = new List<float>(new float[] { 1f, 0.75f, 0.5f, 0.25f });
-    [SerializeField] List<float> TwoxTwoSpawnChances = new List<float>(new float[] { 1f, 1f, 0.75f, 0.5f, 0.25f });
-    [SerializeField] List<float> ThreexThreeSpawnChances = new List<float>(new float[] { 1f, 1f, 1f, 0.75f, 0.75f, 0.75f, 0.5f, 0.5f, 0.25f });
+    [SerializeField] List<float> EnemyOnexOneSpawnChances = new List<float>(new float[] { 0.5f, 0.5f });
+    [SerializeField] List<float> EnemyOnexTwoSpawnChances = new List<float>(new float[] { 0.5f, 0.5f, 0.5f });
+    [SerializeField] List<float> EnemyTwoxOneSpawnChances = new List<float>(new float[] { 0.5f, 0.5f, 0.5f });
+    [SerializeField] List<float> EnemyTwoxTwoSpawnChances = new List<float>(new float[] { 0.75f, 0.75f, 0.5f, 0.5f });
+    [SerializeField] List<float> EnemyThreexThreeSpawnChances = new List<float>(new float[] { 1f, 0.75f, 0.75f, 0.5f, 0.5f });
+
+    [SerializeField] List<float> TankEnemyOnexOneSpawnChances = new List<float>(new float[] { 0.05f });
+    [SerializeField] List<float> TankEnemyOnexTwoSpawnChances = new List<float>(new float[] { 0.15f });
+    [SerializeField] List<float> TankEnemyTwoxOneSpawnChances = new List<float>(new float[] { 0.15f });
+    [SerializeField] List<float> TankEnemyTwoxTwoSpawnChances = new List<float>(new float[] { 0.25f });
+    [SerializeField] List<float> TankEnemyThreexThreeSpawnChances = new List<float>(new float[] { 0.75f, 0.25f });
 
     private RoomGeneration roomGen;
     private List<Room> rooms;
@@ -43,16 +50,19 @@ public class EnemySpawning : MonoBehaviour
                 continue;
             }
 
-            List<float> spawnChances = getSpawnChances(room.size);
+            List<float> enemySpawnChances = getSpawnChances(enemy, room.size);
+            List<float> tankEnemySpawnChances = getSpawnChances(tankEnemy, room.size);
             int numEnemiesSpawned = 0;
+            int numTankEnemiesSpawned = 0;
             bool spawnEnemy = true;
+            bool spawnTankEnemy = true;
 
             do
             {
                 float random = Random.value;
 
-                if (numEnemiesSpawned < spawnChances.Count
-                    && random <= spawnChances[numEnemiesSpawned])
+                if (numEnemiesSpawned < enemySpawnChances.Count
+                    && random <= enemySpawnChances[numEnemiesSpawned])
                 {
                     GameObject newEnemy = Instantiate(enemy, room.getRandomPosition(), Quaternion.identity);
                     enemies.Add(newEnemy);
@@ -63,32 +73,75 @@ public class EnemySpawning : MonoBehaviour
                 {
                     spawnEnemy = false;
                 }
+
+                if (numTankEnemiesSpawned < tankEnemySpawnChances.Count
+                    && random <= tankEnemySpawnChances[numTankEnemiesSpawned])
+                {
+                    GameObject newTankEnemy = Instantiate(tankEnemy, room.getRandomPosition(), Quaternion.identity);
+                    enemies.Add(newTankEnemy);
+                    numTankEnemiesSpawned++;
+                    newTankEnemy.transform.parent = enemiesList;
+                }
+                else
+                {
+                    spawnTankEnemy = false;
+                }
             }
-            while (spawnEnemy);
+            while (spawnEnemy || spawnTankEnemy);
         }
     }
 
-    private List<float> getSpawnChances(Vector2 roomSize)
+    private List<float> getSpawnChances(GameObject enemyType, Vector2 roomSize)
     {
-        if (roomSize == OnexOne)
+        if (enemyType == enemy)
         {
-            return OnexOneSpawnChances;
+            if (roomSize == OnexOne)
+            {
+                return EnemyOnexOneSpawnChances;
+            }
+            else if (roomSize == OnexTwo)
+            {
+                return EnemyOnexTwoSpawnChances;
+            }
+            else if (roomSize == TwoxOne)
+            {
+                return EnemyTwoxOneSpawnChances;
+            }
+            else if (roomSize == TwoxTwo)
+            {
+                return EnemyTwoxTwoSpawnChances;
+            }
+            else
+            {
+                return EnemyThreexThreeSpawnChances;
+            }
         }
-        else if (roomSize == OnexTwo)
+        else if (enemyType == tankEnemy)
         {
-            return OnexTwoSpawnChances;
-        }
-        else if (roomSize == TwoxOne)
-        {
-            return TwoxOneSpawnChances;
-        }
-        else if (roomSize == TwoxTwo)
-        {
-            return TwoxTwoSpawnChances;
+            if (roomSize == OnexOne)
+            {
+                return TankEnemyOnexOneSpawnChances;
+            }
+            else if (roomSize == OnexTwo)
+            {
+                return TankEnemyOnexTwoSpawnChances;
+            }
+            else if (roomSize == TwoxOne)
+            {
+                return TankEnemyTwoxOneSpawnChances;
+            }
+            else if (roomSize == TwoxTwo)
+            {
+                return TankEnemyTwoxTwoSpawnChances;
+            }
+            else
+            {
+                return TankEnemyThreexThreeSpawnChances;
+            }
         }
         else
         {
-            return ThreexThreeSpawnChances;
+            return EnemyOnexOneSpawnChances;
         }
     }
 }

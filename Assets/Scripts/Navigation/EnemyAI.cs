@@ -49,6 +49,10 @@ public class EnemyAI : MonoBehaviour
     private float idleTimer = 0f;
     private const float IDLETIME = 1.5f;
 
+
+    //Initial Attack Delay
+    private float attackDelay = 0.5f;
+
     //Attack cooldown
     private float attackTimer = 0f;
     [SerializeField]
@@ -147,7 +151,7 @@ public class EnemyAI : MonoBehaviour
         if (Vector3.Distance(target.transform.position, transform.position) <= attackRange)
         {
             //1
-            attackTimer = attackCooldown;
+            attackTimer = attackDelay;
             agent.isStopped = true;
             state = State.ATTACK;
         }
@@ -193,7 +197,7 @@ public class EnemyAI : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(transform.position, Vector3.down, out hit))
         {
-            if (hit.collider.tag == "Walkable" && hit.point.y < .5f)
+            if (hit.collider.tag == "Walkable" && hit.point.y < .8f)
             {
                 Room current = null;
                 List<Room> rooms = gen.getAllRooms();

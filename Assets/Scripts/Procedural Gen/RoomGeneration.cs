@@ -106,8 +106,8 @@ public class RoomGeneration : MonoBehaviour
         numOfRoomsFinal = rooms.Count;
         baker.roomCount = numOfRoomsFinal;
         BuildPrimitives();
-        AddObjects();
         baker.generateNavMesh();
+        AddObjects();
         SpawnEnemies();
     }
 

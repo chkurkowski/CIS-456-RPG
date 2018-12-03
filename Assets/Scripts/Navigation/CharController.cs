@@ -60,7 +60,7 @@ public class CharController : MonoBehaviour
                 {
                     pickup.focused = true;
                 }
-                if(hit.point.y <= .5)
+                if(hit.point.y <= .8)
                 {
                     navMeshAgent.destination = hit.point;
                     navMeshAgent.isStopped = false;
