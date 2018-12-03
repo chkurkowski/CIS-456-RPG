@@ -27,7 +27,7 @@ public class Teleporter : MonoBehaviour {
     {
         GameManager.instance.levelPP();
         //PlayerStats.Instance.SetSavedEquipment();
-        PlayerStats.Instance.SetSavedInventory();
+        //PlayerStats.Instance.SetSavedInventory();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

@@ -87,60 +87,60 @@ public class PlayerStats {
         //Debug.Log("Damage: " + damageModifier);
     }
 
-    public void GetSavedEquipment()
-    {
-        EquipmentManager manager = EquipmentManager.instance;
+    //public void GetSavedEquipment()
+    //{
+    //    EquipmentManager manager = EquipmentManager.instance;
 
-        if(savedEquipment.Length != 0)
-        {
-            foreach (Equipment e in savedEquipment)
-            {
-                manager.Equip(e);
-            }
-        }
-    }
+    //    if(savedEquipment.Length != 0)
+    //    {
+    //        foreach (Equipment e in savedEquipment)
+    //        {
+    //            manager.Equip(e);
+    //        }
+    //    }
+    //}
 
-    public void SetSavedEquipment()
-    {
-        EquipmentManager manager = EquipmentManager.instance;
+    //public void SetSavedEquipment()
+    //{
+    //    EquipmentManager manager = EquipmentManager.instance;
 
-        if (manager.currentEquipment.Length != 0)
-        {
-            for (int i = 0; i < manager.currentEquipment.Length; i++)
-            {
-                if (manager.currentEquipment[i] != null)
-                {
-                    savedEquipment[i] = manager.currentEquipment[i];
-                }
-            }
-        }
-    }
+    //    if (manager.currentEquipment.Length != 0)
+    //    {
+    //        for (int i = 0; i < manager.currentEquipment.Length; i++)
+    //        {
+    //            if (manager.currentEquipment[i] != null)
+    //            {
+    //                savedEquipment[i] = manager.currentEquipment[i];
+    //            }
+    //        }
+    //    }
+    //}
 
-    public void GetSavedInventory()
-    {
-        InventoryManager manager = InventoryManager.instance;
+    //public void GetSavedInventory()
+    //{
+    //    InventoryManager manager = InventoryManager.instance;
 
-        if (savedItems.Count != 0)
-        {
-            foreach (Items i in savedItems)
-            {
-                manager.Add(i);
-            }
-        }
-    }
+    //    if (savedItems.Count != 0)
+    //    {
+    //        foreach (Items i in savedItems)
+    //        {
+    //            manager.Add(i);
+    //        }
+    //    }
+    //}
 
-    public void SetSavedInventory()
-    {
-        savedItems.Clear();
-        InventoryManager manager = InventoryManager.instance;
+    //public void SetSavedInventory()
+    //{
+    //    savedItems.Clear();
+    //    InventoryManager manager = InventoryManager.instance;
 
-        if (manager.items.Count != 0)
-        {
-            foreach (Items i in manager.items)
-            {
-                savedItems.Add(i);
-            }
-        }
-    }
+    //    if (manager.items.Count != 0)
+    //    {
+    //        foreach (Items i in manager.items)
+    //        {
+    //            savedItems.Add(i);
+    //        }
+    //    }
+    //}
 
 }

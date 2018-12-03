@@ -49,6 +49,7 @@ public class GameManager : MonoBehaviour {
         level = 1;
         PlayerStats.Instance.Reset();
         EquipmentManager.instance.UnequipAll();
+        InventoryManager.instance.RemoveAll();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
