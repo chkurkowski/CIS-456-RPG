@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Name: Minor Health Potion
   m_EditorClassIdentifier: 
   name: Minor Health Potion
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 72ca4d1cd449c440bb72608542988332, type: 3}
   potion: 0
   potionStrength: 15
