@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour {
 
     public Text goldText;
 
+    private static int initialNumOfRooms = 10;
     private PlayerStats stats;
     [SerializeField]
     private static int level = 1;
@@ -26,6 +27,46 @@ public class GameManager : MonoBehaviour {
     private void Start()
     {
         stats = PlayerStats.Instance;
+    }
+
+    public int getLevel()
+    {
+        return level;
+    }
+
+
+    public int getNewLevelInitialNumOfRooms()
+    {
+        if (level == 1)
+        {
+            initialNumOfRooms = 10;
+        }
+        else if (level >= 16)
+        {
+            initialNumOfRooms = 55;
+        }
+        else if (level >= 13)
+        {
+            initialNumOfRooms++;
+        }
+        else if (level >= 10)
+        {
+            initialNumOfRooms += 2;
+        }
+        else if (level >= 7)
+        {
+            initialNumOfRooms += 3;
+        }
+        else if (level >= 4)
+        {
+            initialNumOfRooms += 4;
+        }
+        else
+        {
+            initialNumOfRooms += 5;
+        }
+
+        return initialNumOfRooms;
     }
 
     public void UpdateGoldText()

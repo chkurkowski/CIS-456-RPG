@@ -21,6 +21,9 @@ public class Room {
     //The max number of neighbors a room can have
     public int maxNeighbors;
 
+    //Whether or not the player has entered the room
+    public bool discovered;
+
     //What type of room it is:
     //"": Default
     //TODO: More types of rooms (spawn room, loot room, boss room, etc.)
@@ -60,6 +63,8 @@ public class Room {
         size = s;
         type = t;
 
+        discovered = false;
+
         setMaxNeighbors();
 
         locations = new List<Vector2>();
@@ -75,6 +80,8 @@ public class Room {
         size = s;
         type = "";
 
+        discovered = false;
+
         setMaxNeighbors();
 
         locations = new List<Vector2>();
@@ -88,6 +95,8 @@ public class Room {
         size = OnexOne;
         type = t;
 
+        discovered = false;
+
         setMaxNeighbors();
 
         locations = new List<Vector2>();
@@ -100,6 +109,8 @@ public class Room {
         center = c;
         size = OnexOne;
         type = "";
+
+        discovered = false;
 
         setMaxNeighbors();
 

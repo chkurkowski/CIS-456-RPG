@@ -20,9 +20,9 @@ public class RoomGeneration : MonoBehaviour
     private EnemySpawning spawner;
 
 
-    [SerializeField] int areaSizeX = 50; //Size of the grid on the x axis
-    [SerializeField] int areaSizeY = 50; //Size of the grid on the y axis
-    [SerializeField] int numOfRoomsInitial = 50; //Number of rooms to add to the grid
+    private int areaSizeX = 50; //Size of the grid on the x axis
+    private int areaSizeY = 50; //Size of the grid on the y axis
+    private int numOfRoomsInitial; //Number of rooms to add to the grid
     public int numOfRoomsFinal; //Number of rooms actually added (including cycles and branching off of cycles)
 
 
@@ -63,10 +63,12 @@ public class RoomGeneration : MonoBehaviour
     {
         errorRoom = new Room(errorVector);
 
+        numOfRoomsInitial = GameManager.instance.getNewLevelInitialNumOfRooms();
+
         //If there are more rooms than can fit in the grid
-        if (numOfRoomsInitial>= (areaSizeX * areaSizeY))
+        if (numOfRoomsInitial >= (areaSizeX * areaSizeY))
         {
-            numOfRoomsInitial= Mathf.RoundToInt(areaSizeX * areaSizeY);
+            numOfRoomsInitial = Mathf.RoundToInt(areaSizeX * areaSizeY);
         }
 
         cameraController = FindObjectOfType<FollowPlayer>();
@@ -198,6 +200,7 @@ public class RoomGeneration : MonoBehaviour
     private void AddObjects()
     {
         GameObject tp = Instantiate(teleporter, rooms[numOfRoomsInitial - 1].getRandomPosition(4) + new Vector3(0f, 0.4f, 0f), Quaternion.identity);
+        rooms[numOfRoomsInitial - 1].type = "teleport";
     }
 
     //Gets a random room size
