@@ -58,7 +58,6 @@ public class EnemyAI : MonoBehaviour
     [SerializeField]
     private float attackCooldown = 0.5f;
 
-    // Use this for initialization
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
