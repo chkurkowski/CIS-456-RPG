@@ -18,15 +18,21 @@ public class GameManager : MonoBehaviour {
     #endregion
 
     public Text goldText;
+    public GameObject inGameUI;
+    public GameObject inventoryUI;
+    public GameObject gameOverUI;
 
     private static int initialNumOfRooms = 10;
+
     private PlayerStats stats;
-    [SerializeField]
-    private static int level = 1;
+    private CharController charController;
+
+    [SerializeField] private static int level = 1;
 
     private void Start()
     {
         stats = PlayerStats.Instance;
+        charController = FindObjectOfType<CharController>();
     }
 
     public int getLevel()
@@ -87,10 +93,27 @@ public class GameManager : MonoBehaviour {
 	public void EndGame()
     {
         //TODO: Game over screen ON THIS LINE
+        charController.canMove = false;
+        inGameUI.SetActive(false);
+        inventoryUI.SetActive(false);
+        gameOverUI.SetActive(true);
+    }
+
+    public void Restart()
+    {
         level = 1;
         PlayerStats.Instance.Reset();
         EquipmentManager.instance.UnequipAll();
         InventoryManager.instance.RemoveAll();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void GoToMainMenu()
+    {
+        level = 1;
+        PlayerStats.Instance.Reset();
+        EquipmentManager.instance.UnequipAll();
+        InventoryManager.instance.RemoveAll();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
     }
 }

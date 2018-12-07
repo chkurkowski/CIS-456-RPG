@@ -12,7 +12,10 @@ public class CharController : MonoBehaviour
     public GameObject atkOrigin;
     public GameObject laser;
     public GameObject magicMissile;
+
+
     private RoomGeneration roomGen;
+    public bool canMove;
 
     //Instances of Laser
     private Laser laserInst;
@@ -32,6 +35,7 @@ public class CharController : MonoBehaviour
     // Use this for initialization
     void Awake()
     {
+        canMove = true;
         navMeshAgent = GetComponent<NavMeshAgent>();
         laserInst = laser.GetComponent<Laser>();
         laserLineRendInst = laser.GetComponent<LineRenderer>();
@@ -51,8 +55,10 @@ public class CharController : MonoBehaviour
 
     private void ClickToMove()
     {
-        if (EventSystem.current.IsPointerOverGameObject())
+        if (!canMove || EventSystem.current.IsPointerOverGameObject())
+        {
             return;
+        }
 
         if (Input.GetKey(KeyCode.Mouse0) && !(Input.GetKey(KeyCode.LeftShift)))
         {
