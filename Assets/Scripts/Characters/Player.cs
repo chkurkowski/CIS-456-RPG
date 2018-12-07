@@ -13,7 +13,7 @@ public class Player : MonoBehaviour {
 
     private void Update()
     {
-        Debug.Log("Armor: " + stats.GetArmorModifier() + " Damage: " + stats.GetDamageModifier());
+        //Debug.Log("Armor: " + stats.GetArmorModifier() + " Damage: " + stats.GetDamageModifier());
 
         if (stats.getHealth() <= 0)
         {

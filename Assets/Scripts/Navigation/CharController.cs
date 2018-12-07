@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
 
@@ -10,6 +12,7 @@ public class CharController : MonoBehaviour
     public GameObject atkOrigin;
     public GameObject laser;
     public GameObject magicMissile;
+    private RoomGeneration roomGen;
 
     //Instances of Laser
     private Laser laserInst;
@@ -33,11 +36,13 @@ public class CharController : MonoBehaviour
         laserInst = laser.GetComponent<Laser>();
         laserLineRendInst = laser.GetComponent<LineRenderer>();
         laserBoxCollInst = laser.GetComponent<BoxCollider>();
+        roomGen = FindObjectOfType<RoomGeneration>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        discoverRoom();
         ClickToMove();
         ClickToPickUp();
         MagicMissileAttack();
@@ -141,6 +146,24 @@ public class CharController : MonoBehaviour
             laserLineRendInst.enabled = false;
             laserBoxCollInst.enabled = false;
             laserInst.setTarget(null);
+        }
+    }
+
+    private void discoverRoom()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(atkOrigin.transform.position, Vector3.down, out hit, 100))
+        {
+            Vector2 centerOfRoom = new Vector2 (hit.transform.position.x / 10, hit.transform.position.z / 10);
+            List<Room> rooms = roomGen.getAllRooms();
+
+            foreach (Room room in rooms)
+            {
+                if (!room.discovered && room.center.Equals(centerOfRoom))
+                {
+                    room.discovered = true;
+                }
+            }
         }
     }
 }
