@@ -71,7 +71,8 @@ public class CharController : MonoBehaviour
                 {
                     pickup.focused = true;
                 }
-                if(hit.point.y <= .8)
+
+                if (hit.point.y <= .8)
                 {
                     navMeshAgent.destination = hit.point;
                     navMeshAgent.isStopped = false;
@@ -103,7 +104,7 @@ public class CharController : MonoBehaviour
         missleNextFire = Mathf.Clamp(missleNextFire, 0, missleNextFire);
 
         //&& Input.GetKey(KeyCode.LeftShift)
-        if (Input.GetMouseButtonDown(0) && missleNextFire <= 0f)
+        if (Input.GetMouseButtonDown(1) && missleNextFire <= 0f)
         {
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
@@ -123,36 +124,37 @@ public class CharController : MonoBehaviour
         }
     }
 
+    // Legacy Laser Code
     private void LaserAttack()
     {
-        if(Input.GetKey(KeyCode.Mouse1))
-        {
-            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit; 
-            if (Physics.Raycast(ray, out hit, 100))
-            {
-                navMeshAgent.isStopped = true;
-                laserLineRendInst.enabled = true;
-                laserBoxCollInst.enabled = true;
-                this.transform.LookAt(new Vector3(hit.point.x, this.transform.position.y, hit.point.z));
+        //if(Input.GetKey(KeyCode.Mouse1))
+        //{
+        //    Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+        //    RaycastHit hit; 
+        //    if (Physics.Raycast(ray, out hit, 100))
+        //    {
+        //        navMeshAgent.isStopped = true;
+        //        laserLineRendInst.enabled = true;
+        //        laserBoxCollInst.enabled = true;
+        //        this.transform.LookAt(new Vector3(hit.point.x, this.transform.position.y, hit.point.z));
 
-                float dist = Vector3.Distance(atkOrigin.transform.position, hit.collider.transform.position);
+        //        float dist = Vector3.Distance(atkOrigin.transform.position, hit.collider.transform.position);
 
-                if (dist >= laserInst.getRange() || hit.collider.gameObject.tag != "Enemy")
-                {
-                    laserInst.setTarget(null);
-                    return;
-                }
+        //        if (dist >= laserInst.getRange() || hit.collider.gameObject.tag != "Enemy")
+        //        {
+        //            laserInst.setTarget(null);
+        //            return;
+        //        }
 
-                laserInst.setTarget(hit.collider.gameObject);
-            }
-        }
-        else
-        {
-            laserLineRendInst.enabled = false;
-            laserBoxCollInst.enabled = false;
-            laserInst.setTarget(null);
-        }
+        //        laserInst.setTarget(hit.collider.gameObject);
+        //    }
+        //}
+        //else
+        //{
+        //    laserLineRendInst.enabled = false;
+        //    laserBoxCollInst.enabled = false;
+        //    laserInst.setTarget(null);
+        //}
     }
 
     private void discoverRoom()
