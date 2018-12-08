@@ -15,6 +15,7 @@ public class CharController : MonoBehaviour
 
 
     private RoomGeneration roomGen;
+    private ParticleSystem particles;
     public bool canMove;
 
     //Instances of Laser
@@ -32,6 +33,10 @@ public class CharController : MonoBehaviour
     private bool ranged;
     private float missleNextFire = 0f; //Used for missle cooldown
 
+    //Teleport
+    private float teleportCooldownTimer = 4f;
+    private const float TELEPORTCOOLDOWN = 4f;
+
     // Use this for initialization
     void Awake()
     {
@@ -41,6 +46,7 @@ public class CharController : MonoBehaviour
         laserLineRendInst = laser.GetComponent<LineRenderer>();
         laserBoxCollInst = laser.GetComponent<BoxCollider>();
         roomGen = FindObjectOfType<RoomGeneration>();
+        particles = GetComponentInChildren<ParticleSystem>();
     }
 
     // Update is called once per frame
@@ -50,7 +56,7 @@ public class CharController : MonoBehaviour
         ClickToMove();
         ClickToPickUp();
         MagicMissileAttack();
-        LaserAttack();
+        Teleport();
     }
 
     private void ClickToMove()
@@ -120,6 +126,32 @@ public class CharController : MonoBehaviour
                 Missle mmInst = mm.GetComponent<Missle>();
                 mmInst.setTarget(hit.collider.gameObject);
                 missleNextFire = (1 / mmInst.getAttackRate());
+            }
+        }
+    }
+
+    //Tentative Teleport
+    private void Teleport()
+    {
+        if(teleportCooldownTimer < TELEPORTCOOLDOWN)
+            teleportCooldownTimer += Time.deltaTime;
+
+        if (Input.GetKey(KeyCode.Space) && teleportCooldownTimer >= TELEPORTCOOLDOWN)
+        {
+            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, 100))
+            {
+                if (hit.collider.gameObject.tag == "Enemy" && Vector3.Distance(transform.position, hit.point) > 8) //Makes it so magic missles can only hit enemies (looks weird when you click the floor)
+                {
+                    return;
+                }
+                particles.Play();
+                teleportCooldownTimer = 0f;
+                navMeshAgent.isStopped = true;
+                this.transform.LookAt(new Vector3(hit.point.x, this.transform.position.y, hit.point.z));
+                this.transform.position = new Vector3(hit.point.x, transform.position.y, hit.point.z);
+                particles.Play();
             }
         }
     }
