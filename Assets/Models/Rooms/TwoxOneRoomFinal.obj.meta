@@ -1,16 +1,16 @@
 fileFormatVersion: 2
-guid: 240125831c91c7d4583b4c275914e59a
+guid: b26a51681e3aa564b975e826b30501d1
 ModelImporter:
   serializedVersion: 23
   fileIDToRecycleName:
-    100000: RoomDoor
+    100000: TwoxOneRoomFinal
     100002: //RootNode
-    400000: RoomDoor
+    400000: TwoxOneRoomFinal
     400002: //RootNode
-    2100000: RoomDoorMat
-    2300000: RoomDoor
-    3300000: RoomDoor
-    4300000: RoomDoor
+    2100000: TwoxOneRoomFinalMat
+    2300000: TwoxOneRoomFinal
+    3300000: TwoxOneRoomFinal
+    4300000: TwoxOneRoomFinal
   externalObjects: {}
   materials:
     importMaterials: 1

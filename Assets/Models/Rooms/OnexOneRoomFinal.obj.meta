@@ -1,16 +1,16 @@
 fileFormatVersion: 2
-guid: 68ed48e93644a4f44992f52c47b6d441
+guid: 17c0f6fb118b37048b9d73af90df8e8e
 ModelImporter:
   serializedVersion: 23
   fileIDToRecycleName:
-    100000: OnexOneRoom
+    100000: OnexOneRoomFinal
     100002: //RootNode
-    400000: OnexOneRoom
+    400000: OnexOneRoomFinal
     400002: //RootNode
-    2100000: OnexOneRoomMat
-    2300000: OnexOneRoom
-    3300000: OnexOneRoom
-    4300000: OnexOneRoom
+    2100000: OnexOneRoomFinalMat
+    2300000: OnexOneRoomFinal
+    3300000: OnexOneRoomFinal
+    4300000: OnexOneRoomFinal
   externalObjects: {}
   materials:
     importMaterials: 1
