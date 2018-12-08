@@ -4,13 +4,22 @@ using UnityEngine;
 
 public class ProceduralLoot : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    #region Singleton
+
+    public static ProceduralLoot instance;
+
+    private void Awake()
+    {
+        instance = this;
+    }
+
+    #endregion
+
+    private Items spawnedEquipment;
+    private GameManager manager = GameManager.instance;
+
+    public void RandomizeLoot(GameObject equipment)
+    {
+        spawnedEquipment = equipment.GetComponent<ItemPickup>().item;
+    }
 }
