@@ -184,7 +184,7 @@ public class EnemyAI : MonoBehaviour
         {
             attackTimer = attackCooldown;
             if(GameManager.instance.getLevel() != 1)
-                attackDamage += attackDamage * (GameManager.instance.getLevel() * .5f);
+                attackDamage += attackDamage * (GameManager.instance.getLevel() * .30f);
             playerScript.TakeDamage(attackDamage);
         }
     }
