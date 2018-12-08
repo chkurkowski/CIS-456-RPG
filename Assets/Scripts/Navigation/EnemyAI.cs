@@ -78,7 +78,7 @@ public class EnemyAI : MonoBehaviour
     {
         while (alive)
         {
-            print(state);
+            //print(state);
             switch (state)
             {
                 case State.PATROL:
