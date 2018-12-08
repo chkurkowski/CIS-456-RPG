@@ -9,6 +9,6 @@ public class HighScore : MonoBehaviour {
 
     public void DisplayScore()
     {
-        textMesh.text = "SCORE: " + PlayerStats.Instance.getGold().ToString();
+        textMesh.text = PlayerStats.Instance.getGold().ToString();
     }
 }
