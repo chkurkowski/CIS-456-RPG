@@ -96,6 +96,7 @@ public class GameManager : MonoBehaviour {
         charController.canMove = false;
         inGameUI.SetActive(false);
         inventoryUI.SetActive(false);
+        gameOverUI.GetComponentInChildren<HighScore>().DisplayScore();
         gameOverUI.SetActive(true);
     }
 

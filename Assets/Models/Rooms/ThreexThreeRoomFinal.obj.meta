@@ -1,16 +1,16 @@
 fileFormatVersion: 2
-guid: 25cd1fd3d7e68ff49b298e028878cbf7
+guid: 3a5d8906aadca6941a09629866e5d045
 ModelImporter:
   serializedVersion: 23
   fileIDToRecycleName:
-    100000: ThreexThreeRoom
+    100000: ThreexThreeRoomFinal
     100002: //RootNode
-    400000: ThreexThreeRoom
+    400000: ThreexThreeRoomFinal
     400002: //RootNode
-    2100000: ThreexThreeRoomMat
-    2300000: ThreexThreeRoom
-    3300000: ThreexThreeRoom
-    4300000: ThreexThreeRoom
+    2100000: ThreexThreeRoomFinalMat
+    2300000: ThreexThreeRoomFinal
+    3300000: ThreexThreeRoomFinal
+    4300000: ThreexThreeRoomFinal
   externalObjects: {}
   materials:
     importMaterials: 1

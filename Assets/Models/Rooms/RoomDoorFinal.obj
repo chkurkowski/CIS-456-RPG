@@ -1,10 +1,10 @@
 # MagicaVoxel @ Ephtracy
 
 # group
-g RoomDoor
+g RoomDoorFinal
 
 # material
-mtllib RoomDoor.mtl
+mtllib RoomDoorFinal.mtl
 usemtl palette
 
 # normals
@@ -16,7 +16,7 @@ vn 0 -1 0
 vn 0 1 0
 
 # texcoords
-vt 0.978516 0.5
+vt 0.990234 0.5
 
 # verts
 v -2.5 0 0.5

@@ -120,7 +120,7 @@ MonoBehaviour:
   chaseRange: 8
   attackDamage: 25
   alive: 0
-  attackCooldown: 2
+  attackCooldown: 1.25
 --- !u!114 &114608327388342594
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -141,7 +141,8 @@ MonoBehaviour:
   - {fileID: 1777722872658952, guid: 677dff78446de4f3c9d6f5622a4f66a1, type: 2}
   - {fileID: 1805743057951068, guid: 035caefcbe20c406ea1cfb78af151526, type: 2}
   - {fileID: 1850583187578550, guid: c1dc0be08a4294f6fa85b43c4bc4126c, type: 2}
-  health: 25
+  potions: []
+  health: 50
 --- !u!136 &136792366904468300
 CapsuleCollider:
   m_ObjectHideFlags: 1
