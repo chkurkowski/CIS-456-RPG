@@ -13,7 +13,7 @@ public class Player : MonoBehaviour {
 
     private void Update()
     {
-        //Debug.Log("Armor: " + stats.GetArmorModifier() + " Damage: " + stats.GetDamageModifier());
+        Debug.Log("Armor: " + stats.GetArmorModifier() + " Damage: " + stats.GetDamageModifier());
 
         if (stats.getHealth() <= 0)
         {
@@ -37,7 +37,7 @@ public class Player : MonoBehaviour {
     public void TakeDamage(float dmg)
     {
         if (stats.GetArmorModifier() > 0)
-            dmg = dmg / (stats.GetArmorModifier() / 4);
+            dmg = dmg / (stats.GetArmorModifier() / 10);
 
         stats.setHealth(stats.getHealth() - dmg);
         //Debug.Log("Health: " + stats.getHealth());
