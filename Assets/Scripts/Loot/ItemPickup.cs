@@ -6,6 +6,8 @@ public class ItemPickup : MonoBehaviour {
 
     public Items item;
 
+    public Equipment equipment;
+
     public float radius = 2f;
     public bool focused = false;
 
@@ -38,8 +40,17 @@ public class ItemPickup : MonoBehaviour {
 
     private void PickUp()
     {
-        Debug.Log("Picking up " + item.name);
-        bool pickedUp = InventoryManager.instance.Add(item);
+        bool pickedUp = false;
+        //Debug.Log("Picking up " + item.name);
+
+        if(item != null)
+        {
+            pickedUp = InventoryManager.instance.Add(item);
+        }
+        else if(equipment != null)
+        {
+            pickedUp = InventoryManager.instance.Add(equipment);
+        }
         if (pickedUp)
             Destroy(gameObject);
     }

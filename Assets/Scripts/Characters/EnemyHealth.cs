@@ -121,22 +121,22 @@ public class EnemyHealth : MonoBehaviour {
         if (roll < itemChance[0])
         {
             GameObject gm = Instantiate(itemLoot[0], transform.position + Vector3.up, Quaternion.identity);
-            //Set Quality here?
+            ProceduralLoot.Instance.RandomizeLoot(gm);
         }
         else if (roll < itemChance[1])
         {
             GameObject gm = Instantiate(itemLoot[1], transform.position + Vector3.up, Quaternion.identity);
-            //Set Quality here?
+            ProceduralLoot.Instance.RandomizeLoot(gm);
         }
         else if (roll < itemChance[2])
         {
             GameObject gm = Instantiate(itemLoot[2], transform.position + Vector3.up, Quaternion.identity);
-            //Set quiality here?
+            ProceduralLoot.Instance.RandomizeLoot(gm);
         }
         else if(roll < itemChance[3])
         {
             GameObject gm = Instantiate(itemLoot[3], transform.position + Vector3.up, Quaternion.identity);
-            //Set Quality here?
+            ProceduralLoot.Instance.RandomizeLoot(gm);
         }
     }
 
