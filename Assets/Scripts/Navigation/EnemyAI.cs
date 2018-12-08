@@ -183,6 +183,8 @@ public class EnemyAI : MonoBehaviour
         if (attackTimer <= 0)
         {
             attackTimer = attackCooldown;
+            if(GameManager.instance.getLevel() != 1)
+                attackDamage += attackDamage * (GameManager.instance.getLevel() * .5f);
             playerScript.TakeDamage(attackDamage);
         }
     }
