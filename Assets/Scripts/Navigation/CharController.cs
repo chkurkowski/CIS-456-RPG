@@ -170,6 +170,7 @@ public class CharController : MonoBehaviour
                 if (!room.discovered && room.center.Equals(centerOfRoom))
                 {
                     room.discovered = true;
+                    room.roomRef.layer = 9;
                 }
             }
         }
